@@ -1,7 +1,8 @@
 import { LoaderCircle } from "lucide-react";
-import { Navigate, RouteObject } from "react-router";
-import ProtectedRouteAuth from "@/components/elements/protect-route-auth.element";
+import { Navigate, Outlet, RouteObject } from "react-router";
+// import ProtectedRouteAuth from "@/components/elements/protect-route-auth.element";
 import LoginPage from "@/components/pages/login.page";
+import PropertyListingPage from "@/components/pages/test";
 
 const appRouterConfig: RouteObject[] = [
   {
@@ -21,8 +22,17 @@ const appRouterConfig: RouteObject[] = [
     ),
   },
   {
+    path: "home",
+    element: <PropertyListingPage />,
+  },
+  {
     path: "/",
-    element: <ProtectedRouteAuth element={<></>} />,
+    element: (
+      <>
+        {" "}
+        <Outlet></Outlet>
+      </>
+    ),
     children: [
       {
         path: "message",
@@ -35,10 +45,6 @@ const appRouterConfig: RouteObject[] = [
       {
         path: "notification",
         element: <div>Notification</div>,
-      },
-      {
-        path: "friends",
-        element: <div>Friends</div>,
       },
     ],
   },

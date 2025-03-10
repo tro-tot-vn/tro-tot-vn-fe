@@ -1,6 +1,7 @@
 import { LoaderCircle } from "lucide-react";
 import { Navigate, RouteObject } from "react-router";
 import ProtectedRouteAuth from "@/components/elements/protect-route-auth.element";
+import LoginPage from "@/components/pages/login.page";
 
 const appRouterConfig: RouteObject[] = [
   {
@@ -9,7 +10,7 @@ const appRouterConfig: RouteObject[] = [
   },
   {
     path: "login",
-    element: <></>,
+    element: <LoginPage></LoginPage>,
   },
   {
     path: "/forgot-password",

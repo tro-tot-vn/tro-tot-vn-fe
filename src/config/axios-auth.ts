@@ -1,9 +1,7 @@
-import { AccessToken } from "@/services/types/get-access-token-response.types";
-import { ResponseData } from "@/types/response.types";
 import axios from "axios";
 
 const axios_auth = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: "http://localhost:3333",
   transformResponse: [
     (data) => {
       // First, parse the JSON string into an object
@@ -38,7 +36,7 @@ const axios_auth = axios.create({
   ],
 });
 const axios_base = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: "http://localhost:3333",
   transformResponse: [
     (data) => {
       // First, parse the JSON string into an object
@@ -80,41 +78,41 @@ axios_auth.interceptors.request.use((config) => {
   return config;
 });
 
-axios_auth.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  async (error) => {
-    const originalRequest = error.config; // get the original request
-    if (
-      error.response.status === 401 && // if the error is 401 Unauthorized
-      !originalRequest._retry // and the original request has not been retried yet
-    ) {
-      originalRequest._retry = true; // mark the original request as retried
-      try {
-        const res = await axios_auth.post<ResponseData<AccessToken>>(
-          "/refresh-token",
-          {
-            refreshToken: localStorage.getItem("refreshToken"),
-          }
-        );
-        if (res.data.success) {
-          // if the refresh token is valid
-          axios_auth.defaults.headers.common[
-            "Authorization"
-          ] = `Bearer ${res.data.data.accessToken}`;
-          return axios_auth(originalRequest); // retry the original request
-        }
-      } catch (error) {
-        console.log("Intercepter Axios", error);
-        // if the refresh token is invalid
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("user");
-        window.location.href = "/";
-      }
-    }
-    return Promise.reject(error);
-  }
-);
+// axios_auth.interceptors.response.use(
+//   (response) => {
+//     return response;
+//   },
+//   async (error) => {
+//     const originalRequest = error.config; // get the original request
+//     if (
+//       error.response.status === 401 && // if the error is 401 Unauthorized
+//       !originalRequest._retry // and the original request has not been retried yet
+//     ) {
+//       originalRequest._retry = true; // mark the original request as retried
+//       try {
+//         const res = await axios_auth.post<ResponseData<AccessToken>>(
+//           "/refresh-token",
+//           {
+//             refreshToken: localStorage.getItem("refreshToken"),
+//           }
+//         );
+//         if (res.data.success) {
+//           // if the refresh token is valid
+//           axios_auth.defaults.headers.common[
+//             "Authorization"
+//           ] = `Bearer ${res.data.data.accessToken}`;
+//           return axios_auth(originalRequest); // retry the original request
+//         }
+//       } catch (error) {
+//         console.log("Intercepter Axios", error);
+//         // if the refresh token is invalid
+//         localStorage.removeItem("refreshToken");
+//         localStorage.removeItem("accessToken");
+//         localStorage.removeItem("user");
+//         window.location.href = "/";
+//       }
+//     }
+//     return Promise.reject(error);
+//   }
+// );
 export { axios_auth, axios_base };

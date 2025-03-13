@@ -35,6 +35,7 @@ const axios_auth = axios.create({
     },
   ],
 });
+
 const axios_base = axios.create({
   baseURL: "http://localhost:3333",
   transformResponse: [
@@ -70,6 +71,7 @@ const axios_base = axios.create({
     },
   ],
 });
+
 axios_auth.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken");
   if (token) {
@@ -108,7 +110,7 @@ axios_auth.interceptors.request.use((config) => {
 //         // if the refresh token is invalid
 //         localStorage.removeItem("refreshToken");
 //         localStorage.removeItem("accessToken");
-//         localStorage.removeItem("user");
+//         localStorage.removeItem("account");
 //         window.location.href = "/";
 //       }
 //     }

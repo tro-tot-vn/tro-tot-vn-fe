@@ -7,8 +7,8 @@ import { Link } from "react-router"
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white">
-      <div className="container flex h-16 items-center gap-4 ">
+    <header className="sticky top-0 z-50 w-full border-b bg-white ">
+      <div className="container flex h-16 items-center justify-between w-full">
         <Link to="/" className="flex-shrink-0">
           <img
             src="/tro-tot-logo-png.jpeg"
@@ -37,7 +37,7 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" className="hidden md:inline-flex">
-            <Bell className="h-5 w-5" />
+            <Bell className="h-7 w-7" />
           </Button>
           <Button variant="ghost" size="icon" className="hidden md:inline-flex">
             <MessageSquare className="h-5 w-5" />

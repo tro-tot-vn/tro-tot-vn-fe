@@ -1,8 +1,8 @@
 import { LoaderCircle } from "lucide-react";
-import { Navigate, Outlet, RouteObject } from "react-router";
-// import ProtectedRouteAuth from "@/components/elements/protect-route-auth.element";
+import { Navigate, RouteObject } from "react-router";
 import LoginPage from "@/components/pages/login.page";
-import PropertyListingPage from "@/components/pages/test";
+import MainPage from "@/components/layouts/main.layout";
+import ProtectedRouteNoAuth from "@/components/elements/protect-route-no-auth.element";
 
 const appRouterConfig: RouteObject[] = [
   {
@@ -11,7 +11,7 @@ const appRouterConfig: RouteObject[] = [
   },
   {
     path: "login",
-    element: <LoginPage></LoginPage>,
+    element: <ProtectedRouteNoAuth element={<LoginPage />} />,
   },
   {
     path: "/forgot-password",
@@ -22,21 +22,16 @@ const appRouterConfig: RouteObject[] = [
     ),
   },
   {
-    path: "home",
-    element: <PropertyListingPage />,
-  },
-  {
     path: "/",
-    element: (
-      <>
-        {" "}
-        <Outlet></Outlet>
-      </>
-    ),
+    element: <MainPage />,
     children: [
       {
+        path: "",
+        element: <>DashBoard</>,
+      },
+      {
         path: "message",
-        element: <></>,
+        element: <>message</>,
       },
       {
         path: "profile",

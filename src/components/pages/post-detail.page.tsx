@@ -4,15 +4,10 @@ import { ImageGallery } from "../elements/image-gallery";
 import { PropertyDetails } from "../elements/property-details";
 import { SellerInfo } from "../elements/seller-info";
 import { SimilarListings } from "../elements/similar-listings";
-import { SiteHeader } from "../elements/site-header";
 
-export default function PropertyListingPage() {
+export default function PostDetailPage() {
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <SiteHeader />
-
-      {/* Main Content */}
+    <>
       <main className="flex-1 py-8">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-3 gap-8">
@@ -78,15 +73,6 @@ export default function PropertyListingPage() {
           <SimilarListings />
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="bg-gray-100 py-8">
-        <div className="container mx-auto px-4">
-          <p className="text-center text-gray-600">
-            © 2025 NhaTot. All rights reserved.
-          </p>
-        </div>
-      </footer>
-    </div>
+    </>
   );
 }

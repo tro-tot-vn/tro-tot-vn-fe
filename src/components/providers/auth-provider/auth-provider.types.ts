@@ -1,5 +1,5 @@
-import User from '@/types/user';
-import React from 'react';
+import { Account } from "@/types/user.type";
+import React from "react";
 
 /**
  * Props for the AuthProvider component.
@@ -13,7 +13,7 @@ export interface AuthProviderProps extends React.PropsWithChildren<object> {
  */
 export interface AuthProviderStore {
   isAuthenticated: boolean;
-  user?: User;
+  user?: Account;
   accessToken?: string;
 }
 
@@ -22,16 +22,20 @@ export interface AuthProviderStore {
  */
 export interface AuthProviderContextType {
   isAuthenticated: boolean;
-  user?: User;
+  user?: Account;
   accessToken?: string;
   /**
    * Authenticates the user.
    * @param user The user to authenticate.
    */
-  authenticate: (accessToken: string, user: User, refreshToken : string) => void;
+  authenticate: (
+    user: Account,
+    accessToken: string,
+    refreshToken: string
+  ) => void;
 
   /**
    * Signs out the user.
-   */ 
+   */
   signout: () => void;
 }

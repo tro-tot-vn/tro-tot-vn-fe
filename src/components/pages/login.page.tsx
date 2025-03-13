@@ -1,22 +1,38 @@
-"use client";
-
 import type React from "react";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
-import { Link } from "react-router";
-import { X } from "lucide-react";
+import { Link, useNavigate } from "react-router";
+import { TriangleAlert, X } from "lucide-react";
+import authService from "@/services/auth.service";
+import useAuth from "@/hooks/use-auth";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoginFailure, setLoginFalure] = useState(false);
+  const auth = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Logging in with:", { phoneNumber, password });
+    const res = await authService.login(phoneNumber, password);
+    if (res && res.status === 200) {
+      if (res.data.data) {
+        auth.authenticate(
+          res.data.data.account,
+          res.data.data.token.accessToken,
+          res.data.data.token.refreshToken
+        );
+        toast("Đăng nhập thành công");
+        navigate("/home");
+      }
+    } else {
+      setLoginFalure(true);
+    }
   };
 
   const clearPhoneNumber = () => {
@@ -30,9 +46,11 @@ export default function LoginPage() {
         background: "url('/login-background.avif') center/cover no-repeat",
       }}
     >
-      <div className="w-full max-w-[440px] space-y-6 shadow-[0px_0px_8px_0px_rgba(30,40,60,0.1)] rounded-md
-      bg-white p-8">
-        <div >
+      <div
+        className="w-full max-w-[440px] space-y-6 shadow-[0px_0px_8px_0px_rgba(30,40,60,0.1)] rounded-md
+      bg-white p-8"
+      >
+        <div>
           <img
             src="/tro-tot-logo-png.jpeg"
             alt="Logo"
@@ -43,11 +61,26 @@ export default function LoginPage() {
           <h1 className="text-2xl font-semibold mt-6">Đăng nhập</h1>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" >
+          {isLoginFailure && (
+            <div className="bg-[#FFE5EA] flex flex-row text-center rounded-md p-2">
+              <TriangleAlert
+                color="red"
+                className="m-1"
+                size={20}
+              ></TriangleAlert>
+              <p className="flex flex-1 text-[14px] text-muted-foreground justify-center items-center">
+                Số điện thoại hoặc mật khẩu chưa đúng, vui lòng kiểm tra lại
+              </p>
+            </div>
+          )}
+
           <div className="relative">
             <Input
-              type="tel"
-              placeholder="Số điện thoại"
+              id="username"
+              name="username"
+              placeholder="Số điện thoại hoặc email"
+              required
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               className="pr-8"
@@ -65,9 +98,12 @@ export default function LoginPage() {
 
           <div className="relative">
             <Input
+              id="password"
+              name="password"
               type={showPassword ? "text" : "password"}
               placeholder="Mật khẩu"
               value={password}
+              required
               onChange={(e) => setPassword(e.target.value)}
               className="pr-16"
             />
@@ -82,7 +118,10 @@ export default function LoginPage() {
           </div>
 
           <div className="text-right">
-            <Link to="#" className="text-primary hover:underline text-sm text-blue-600">
+            <Link
+              to="#"
+              className="text-primary hover:underline text-sm text-blue-600"
+            >
               Quên mật khẩu?
             </Link>
           </div>
@@ -104,7 +143,7 @@ export default function LoginPage() {
 
         <div className="grid grid-cols-2 gap-3">
           <Button variant="outline" className="w-full">
-          <img
+            <img
               src="/facebook-logo.svg"
               alt="Google"
               width={24}
@@ -127,7 +166,10 @@ export default function LoginPage() {
 
         <div className="text-center text-sm">
           Chưa có tài khoản?{" "}
-          <Link to="#" className="text-primary hover:underline text-blue-700 font-bold">
+          <Link
+            to="#"
+            className="text-primary hover:underline text-blue-700 font-bold"
+          >
             Đăng ký tài khoản mới
           </Link>
         </div>

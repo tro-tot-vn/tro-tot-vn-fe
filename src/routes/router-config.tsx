@@ -3,6 +3,8 @@ import { Navigate, RouteObject } from "react-router";
 import LoginPage from "@/components/pages/login.page";
 import MainPage from "@/components/layouts/main.layout";
 import ProtectedRouteNoAuth from "@/components/elements/protect-route-no-auth.element";
+import MyPostPage from "@/components/pages/my-post.page";
+import CreatePostPage from "@/components/pages/create-post.page";
 
 const appRouterConfig: RouteObject[] = [
   {
@@ -40,6 +42,14 @@ const appRouterConfig: RouteObject[] = [
       {
         path: "notification",
         element: <div>Notification</div>,
+      },
+      {
+        path: "my-post",
+        element: <MyPostPage />,
+      },
+      {
+        path: "create-post",
+        element: <CreatePostPage />,
       },
     ],
   },

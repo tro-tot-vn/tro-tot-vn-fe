@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
-import { Bell, Menu, MessageSquare, Search, LayoutGrid, User } from "lucide-react"
+import { Bell, Menu, MessageSquare, Search, LayoutGrid, CircleUserRound } from "lucide-react"
 import { Link } from "react-router"
 
 
@@ -20,7 +20,7 @@ export function SiteHeader() {
         </Link>
 
         <Button variant="ghost" size="icon" className="md:hidden">
-          <Menu className="h-5 w-5" />
+          <Menu className="!w-5 !h-5" />
         </Button>
 
         <div className="flex-1 max-w-xl">
@@ -35,21 +35,21 @@ export function SiteHeader() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
           <Button variant="ghost" size="icon" className="hidden md:inline-flex">
-            <Bell className="h-7 w-7" />
+            <Bell className="!w-5 !h-5" />
           </Button>
           <Button variant="ghost" size="icon" className="hidden md:inline-flex">
-            <MessageSquare className="h-5 w-5" />
+            <MessageSquare className="!w-5 !h-5" />
           </Button>
           <Button variant="ghost" size="icon" className="hidden md:inline-flex">
-            <LayoutGrid className="h-5 w-5" />
+            <LayoutGrid className="!w-5 !h-5" />
           </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
-                <User className="h-5 w-5" />
+                <CircleUserRound className="!w-5 !h-5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">

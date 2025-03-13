@@ -4,6 +4,6 @@ import { Navigate } from "react-router";
 
 const ProtectedRouteNoAuth = ({ element }: { element: JSX.Element }) => {
   const { isAuthenticated } = useAuth();
-  return !isAuthenticated ? element : <Navigate to="/u/message" replace />;
+  return isAuthenticated ? <Navigate to="/" replace /> : element;
 };
 export default ProtectedRouteNoAuth;

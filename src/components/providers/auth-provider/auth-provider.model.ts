@@ -1,9 +1,9 @@
-import User from "@/types/user";
+import { Account } from "@/types/user.type";
 import { AuthProviderProps, AuthProviderStore } from "./auth-provider.types";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 function getSaveAuthData(): AuthProviderStore {
-  const userJson = localStorage.getItem("user");
+  const userJson = localStorage.getItem("account");
   const accessToken = localStorage.getItem("accessToken");
 
   if (!userJson || !accessToken)
@@ -12,9 +12,9 @@ function getSaveAuthData(): AuthProviderStore {
     };
 
   try {
-    const usr = JSON.parse(userJson) as User;
+    const usr = JSON.parse(userJson) as Account;
 
-    if (usr.userId) {
+    if (usr.accountId) {
       return {
         isAuthenticated: true,
         accessToken: accessToken,
@@ -27,7 +27,7 @@ function getSaveAuthData(): AuthProviderStore {
     };
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
-    localStorage.removeItem("user");
+    localStorage.removeItem("account");
     localStorage.removeItem("accessToken");
   }
 
@@ -41,17 +41,20 @@ function useAuthProviderModel(_props: AuthProviderProps) {
   const initalizedState = useRef<boolean>(false);
   const [store, setStore] = useState<AuthProviderStore>(getSaveAuthData());
 
-  const authenticate = useCallback((accessToken: string, user: User, refreshToken : string) => {
-    setStore({
-      isAuthenticated: true,
-      user,
-      accessToken: accessToken,
-    });
+  const authenticate = useCallback(
+    (user: Account, accessToken: string,  refreshToken: string) => {
+      setStore({
+        isAuthenticated: true,
+        user,
+        accessToken: accessToken,
+      });
 
-    localStorage.setItem("user", JSON.stringify(user));
-    localStorage.setItem("accessToken", accessToken);
-    localStorage.setItem("refreshToken", refreshToken);
-  }, []);
+      localStorage.setItem("account", JSON.stringify(user));
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+    },
+    []
+  );
 
   const signout = useCallback(() => {
     setStore({
@@ -59,7 +62,7 @@ function useAuthProviderModel(_props: AuthProviderProps) {
       user: undefined,
       accessToken: undefined,
     });
-    localStorage.removeItem("user");
+    localStorage.removeItem("account");
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
   }, []);
@@ -68,15 +71,15 @@ function useAuthProviderModel(_props: AuthProviderProps) {
     if (!initalizedState.current) {
       initalizedState.current = true;
 
-      const userJson = localStorage.getItem("user");
+      const userJson = localStorage.getItem("account");
       const accessToken = localStorage.getItem("accessToken");
 
       if (!userJson || !accessToken) return;
 
       try {
-        const usr = JSON.parse(userJson) as User;
+        const usr = JSON.parse(userJson) as Account;
 
-        if (usr.userId) {
+        if (usr.accountId) {
           setStore({
             isAuthenticated: true,
             accessToken: accessToken,
@@ -85,7 +88,7 @@ function useAuthProviderModel(_props: AuthProviderProps) {
         }
       } catch (e) {
         console.error(e);
-        localStorage.removeItem("user");
+        localStorage.removeItem("account");
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
       }

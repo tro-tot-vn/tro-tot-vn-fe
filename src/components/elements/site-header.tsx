@@ -1,11 +1,23 @@
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
-import { Bell, Menu, MessageSquare, Search, LayoutGrid, CircleUserRound } from "lucide-react"
-import { Link } from "react-router"
-
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
+  Bell,
+  Menu,
+  MessageSquare,
+  Search,
+  LayoutGrid,
+  CircleUserRound,
+} from "lucide-react";
+import { Link, useNavigate } from "react-router";
 
 export function SiteHeader() {
+  const nav = useNavigate();
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white ">
       <div className="container flex h-16 items-center justify-between w-full">
@@ -58,10 +70,14 @@ export function SiteHeader() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button className="hidden md:inline-flex bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white">ĐĂNG TIN</Button>
+          <Button
+            onClick={() => {nav("/create-post/")}}
+            className="hidden md:inline-flex bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white"
+          >
+            ĐĂNG TIN
+          </Button>
         </div>
       </div>
     </header>
-  )
+  );
 }
-

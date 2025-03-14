@@ -5,7 +5,7 @@ export default function NoPostElement() {
     <div className="text-center py-16">
       <img
         src="/empty-frame.svg"
-        alt="No listings"
+        alt="No posts"
         width={300}
         height={300}
         className="mx-auto mb-4"

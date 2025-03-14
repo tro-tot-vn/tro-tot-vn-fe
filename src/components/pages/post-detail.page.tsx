@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { ImageGallery } from "../elements/image-gallery";
 import { PropertyDetails } from "../elements/property-details";
 import { SellerInfo } from "../elements/seller-info";
-import { SimilarListings } from "../elements/similar-listings";
+import { SimilarListings } from "../elements/similar-posts";
 
 export default function PostDetailPage() {
   return (

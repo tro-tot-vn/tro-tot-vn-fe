@@ -1,6 +1,9 @@
-import { LoaderCircle } from "lucide-react";
+
 import { Navigate, RouteObject } from "react-router";
 import ProtectedRouteAuth from "@/components/elements/protect-route-auth.element";
+import ForgotPassword from "@/components/pages/forgot-password.pages";
+import VerifyOtp from "@/components/pages/verify-otp.page";
+import ResetPassword from "@/components/pages/reset-password.page";
 
 const appRouterConfig: RouteObject[] = [
   {
@@ -13,11 +16,15 @@ const appRouterConfig: RouteObject[] = [
   },
   {
     path: "/forgot-password",
-    element: (
-      <div className="flex-1 flex justify-center items-center">
-        <LoaderCircle className=" animate-spin" />
-      </div>
-    ),
+    element: <ForgotPassword />,
+  },
+  {
+    path: "/verify-otp",
+    element: <VerifyOtp />,
+  },
+  {
+    path: "/reset-password",
+    element: <ResetPassword />,
   },
   {
     path: "/",

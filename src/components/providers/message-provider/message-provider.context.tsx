@@ -1,9 +1,9 @@
-import Message from "@/types/message.model";
-import { createContext } from "react";
+// import Message from "@/types/message.model";
+// import { createContext } from "react";
 
-export const MessageContext = createContext<MessageContextType>({
-  messages: [],
-});
-interface MessageContextType {
-  messages: Message[];
-}
+// export const MessageContext = createContext<MessageContextType>({
+//   messages: [],
+// });
+// interface MessageContextType {
+//   messages: Message[];
+// }

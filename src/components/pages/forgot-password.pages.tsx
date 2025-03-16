@@ -5,11 +5,6 @@ import { useNavigate } from "react-router";
 import { useState } from "react";
 
 const { Title } = Typography;
-const contentStyle = {
-    padding: 50,
-    borderRadius: 4,
-  };
-const content = <div style={contentStyle} />;
 
 function ForgotPassword() {
     const [messageApi, contextHolder] = message.useMessage();
@@ -37,6 +32,10 @@ function ForgotPassword() {
         } catch (error) {
             const message = (error as any).response.data.message;
             console.error("Lỗi gửi email:", message.toString());
+            messageApi.open({
+                type: 'error',
+                content: 'Email không tồn tại',
+            });
         }finally{
             setLoading(false);
         }
@@ -60,9 +59,11 @@ function ForgotPassword() {
                         >
                             <Input type="email"/>
                         </FormItem>
-                        <Button type="primary" htmlType="submit">Submit</Button>  
+                    
+                        <Button type="primary" htmlType="submit" disabled={loading}>
+                            {loading ? <Spin size="small" /> : "Gửi yêu cầu"}
+                        </Button>  
                     </Form>
-                    {loading && <Spin tip="Đang gửi..." size="large">{content}</Spin>}
                 </Card>
             </Col>
         </Row>

@@ -4,7 +4,12 @@ import FormItem from "antd/es/form/FormItem";
 import { useLocation, useNavigate } from "react-router";
 const { Title } = Typography;
 function ResetPassword () {
-    const rules = [{ required: true, message: 'Thông tin không được bỏ trống' }];
+    const passwordRules = [
+        { required: true, message: 'Mật khẩu không được để trống' },
+        { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự' },
+        { pattern: /[A-Z]/, message: 'Phải có ít nhất một chữ cái in hoa' },
+        { pattern: /\d/, message: 'Phải có ít nhất một số' }
+    ];
     const [messageApi, contextHolder] = message.useMessage();
     const location = useLocation();
     const navigate = useNavigate();
@@ -15,24 +20,36 @@ function ResetPassword () {
                     type: 'error',
                     content: 'Mật khẩu không khớp',
                });
-            }
-            else{
-                const email = location.state?.email;
-                const result = await resetPassword(email, values.password);
+               
+            }else{
+                const resetToken = location.state?.resetToken;
+        
+                if (!resetToken) {
+                    console.error("Thiếu resetToken, chuyển hướng về trang forgot-password");
+                    navigate('/forgot-password');
+                    return;
+                }
+                const result = await resetPassword(resetToken, values.password);
+
                 if (result.status === 200) {
                     messageApi.open({
                         type: 'success',
                         content: 'Đổi mật khẩu thành công',
                     });
                     setTimeout(() => {
-                        navigate('/login');
+                        navigate('/login', { replace: true });
                     }, 1000);
                 }
             }
         } catch (error) {
+            if (error instanceof Error) {
+                console.error("Lỗi từ API:", (error as any).response?.data || error.message);
+            } else {
+                console.error("Lỗi từ API:", error);
+            }
             messageApi.open({
                 type: 'error',
-                content: 'Vui lòng sử dụng mật khẩu mới khác mật khẩu cũ',
+                content: 'Có lỗi xảy ra, vui lòng thử lại!',
             });
         }
     }
@@ -49,14 +66,14 @@ function ResetPassword () {
                 <FormItem
                 label="New Password"
                 name="password"
-                rules={rules}
+                rules={passwordRules}
                 >
                     <Input.Password/>
                 </FormItem>
                 <FormItem
                 label="Confirm Password"
                 name="confirmPassword"
-                rules={rules}
+                rules={passwordRules}
                 >
                     <Input.Password/>
                 </FormItem>

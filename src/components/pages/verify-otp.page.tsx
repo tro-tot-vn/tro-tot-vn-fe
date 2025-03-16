@@ -8,7 +8,7 @@ function VerifyOtp(){
     const navigate = useNavigate();
     const [messageApi, contextHolder] = message.useMessage();
     const location = useLocation();
-    const email = location.state?.email;
+    const email = location.state.email;
     const [loading, setLoading] = useState(false);
     const handeClick = async () => {
         if (!email) {
@@ -30,6 +30,11 @@ function VerifyOtp(){
         }
     }
     const handleSubmit = async (values: { otp: string; }) => {
+        if (!email) {
+            messageApi.open({ type: 'error', content: 'Email không hợp lệ' });
+            return;
+        }
+        setLoading(true);
         try {
             const result = await sendOtp(email, values.otp);
             if (result.status === 200) {
@@ -37,8 +42,10 @@ function VerifyOtp(){
                     type: 'success',
                     content: 'Xác thực thành công',
                 });
+                const resetToken = result.data.resetToken;
+                console.log(resetToken);
                 setTimeout(() => {
-                    navigate('/reset-password', { state: { email: email } });
+                    navigate('/reset-password', { state: { resetToken} });
                 }, 1000);
                 
             }
@@ -47,6 +54,8 @@ function VerifyOtp(){
                 type: 'error',
                 content: 'OTP không đúng hoặc đã hết hạn',
             });
+        }finally{
+            setLoading(false);
         }
         
     }
@@ -66,7 +75,7 @@ function VerifyOtp(){
                         <Input.OTP inputMode="numeric"/>
                     </Form.Item>
 
-                    <Button style={{marginTop:30}} type="primary" htmlType='submit'>Verify OTP</Button>
+                    <Button style={{marginTop:30}} type="primary" htmlType='submit' disabled={loading}>Verify OTP</Button>
                     <div style={{ marginTop: 10 }}>
                         <span>
                             Nếu bạn chưa nhận được mã!  

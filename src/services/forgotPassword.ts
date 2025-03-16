@@ -9,7 +9,8 @@ export const sendOtp = async (email: string,otp: string) => {
     const result = await post(`verify-otp`, { email, otp });
     return result;
 };
-export const resetPassword = async (email: string,password: string) => {
-    const result = await post(`reset-password`, { email, password });
+// Đặt lại mật khẩu (Cần token)
+export const resetPassword = async (token: string, password: string) => {
+    const result = await post(`reset-password`, { password }, token);
     return result;
-}
+};

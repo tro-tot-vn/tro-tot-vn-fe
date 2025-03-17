@@ -27,6 +27,9 @@ import ProtectRouteRole from "@/components/elements/protect-role.element";
 import { Role } from "@/utils/role.enum";
 import SettingsPage from "@/components/pages/settings.page";
 import UserProfilePage from "@/components/pages/user-profile.page";
+import ForgotPassword from "@/components/pages/forgot-password.page";
+import VerifyOtp from "@/components/pages/verify-otp-password.page";
+import ResetPassword from "@/components/pages/reset-password.page";
 
 const appRouterConfig: RouteObject[] = [
   {
@@ -39,11 +42,15 @@ const appRouterConfig: RouteObject[] = [
   },
   {
     path: "/forgot-password",
-    element: (
-      <div className="flex-1 flex justify-center items-center">
-        <LoaderCircle className=" animate-spin" />
-      </div>
-    ),
+    element: <ProtectedRouteNoAuth element={<ForgotPassword />} />,
+  },
+  {
+    path: "/verify-otp",
+    element: <ProtectedRouteNoAuth element={<VerifyOtp />} />,
+  },
+  {
+    path: "/reset-password",
+    element: <ProtectedRouteNoAuth element={<ResetPassword />} />,
   },
   {
     path: "/",

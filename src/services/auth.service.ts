@@ -49,6 +49,51 @@ class AuthService {
       return null;
     }
   }
+
+  async sendEmail(email: string) {
+    try {
+      const res = await axios_base.post<ResponseData<any>>(
+        "api/auth/forgot-password",
+          {
+           email
+          }
+        );
+      return res;
+    } catch (error) {
+      console.error("sendEmail error:", error);
+      return null;
+    }
+  }
+
+  async sendOtp(email: string, otp: string) {
+    try {
+      const res = await axios_base.post<ResponseData<any>>(
+        "api/auth/verify-otp",
+          {
+            email,
+            otp
+          });
+      return res;
+    } catch (error) {
+      console.error("sendOtp error:", error);
+      return null;
+    }
+  }
+
+  async resetPassword(token: string, password: string) {
+    try {
+      const res = await axios_base.post<ResponseData<any>>(
+        "api/auth/reset-password",
+        {
+          password,
+          token
+        });
+      return res;
+    } catch (error) {
+      console.error("resetPassword error:", error);
+      return null;
+    }
+  }
 }
 
 export default new AuthService();

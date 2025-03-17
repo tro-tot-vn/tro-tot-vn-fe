@@ -3,6 +3,7 @@ export default class ResponseData<T> {
   message: string;
   error: unknown[];
   data: T | null;
+  resetToken: any;
 
   constructor(
     status: number,

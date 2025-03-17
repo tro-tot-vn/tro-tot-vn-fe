@@ -18,6 +18,14 @@ import PostReportsPage from "@/components/pages/post-report.page";
 import PostReportDetailPage from "@/components/pages/post-report-detail.page";
 import CommentReportsPage from "@/components/pages/comment-report.page";
 import CommentReportDetailPage from "@/components/pages/comment-report-detail";
+import { PostListings } from "@/components/pages/post-listing.page";
+import HomePage from "@/components/pages/home.page";
+import PostDetailPage from "@/components/pages/post-detail.page";
+import ProtectedRouteAuth from "@/components/elements/protect-route-auth.element";
+import ProtectRouteRole from "@/components/elements/protect-role.element";
+import { Role } from "@/utils/role.enum";
+import SettingsPage from "@/components/pages/settings.page";
+import UserProfilePage from "@/components/pages/user-profile.page";
 
 const appRouterConfig: RouteObject[] = [
   {
@@ -42,43 +50,63 @@ const appRouterConfig: RouteObject[] = [
     children: [
       {
         path: "",
-        element: <>DashBoard</>,
+        element: <HomePage />,
       },
       {
-        path: "message",
-        element: <>message</>,
+        path: "search",
+        element: <PostListings />,
       },
       {
-        path: "profile",
-        element: <div>Users</div>,
+        path: "user",
+        element: <Outlet />,
+        children: [
+          {
+            path: "setting",
+            element: <ProtectedRouteAuth element={<SettingsPage />} />,
+          },
+          {
+            path: "profile",
+            element: <UserProfilePage />,
+          },
+        ],
       },
       {
         path: "notification",
         element: <div>Notification</div>,
       },
       {
-        path: "my-post",
-        element: <MyPostPage />,
+        path: "posts/my-posts",
+        element: <ProtectedRouteAuth element={<MyPostPage />} />,
       },
       {
-        path: "create-post",
-        element: <CreatePostPage />,
+        path: "my-posts/create-post",
+        element: <ProtectedRouteAuth element={<CreatePostPage />} />,
+      },
+      {
+        path: "posts/detail/:postId",
+        element: <PostDetailPage />,
       },
     ],
   },
   {
     path: "/a",
     element: (
-      <SidebarProvider>
-        <div className="relative flex min-w-screen flex-col">
-          <SiteHeader />
-          <div className="flex flex-1">
-            <AdminSidebar />
-            <Outlet />
-          </div>
-        </div>
-      </SidebarProvider>
+      <ProtectRouteRole
+        roles={[Role.Manager, Role.Moderator]}
+        children={
+          <SidebarProvider>
+            <div className="relative flex min-w-screen flex-col">
+              <SiteHeader />
+              <div className="flex flex-1">
+                <AdminSidebar />
+                <Outlet />
+              </div>
+            </div>
+          </SidebarProvider>
+        }
+      />
     ),
+
     children: [
       {
         path: "",

@@ -1,10 +1,38 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NoPostElement from "../elements/no-post.element";
+import { StatsCard } from "../elements/stats-card.element";
+import { Eye, FileText, MessageSquare } from "lucide-react";
 
 export default function MyPostPage() {
   return (
     <div className="flex flex-col">
-      {/* Header */}
+      <div className="container mx-auto px-4 m-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          <StatsCard
+            title="Tổng số tin đăng"
+            value="5"
+            description="Trong tháng này"
+            icon={FileText}
+            trend="up"
+            trendValue="20%"
+          />
+          <StatsCard
+            title="Lượt xem"
+            value="128"
+            description="7 ngày qua"
+            icon={Eye}
+            trend="up"
+            trendValue="15%"
+          />
+          <StatsCard
+            title="Tin nhắn"
+            value="24"
+            description="Chưa đọc: 3"
+            icon={MessageSquare}
+            trend="neutral"
+          />
+        </div>
+      </div>
 
       {/* Main Content */}
       <div className="container mx-auto px-4 flex-1">

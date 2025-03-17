@@ -3,6 +3,7 @@ import { Outlet, RouteObject } from "react-router";
 import LoginPage from "@/components/pages/login.page";
 import MainPage from "@/components/layouts/main.layout";
 import ProtectedRouteNoAuth from "@/components/elements/protect-route-no-auth.element";
+import RegisterForm from "@/components/pages/register.pages";
 import MyPostPage from "@/components/pages/my-post.page";
 import CreatePostPage from "@/components/pages/create-post.page";
 import NotFoundPage from "@/components/pages/not-found.page";
@@ -30,7 +31,7 @@ import UserProfilePage from "@/components/pages/user-profile.page";
 const appRouterConfig: RouteObject[] = [
   {
     path: "register",
-    element: <></>,
+    element: <ProtectedRouteNoAuth element={<RegisterForm />} />,
   },
   {
     path: "login",

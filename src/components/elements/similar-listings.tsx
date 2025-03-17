@@ -1,7 +1,7 @@
 import { Heart } from "lucide-react"
 
 export function SimilarListings() {
-  const listings = [
+  const posts = [
     {
       img: "/placeholder.svg?height=150&width=200",
       title: "PLB ngay ĐHVH, gần trung tâm chủ 1 đời bán nhà...",
@@ -11,14 +11,14 @@ export function SimilarListings() {
       location: "Phú Nhuận, Tp Hồ Chí Minh",
       time: "3 ngày trước",
     },
-    // Add more similar listings here
+    // Add more similar posts here
   ]
 
   return (
     <div className="mt-12">
       <h2 className="text-2xl font-bold mb-6">Tin đăng tương tự</h2>
       <div className="grid grid-cols-4 gap-6">
-        {listings.map((listing, index) => (
+        {posts.map((listing, index) => (
           <div key={index} className="border rounded-lg overflow-hidden">
             <div className="relative">
               <img

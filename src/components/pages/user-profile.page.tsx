@@ -14,7 +14,6 @@ import {
   StarHalf,
   CheckCircle,
 } from "lucide-react";
-import { useParams } from "react-router";
 import { PostListing } from "../elements/post-listing.element";
 import { Label } from "@radix-ui/react-dropdown-menu";
 
@@ -109,7 +108,7 @@ const activeListings = [
 
 export default function UserProfilePage() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const params = useParams();
+  // const params = useParams();
   const [isFollowing, setIsFollowing] = useState(false);
 
   const handleFollow = () => {

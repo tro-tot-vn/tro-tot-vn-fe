@@ -1,2 +1,1 @@
-import { Account, Token, Customer } from "@/types/user.type";
-export interface RegisterResponse {}
+export type RegisterResponse = object

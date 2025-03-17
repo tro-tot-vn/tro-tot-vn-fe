@@ -9,7 +9,7 @@ class AuthService {
     email: string,
     firstName: string,
     lastName: string,
-    birthday: Date,
+    birthday: Date | null,
     gender: string,
     password: string
   ) {

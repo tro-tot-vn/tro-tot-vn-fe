@@ -3,6 +3,7 @@ export interface ForgotPasswordResponse {
 }
   
 export interface VerifyOtpResponse {
+    [x: string]: any,
     email: string,
     otp: string
 }

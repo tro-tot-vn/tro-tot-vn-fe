@@ -27,7 +27,6 @@ function ResetPassword () {
                 if (!resetToken) {
                     console.error("Thiếu resetToken, chuyển hướng về trang forgot-password");
                     navigate('/forgot-password');
-                    return;
                 }
                 const result = await authService.resetPassword(resetToken, values.password);
 
@@ -39,18 +38,25 @@ function ResetPassword () {
                     setTimeout(() => {
                         navigate('/login', { replace: true });
                     }, 1000);
+                }else {
+                    messageApi.error("Đổi mật khẩu thất bại, vui lòng thử lại!");
                 }
+                
             }
-        } catch (error) {
-            if (error instanceof Error) {
-                console.error("Lỗi từ API:", (error as any).response?.data || error.message);
+        } catch (error: any) {
+            if (error.response) {
+                const { status, data } = error.response;
+                if (status === 400) {
+                    messageApi.error(data.message || "Token không hợp lệ hoặc đã hết hạn");
+                } else if (status === 500) {
+                    messageApi.error("Lỗi hệ thống, vui lòng thử lại sau");
+                } else {
+                    messageApi.error("Có lỗi xảy ra, vui lòng thử lại!");
+                }
             } else {
-                console.error("Lỗi từ API:", error);
+                messageApi.error("Không thể kết nối đến server");
             }
-            messageApi.open({
-                type: 'error',
-                content: 'Có lỗi xảy ra, vui lòng thử lại!',
-            });
+            console.error("Lỗi từ API:", error.response?.data || error.message);
         }
     }
 

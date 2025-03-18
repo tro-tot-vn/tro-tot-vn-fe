@@ -2,6 +2,7 @@ import { axios_base } from "@/config/axios-auth";
 import ResponseData from "@/types/response.type";
 import { LoginResponse } from "./types/login-response";
 import { RegisterResponse } from "./types/register-response";
+import { ForgotPasswordResponse, ResetPasswordResponse, VerifyOtpResponse } from "./types/forgot-pasword-response";
 
 class AuthService {
   async registerAccount(
@@ -52,7 +53,7 @@ class AuthService {
 
   async sendEmail(email: string) {
     try {
-      const res = await axios_base.post<ResponseData<any>>(
+      const res = await axios_base.post<ResponseData<ForgotPasswordResponse>>(
         "api/auth/forgot-password",
           {
            email
@@ -67,7 +68,7 @@ class AuthService {
 
   async sendOtp(email: string, otp: string) {
     try {
-      const res = await axios_base.post<ResponseData<any>>(
+      const res = await axios_base.post<ResponseData<VerifyOtpResponse>>(
         "api/auth/verify-otp",
           {
             email,
@@ -80,13 +81,13 @@ class AuthService {
     }
   }
 
-  async resetPassword(token: string, password: string) {
+  async resetPassword(resetToken: string, password: string) {
     try {
-      const res = await axios_base.post<ResponseData<any>>(
+      const res = await axios_base.post<ResponseData<ResetPasswordResponse>>(
         "api/auth/reset-password",
         {
           password,
-          token
+          resetToken
         });
       return res;
     } catch (error) {

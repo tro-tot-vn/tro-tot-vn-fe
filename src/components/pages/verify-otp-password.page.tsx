@@ -37,22 +37,36 @@ function VerifyOtp(){
         setLoading(true);
         try {
             const result = await authService.sendOtp(email, values.otp); 
-            if (result?.status === 200) {
-                messageApi.open({
-                    type: 'success',
-                    content: 'Xác thực thành công',
-                });
-                const resetToken = result.data.data.resetToken;
-                setTimeout(() => {
-                    navigate('/reset-password', { state: { resetToken} });
-                }, 1000);
-                
+                if(result){
+                    if(result.status === 200){
+                        messageApi.open({
+                            type: 'success',
+                            content: 'Xác thực thành công',
+                        });
+                        if(result.data && result.data.data){
+                            const resetToken = result.data.data.resetToken
+                            setTimeout(() => {
+                                navigate('/reset-password', { state: { resetToken} });
+                            }, 1000);
+                        }
+                       
+                    }
+                }else {
+                    messageApi.error('Không thể xác thực OTP');
+                }
+        } catch (error: any) {
+            if (error.response) {
+                const { status, data } = error.response;
+                if (status === 400) {
+                    messageApi.error(data.message || 'OTP không đúng hoặc đã hết hạn');
+                } else if (status === 500) {
+                    messageApi.error('Lỗi hệ thống, vui lòng thử lại sau');
+                } else {
+                    messageApi.error('Đã có lỗi xảy ra');
+                }
+            } else {
+                messageApi.error('Không thể kết nối đến server');
             }
-        } catch (error) {
-            messageApi.open({
-                type: 'error',
-                content: 'OTP không đúng hoặc đã hết hạn',
-            });
         }finally{
             setLoading(false);
         }

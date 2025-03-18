@@ -27,6 +27,7 @@ import ProtectRouteRole from "@/components/elements/protect-role.element";
 import { Role } from "@/utils/role.enum";
 import SettingsPage from "@/components/pages/settings.page";
 import UserProfilePage from "@/components/pages/user-profile.page";
+import SubscriptionsPage from "@/components/pages/post-subscriptions.page";
 
 const appRouterConfig: RouteObject[] = [
   {
@@ -78,6 +79,10 @@ const appRouterConfig: RouteObject[] = [
       {
         path: "posts/my-posts",
         element: <ProtectedRouteAuth element={<MyPostPage />} />,
+      },
+      {
+        path: "posts/subscriptions",
+        element: <SubscriptionsPage></SubscriptionsPage>,
       },
       {
         path: "my-posts/create-post",

@@ -1,4 +1,3 @@
-import { LoaderCircle } from "lucide-react";
 import { Outlet, RouteObject } from "react-router";
 import LoginPage from "@/components/pages/login.page";
 import MainPage from "@/components/layouts/main.layout";

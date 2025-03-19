@@ -1,6 +1,6 @@
 import authService from "@/services/auth.service";
 import {  Button, Card, Form, Input, message, Spin, Typography } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 const { Title } = Typography;
 
@@ -8,7 +8,14 @@ function VerifyOtp(){
     const navigate = useNavigate();
     const [messageApi, contextHolder] = message.useMessage();
     const location = useLocation();
-    const email = location.state.email;
+    const email = location.state?.email || "";
+
+    useEffect(() => {
+        if (!email) {
+            navigate("/forgot-password", { replace: true }); // `replace: true` để không thể quay lại bằng nút "Back"
+        }
+    }, [email, navigate]);
+
     const [loading, setLoading] = useState(false);
     const handeClick = async () => {
         if (!email) {
@@ -16,61 +23,47 @@ function VerifyOtp(){
             return;
         }
         setLoading(true);
-        try {
-            const result = await authService.sendEmail(email); // Gửi lại email OTP
-            if (result && result.status === 200) {
+        const result = await authService.sendEmail(email); // Gửi lại email OTP
+        if(result){
+            if (result.status === 200) {
                 messageApi.success('Gửi lại OTP thành công');
+            }else if (result.status === 429) {
+                messageApi.error(String(result.data.error) || "Vui lòng chờ trước khi gửi lại OTP");    
             } else {
                 messageApi.error('Không thể gửi lại OTP');
             }
-        } catch (error) {
-            messageApi.error('Lỗi khi gửi lại OTP');
-        } finally {
-            setLoading(false);
         }
-    }
+        setLoading(false);
+    } 
+            
     const handleSubmit = async (values: { otp: string; }) => {
         if (!email) {
             messageApi.open({ type: 'error', content: 'Email không hợp lệ' });
             return;
         }
         setLoading(true);
-        try {
-            const result = await authService.sendOtp(email, values.otp); 
-                if(result){
-                    if(result.status === 200){
-                        messageApi.open({
-                            type: 'success',
-                            content: 'Xác thực thành công',
-                        });
-                        if(result.data && result.data.data){
-                            const resetToken = result.data.data.resetToken
-                            setTimeout(() => {
-                                navigate('/reset-password', { state: { resetToken} });
-                            }, 1000);
-                        }
-                       
-                    }
-                }else {
-                    messageApi.error('Không thể xác thực OTP');
+        const result = await authService.sendOtp(email, values.otp); 
+        if (result) {
+            if (result.status === 200) {
+                messageApi.success("Xác thực thành công");
+
+                if (result.data?.data?.resetToken) {
+                    const resetToken = result.data.data?.resetToken;
+                    setTimeout(() => {
+                        navigate("/reset-password", { state: { resetToken } });
+                    }, 1000);
                 }
-        } catch (error: any) {
-            if (error.response) {
-                const { status, data } = error.response;
-                if (status === 400) {
-                    messageApi.error(data.message || 'OTP không đúng hoặc đã hết hạn');
-                } else if (status === 500) {
-                    messageApi.error('Lỗi hệ thống, vui lòng thử lại sau');
-                } else {
-                    messageApi.error('Đã có lỗi xảy ra');
-                }
+            } else if (result.status === 400) {
+                messageApi.error("OTP không đúng hoặc đã hết hạn");
+            } else if (result.status === 500) {
+                messageApi.error("Lỗi hệ thống, vui lòng thử lại sau");
             } else {
-                messageApi.error('Không thể kết nối đến server');
+                messageApi.error("Đã có lỗi xảy ra");
             }
-        }finally{
             setLoading(false);
-        }
-        
+    } else {
+        messageApi.error("Không thể kết nối đến server");
+    }     
     }
       
     return (

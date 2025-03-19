@@ -15,9 +15,9 @@ function ForgotPassword() {
     const rules = [{ required: true, message: 'Thông tin không được bỏ trống' }];
     const handleClick = async (values: { email: string; }) => {
         setLoading(true);
-        try {
-            const result = await authService.sendEmail(values.email);   
-            if (result && result.status === 200) {
+        const result = await authService.sendEmail(values.email);  
+        if(result){
+            if (result.status === 200) {
                 messageApi.open({
                     type: 'success',
                     content: 'Gửi email thành công',
@@ -25,25 +25,17 @@ function ForgotPassword() {
                 setTimeout(() => {
                     navigation("/verify-otp", { state: { email: values.email } });
                 }, 1000);
+            }else if(result.status === 404){
+                messageApi.error("Email không tồn tại");
+            }else if(result.status === 500){
+                messageApi.error("Lỗi hệ thống, vui lòng thử lại sau");
             }else{
-                messageApi.error("Không thể gửi email, vui lòng thử lại");
+                messageApi.error("Đã có lỗi xảy ra");
             }
-        } catch (error: any) {
-            if (error.response) {
-                const { status, data } = error.response;
-                if (status === 404) {
-                    messageApi.error(data.message || "Email không tồn tại");
-                } else if (status === 500) {
-                    messageApi.error("Lỗi hệ thống, vui lòng thử lại sau");
-                } else {
-                    messageApi.error("Đã có lỗi xảy ra");
-                }
-            } else {
-                messageApi.error("Không thể kết nối đến server");
-            }
-        }finally{
-            setLoading(false);
+        }else {
+            messageApi.error("Không thể kết nối đến server");
         }
+        setLoading(false);
     }
     return (
         <>

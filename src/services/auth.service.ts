@@ -3,8 +3,11 @@ import ResponseData from "@/types/response.type";
 import { LoginResponse } from "./types/login-response";
 import { RegisterResponse } from "./types/register-response";
 import { ForgotPasswordResponse, ResetPasswordResponse, VerifyOtpResponse } from "./types/forgot-pasword-response";
+import { AxiosError } from "axios";
 
 class AuthService {
+
+  
   async registerAccount(
     phone: string,
     email: string,
@@ -61,8 +64,8 @@ class AuthService {
         );
       return res;
     } catch (error) {
-      console.error("sendEmail error:", error);
-      return null;
+      const axiosError = error as AxiosError<ResponseData<ForgotPasswordResponse>>;
+      return axiosError.response ?? null; // Trả về response hoặc null nếu không có
     }
   }
 
@@ -76,8 +79,8 @@ class AuthService {
           });
       return res;
     } catch (error) {
-      console.error("sendOtp error:", error);
-      return null;
+      const axiosError = error as AxiosError<ResponseData<VerifyOtpResponse>>;
+      return axiosError.response ?? null; // Trả về response hoặc null nếu không có
     }
   }
 
@@ -91,8 +94,8 @@ class AuthService {
         });
       return res;
     } catch (error) {
-      console.error("resetPassword error:", error);
-      return null;
+      const axiosError = error as AxiosError<ResponseData<ResetPasswordResponse>>;
+      return axiosError.response ?? null; // Trả về response hoặc null nếu không có
     }
   }
 }

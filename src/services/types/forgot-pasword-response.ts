@@ -1,11 +1,9 @@
 export interface ForgotPasswordResponse {
-    email: string
+    email: string,
 }
   
 export interface VerifyOtpResponse {
-    [x: string]: any,
-    email: string,
-    otp: string
+    resetToken: string,
 }
   
 export interface ResetPasswordResponse {

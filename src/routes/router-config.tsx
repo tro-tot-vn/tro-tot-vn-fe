@@ -26,6 +26,7 @@ import ProtectRouteRole from "@/components/elements/protect-role.element";
 import { Role } from "@/utils/role.enum";
 import SettingsPage from "@/components/pages/settings.page";
 import UserProfilePage from "@/components/pages/user-profile.page";
+import SubscriptionsPage from "@/components/pages/post-subscriptions.page";
 import ForgotPassword from "@/components/pages/forgot-password.page";
 import VerifyOtp from "@/components/pages/verify-otp-password.page";
 import ResetPassword from "@/components/pages/reset-password.page";
@@ -84,6 +85,10 @@ const appRouterConfig: RouteObject[] = [
       {
         path: "posts/my-posts",
         element: <ProtectedRouteAuth element={<MyPostPage />} />,
+      },
+      {
+        path: "posts/subscriptions",
+        element: <SubscriptionsPage></SubscriptionsPage>,
       },
       {
         path: "my-posts/create-post",

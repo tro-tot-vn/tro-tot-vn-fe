@@ -34,6 +34,9 @@ const axios_auth = axios.create({
       return convertDates(parsedData);
     },
   ],
+  validateStatus: function () {
+    return true;
+  },
 });
 
 const axios_base = axios.create({
@@ -70,6 +73,9 @@ const axios_base = axios.create({
       return convertDates(parsedData);
     },
   ],
+  validateStatus: function () {
+    return true;
+  },
 });
 
 axios_auth.interceptors.request.use((config) => {

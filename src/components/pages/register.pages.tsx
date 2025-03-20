@@ -6,7 +6,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { TriangleAlert, X } from "lucide-react";
 import authService from "@/services/auth.service";
-import useAuth from "@/hooks/use-auth";
 import { toast } from "sonner";
 
 export default function RegisterPage() {
@@ -15,12 +14,12 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [birthday, setBirthday] = useState<Date>(new Date());
-  const [gender, setGender] = useState("male"); // Default is male
+  const [birthday, setBirthday] = useState<Date | null>(null);
+  const [gender, setGender] = useState("Male"); // Default is male
   const [password, setPassword] = useState("");
   const [isRegisterFailure, setRegisterFailure] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const auth = useAuth();
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -164,8 +163,7 @@ export default function RegisterPage() {
               id="birthday"
               name="birthday"
               type="date"
-              required
-              value={birthday.toISOString().split("T")[0]}
+              value={birthday ? birthday.toISOString().split("T")[0] : " "}
               onChange={(e) => setBirthday(new Date(e.target.value))}
               className="pr-8"
             />
@@ -177,10 +175,10 @@ export default function RegisterPage() {
               name="gender"
               value={gender}
               onChange={(e) => setGender(e.target.value)}
-              className="w-full px-4 py-2 rounded-md border"
+              className="w-full px-4 py-2 rounded-md border border-gray-200 focus:border-primary shadow-gray-300 focus:ring focus:ring-primary/50 focus:outline-none"
             >
-              <option value="male">Nam</option>
-              <option value="female">Nữ</option>
+              <option value="Male">Nam</option>
+              <option value="Female">Nữ</option>
             </select>
           </div>
 

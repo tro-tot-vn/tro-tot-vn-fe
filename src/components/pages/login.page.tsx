@@ -119,7 +119,7 @@ export default function LoginPage() {
 
           <div className="text-right">
             <Link
-              to="#"
+              to="/forgot-password"
               className="text-primary hover:underline text-sm text-blue-600"
             >
               Quên mật khẩu?

@@ -9,6 +9,11 @@ jobs:
   check-branch:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug PR Branches
+        run: |
+          echo "Base Branch: ${{ github.event.pull_request.base.ref }}"
+          echo "Head Branch: ${{ github.event.pull_request.head.ref }}"
+
       - name: Check Source Branch
         run: |
           if [[ "${{ github.event.pull_request.base.ref }}" == "main" && "${{ github.event.pull_request.head.ref }}" != "dev" ]]; then

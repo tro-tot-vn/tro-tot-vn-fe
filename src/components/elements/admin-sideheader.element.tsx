@@ -3,18 +3,15 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Bell, LogOut, Moon, Settings, Sun, User } from "lucide-react";
-import { useTheme } from "next-themes";
+import useAuth from "@/hooks/use-auth";
+import { Bell, LogOut, Settings, User } from "lucide-react";
 import { Link } from "react-router";
 
 export function SiteHeader() {
-  const { setTheme } = useTheme();
-
+  const auth = useAuth();
   return (
     <header className="sticky top-0 z-40 w-full border-white border-b-[#E8E8EB] border-2 bg-white">
       <div className="container flex h-16 items-center justify-between">
@@ -35,8 +32,6 @@ export function SiteHeader() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <User className="mr-2 h-4 w-4" />
                 <span>Profile</span>
@@ -45,23 +40,12 @@ export function SiteHeader() {
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Settings</span>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Sun
-                  className="mr-2 h-4 w-4"
-                  onClick={() => setTheme("light")}
-                />
-                <span>Light</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Moon
-                  className="mr-2 h-4 w-4"
-                  onClick={() => setTheme("dark")}
-                />
-                <span>Dark</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
+
+              <DropdownMenuItem
+                onClick={() => {
+                  auth.signout();
+                }}
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
               </DropdownMenuItem>

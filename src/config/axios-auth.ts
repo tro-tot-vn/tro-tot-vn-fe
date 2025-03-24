@@ -1,3 +1,5 @@
+import { RefreshTokenResponse } from "@/services/types/refresh-token.response";
+import ResponseData from "@/types/response.type";
 import axios from "axios";
 
 const axios_auth = axios.create({
@@ -86,41 +88,41 @@ axios_auth.interceptors.request.use((config) => {
   return config;
 });
 
-// axios_auth.interceptors.response.use(
-//   (response) => {
-//     return response;
-//   },
-//   async (error) => {
-//     const originalRequest = error.config; // get the original request
-//     if (
-//       error.response.status === 401 && // if the error is 401 Unauthorized
-//       !originalRequest._retry // and the original request has not been retried yet
-//     ) {
-//       originalRequest._retry = true; // mark the original request as retried
-//       try {
-//         const res = await axios_auth.post<ResponseData<AccessToken>>(
-//           "/refresh-token",
-//           {
-//             refreshToken: localStorage.getItem("refreshToken"),
-//           }
-//         );
-//         if (res.data.success) {
-//           // if the refresh token is valid
-//           axios_auth.defaults.headers.common[
-//             "Authorization"
-//           ] = `Bearer ${res.data.data.accessToken}`;
-//           return axios_auth(originalRequest); // retry the original request
-//         }
-//       } catch (error) {
-//         console.log("Intercepter Axios", error);
-//         // if the refresh token is invalid
-//         localStorage.removeItem("refreshToken");
-//         localStorage.removeItem("accessToken");
-//         localStorage.removeItem("account");
-//         window.location.href = "/";
-//       }
-//     }
-//     return Promise.reject(error);
-//   }
-// );
+axios_auth.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  async (error) => {
+    const originalRequest = error.config; // get the original request
+    if (
+      error.response.status === 401 && // if the error is 401 Unauthorized
+      !originalRequest._retry // and the original request has not been retried yet
+    ) {
+      originalRequest._retry = true; // mark the original request as retried
+      try {
+        const res = await axios_auth.post<ResponseData<RefreshTokenResponse>>(
+          "auth/refresh-token",
+          {
+            refreshToken: localStorage.getItem("refreshToken"),
+          }
+        );
+        if (res.data.status === 200) {
+          // if the refresh token is valid
+          axios_auth.defaults.headers.common[
+            "Authorization"
+          ] = `Bearer ${res.data.data?.accessToken}`;
+          return axios_auth(originalRequest); // retry the original request
+        }
+      } catch (error) {
+        console.log("Intercepter Axios", error);
+        // if the refresh token is invalid
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("account");
+      }
+    }
+    window.location.replace("/login");
+    return Promise.reject(error);
+  }
+);
 export { axios_auth, axios_base };

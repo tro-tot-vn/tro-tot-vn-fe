@@ -51,7 +51,7 @@ export default function PendingPostDetailPage() {
       <main className="flex-1 p-6">
         <div className="flex items-center gap-2 mb-6">
           <Button variant="outline" size="icon" asChild>
-            <Link to="/a/posts/pending">
+            <Link to="/a/posts/review-post/">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>

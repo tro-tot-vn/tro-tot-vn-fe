@@ -101,7 +101,7 @@ const appRouterConfig: RouteObject[] = [
     ],
   },
   {
-    path: "/a",
+    path: "/admin",
     element: (
       <ProtectRouteRole
         roles={[Role.Manager, Role.Moderator]}

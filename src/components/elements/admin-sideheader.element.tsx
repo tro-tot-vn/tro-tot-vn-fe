@@ -15,9 +15,9 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 w-full border-white border-b-[#E8E8EB] border-2 bg-white">
       <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger />
-          <Link to="/a" className="flex items-center space-x-2">
+        <div className="flex items-center gap-2 pl-4">
+          <SidebarTrigger className="" />
+          <Link to="/admin" className="flex items-center space-x-2">
             <span className="font-bold text-xl">Trang quản trị</span>
           </Link>
         </div>

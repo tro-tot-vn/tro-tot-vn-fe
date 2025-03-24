@@ -10,7 +10,7 @@ import DashboardPage from "@/components/pages/admin-dashboard.page";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { SiteHeader } from "@/components/elements/admin-sideheader.element";
 import { AdminSidebar } from "@/components/elements/admin-sidebar.element";
-import PendingPostsPage from "@/components/pages/admin-pending-post";
+import AdminReviewPage from "@/components/pages/admin-review.pages.tsx";
 import PendingPostDetailPage from "@/components/pages/admin-post-detail.page";
 import ModeratorsPage from "@/components/pages/admin-moderator-manage.page";
 import UserReportsPage from "@/components/pages/user-report.page";
@@ -125,11 +125,11 @@ const appRouterConfig: RouteObject[] = [
         element: <DashboardPage />,
       },
       {
-        path: "posts/pending",
-        element: <PendingPostsPage />,
+        path: "posts/review-post/",
+        element: <AdminReviewPage />,
       },
       {
-        path: "posts/pending/:postId",
+        path: "posts/review-post/:postId",
         element: <PendingPostDetailPage />,
       },
       {

@@ -58,7 +58,7 @@ const pendingListings = [
   },
 ];
 
-export default function PendingPostsPage() {
+export default function AdminReviewPage() {
   const navigation = useNavigate();
   return (
     <div className="flex-1 flex overflow-hidden">
@@ -90,7 +90,7 @@ export default function PendingPostsPage() {
                 {pendingListings.map((listing) => (
                   <TableRow
                     key={listing.id}
-                    onClick={() => navigation(`/a/posts/pending/${listing.id}`)}
+                    onClick={() => navigation(`/a/posts/review-post/${listing.id}`)}
                     className="cursor-pointer hover:bg-gray-200 border border-gray-100"
                   >
                     <TableCell className="font-semibold whitespace-normal break-words p-5">

@@ -15,10 +15,12 @@ import {
 import { AlertTriangle, FileText, Home, Shield } from "lucide-react";
 import { Link, useLocation } from "react-router";
 import { Label } from "../ui/label";
+import useAuth from "@/hooks/use-auth";
+import { Role } from "@/utils/role.enum";
 
 export function AdminSidebar() {
   const location = useLocation();
-
+  const auth = useAuth();
   const isActive = (path: string) => {
     return location.pathname === path;
   };
@@ -61,13 +63,15 @@ export function AdminSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={isActive("/a/posts/pending")}
+                  isActive={isActive("/a/posts/review-post/")}
                 >
-                  <Link to="posts/pending">
+                  <Link to="posts/review-post/">
                     <FileText className="h-5 w-5" />
                     <span
                       className={`${
-                        isActive("/a/posts/pending") ? "font-bold" : ""
+                        isActive("/a/posts/review-post/")
+                          ? "font-bold"
+                          : ""
                       }`}
                     >
                       Tin chờ duyệt
@@ -92,7 +96,11 @@ export function AdminSidebar() {
                 >
                   <Link to="reports/users">
                     <AlertTriangle className="h-5 w-5" />
-                    <span className={`${isActive("/a/reports/users") ? "font-bold" : ""}`}>
+                    <span
+                      className={`${
+                        isActive("/a/reports/users") ? "font-bold" : ""
+                      }`}
+                    >
                       Người dùng
                     </span>
                   </Link>
@@ -105,7 +113,11 @@ export function AdminSidebar() {
                 >
                   <Link to="reports/posts">
                     <AlertTriangle className="h-5 w-5" />
-                    <span className={`${isActive("/a/reports/posts") ? "font-bold" : ""}`}>
+                    <span
+                      className={`${
+                        isActive("/a/reports/posts") ? "font-bold" : ""
+                      }`}
+                    >
                       Bài viết
                     </span>
                   </Link>
@@ -118,7 +130,11 @@ export function AdminSidebar() {
                 >
                   <Link to="reports/comments">
                     <AlertTriangle className="h-5 w-5" />
-                    <span className={`${isActive("/a/reports/comments") ? "font-bold" : ""}`}>
+                    <span
+                      className={`${
+                        isActive("/a/reports/comments") ? "font-bold" : ""
+                      }`}
+                    >
                       Bình luận
                     </span>
                   </Link>
@@ -128,33 +144,37 @@ export function AdminSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>
-            {" "}
-            <Label className="font-bold text-black">Quản lí người dùng</Label>
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive("manager/moderator")}
-                >
-                  <Link to="manager/moderators">
-                    <Shield className="h-5 w-5" />
-                    <span
-                      className={`${
-                        isActive("/a/moderators") ? "font-bold" : ""
-                      }`}
-                    >
-                      Kiểm duyệt viên
-                    </span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {auth.user?.role.roleName === Role.Manager ? (
+          <SidebarGroup>
+            <SidebarGroupLabel>
+              {" "}
+              <Label className="font-bold text-black">Quản lí người dùng</Label>
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive("manager/moderator")}
+                  >
+                    <Link to="manager/moderators">
+                      <Shield className="h-5 w-5" />
+                      <span
+                        className={`${
+                          isActive("/a/moderators") ? "font-bold" : ""
+                        }`}
+                      >
+                        Kiểm duyệt viên
+                      </span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ) : (
+          <></>
+        )}
       </SidebarContent>
       <SidebarFooter>
         <div className="p-4 text-xs text-muted-foreground">

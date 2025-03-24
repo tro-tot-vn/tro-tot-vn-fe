@@ -118,7 +118,7 @@ export function SiteHeader() {
 
             {auth.user.role.roleName === Role.Manager ||
             auth.user.role.roleName === Role.Moderator ? (
-              <Link to="/a">
+              <Link to="/admin">
                 <Button className="hidden md:inline-flex bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white">
                   Trang quản trị hệ thống
                 </Button>

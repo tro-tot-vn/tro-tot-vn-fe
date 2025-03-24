@@ -41,10 +41,10 @@ export function AdminSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/a")}>
-                  <Link to="/a">
+                <SidebarMenuButton asChild isActive={isActive("/admin")}>
+                  <Link to="/admin">
                     <Home className="h-5 w-5" />
-                    <span className={`${isActive("/a") ? "font-bold" : ""}`}>
+                    <span className={`${isActive("/admin") ? "font-bold" : ""}`}>
                       Tổng quan
                     </span>
                   </Link>

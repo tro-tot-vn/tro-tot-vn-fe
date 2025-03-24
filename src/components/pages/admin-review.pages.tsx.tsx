@@ -90,7 +90,7 @@ export default function AdminReviewPage() {
                 {pendingListings.map((listing) => (
                   <TableRow
                     key={listing.id}
-                    onClick={() => navigation(`/a/posts/review-post/${listing.id}`)}
+                    onClick={() => navigation(`/admin/posts/review-post/${listing.id}`)}
                     className="cursor-pointer hover:bg-gray-200 border border-gray-100"
                   >
                     <TableCell className="font-semibold whitespace-normal break-words p-5">

@@ -63,13 +63,13 @@ export function AdminSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={isActive("/a/posts/review-post/")}
+                  isActive={isActive("/admin/posts/review-post/")}
                 >
                   <Link to="posts/review-post/">
                     <FileText className="h-5 w-5" />
                     <span
                       className={`${
-                        isActive("/a/posts/review-post/")
+                        isActive("/admin/posts/review-post/")
                           ? "font-bold"
                           : ""
                       }`}
@@ -92,13 +92,13 @@ export function AdminSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={isActive("/a/reports/users")}
+                  isActive={isActive("/admin/reports/users")}
                 >
                   <Link to="reports/users">
                     <AlertTriangle className="h-5 w-5" />
                     <span
                       className={`${
-                        isActive("/a/reports/users") ? "font-bold" : ""
+                        isActive("/admin/reports/users") ? "font-bold" : ""
                       }`}
                     >
                       Người dùng
@@ -109,13 +109,13 @@ export function AdminSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={isActive("/a/reports/posts")}
+                  isActive={isActive("/admin/reports/posts")}
                 >
                   <Link to="reports/posts">
                     <AlertTriangle className="h-5 w-5" />
                     <span
                       className={`${
-                        isActive("/a/reports/posts") ? "font-bold" : ""
+                        isActive("/admin/reports/posts") ? "font-bold" : ""
                       }`}
                     >
                       Bài viết
@@ -126,13 +126,13 @@ export function AdminSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={isActive("/a/reports/comments")}
+                  isActive={isActive("/admin/reports/comments")}
                 >
                   <Link to="reports/comments">
                     <AlertTriangle className="h-5 w-5" />
                     <span
                       className={`${
-                        isActive("/a/reports/comments") ? "font-bold" : ""
+                        isActive("/admin/reports/comments") ? "font-bold" : ""
                       }`}
                     >
                       Bình luận
@@ -161,7 +161,7 @@ export function AdminSidebar() {
                       <Shield className="h-5 w-5" />
                       <span
                         className={`${
-                          isActive("/a/moderators") ? "font-bold" : ""
+                          isActive("/admin/moderators") ? "font-bold" : ""
                         }`}
                       >
                         Kiểm duyệt viên

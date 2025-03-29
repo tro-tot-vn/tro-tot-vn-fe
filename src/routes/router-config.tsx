@@ -30,6 +30,7 @@ import SubscriptionsPage from "@/components/pages/post-subscriptions.page";
 import ForgotPassword from "@/components/pages/forgot-password.page";
 import VerifyOtp from "@/components/pages/verify-otp-password.page";
 import ResetPassword from "@/components/pages/reset-password.page";
+import VerifyOtpRegister from "@/components/pages/verify-otp.pages";
 
 const appRouterConfig: RouteObject[] = [
   {
@@ -37,7 +38,7 @@ const appRouterConfig: RouteObject[] = [
     element: <ProtectedRouteNoAuth element={<RegisterForm />} />,
   },
   {
-    path: "login",
+    path: "/login",
     element: <ProtectedRouteNoAuth element={<LoginPage />} />,
   },
   {
@@ -47,6 +48,10 @@ const appRouterConfig: RouteObject[] = [
   {
     path: "/verify-otp",
     element: <ProtectedRouteNoAuth element={<VerifyOtp />} />,
+  },
+  {
+    path: "/verify-otp-register",
+    element: <ProtectedRouteNoAuth element={<VerifyOtpRegister />} />,
   },
   {
     path: "/reset-password",

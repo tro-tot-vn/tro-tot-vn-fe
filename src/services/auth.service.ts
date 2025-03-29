@@ -2,12 +2,14 @@ import { axios_base } from "@/config/axios-auth";
 import ResponseData from "@/types/response.type";
 import { LoginResponse } from "./types/login-response";
 import { RegisterResponse } from "./types/register-response";
-import { ForgotPasswordResponse, ResetPasswordResponse, VerifyOtpResponse } from "./types/forgot-pasword-response";
+import {
+  ForgotPasswordResponse,
+  ResetPasswordResponse,
+  VerifyOtpResponse,
+} from "./types/forgot-pasword-response";
 import { AxiosError } from "axios";
 
 class AuthService {
-
-  
   async registerAccount(
     phone: string,
     email: string,
@@ -58,13 +60,15 @@ class AuthService {
     try {
       const res = await axios_base.post<ResponseData<ForgotPasswordResponse>>(
         "api/auth/forgot-password",
-          {
-           email
-          }
-        );
+        {
+          email,
+        }
+      );
       return res;
     } catch (error) {
-      const axiosError = error as AxiosError<ResponseData<ForgotPasswordResponse>>;
+      const axiosError = error as AxiosError<
+        ResponseData<ForgotPasswordResponse>
+      >;
       return axiosError.response ?? null; // Trả về response hoặc null nếu không có
     }
   }
@@ -73,28 +77,59 @@ class AuthService {
     try {
       const res = await axios_base.post<ResponseData<VerifyOtpResponse>>(
         "api/auth/verify-otp",
-          {
-            email,
-            otp
-          });
+        {
+          email,
+          otp,
+        }
+      );
       return res;
     } catch (error) {
       const axiosError = error as AxiosError<ResponseData<VerifyOtpResponse>>;
       return axiosError.response ?? null; // Trả về response hoặc null nếu không có
     }
   }
-
+  async sendEmailRegister(email: string) {
+    try {
+      const res = await axios_base.post<ResponseData<ForgotPasswordResponse>>(
+        "api/auth/send-otp-register",
+        {
+          email,
+        }
+      );
+      return res;
+    } catch (error) {
+      const axiosError = error as AxiosError<
+        ResponseData<ForgotPasswordResponse>
+      >;
+      return axiosError.response ?? null; // Trả về response hoặc null nếu không có
+    }
+  }
+  async verifyOtpRegister(email: string, otp: string) {
+    try {
+      const res = await axios_base.post<ResponseData<VerifyOtpResponse>>(
+        "api/auth/verify-otp-register",
+        { email, otp }
+      );
+      return res;
+    } catch (error) {
+      const axiosError = error as AxiosError<ResponseData<VerifyOtpResponse>>;
+      return axiosError.response ?? null; // Trả về response hoặc null nếu không có
+    }
+  }
   async resetPassword(resetToken: string, password: string) {
     try {
       const res = await axios_base.post<ResponseData<ResetPasswordResponse>>(
         "api/auth/reset-password",
         {
           password,
-          resetToken
-        });
+          resetToken,
+        }
+      );
       return res;
     } catch (error) {
-      const axiosError = error as AxiosError<ResponseData<ResetPasswordResponse>>;
+      const axiosError = error as AxiosError<
+        ResponseData<ResetPasswordResponse>
+      >;
       return axiosError.response ?? null; // Trả về response hoặc null nếu không có
     }
   }

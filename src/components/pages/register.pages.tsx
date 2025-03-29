@@ -39,8 +39,11 @@ export default function RegisterPage() {
     if (res) {
       if (res.status === 201) {
         if (res.data.data) {
-          toast("Đăng ký thành công");
-          navigate("/login");
+          toast(
+            "Đăng ký thành công. Vui lòng nhập mã OTP để xác thực tài khoản!"
+          );
+          await authService.sendEmailRegister(email);
+          navigate("/verify-otp-register", { state: { email } });
         }
       } else if (res.status === 409) {
         setRegisterFailure(true);
@@ -86,7 +89,6 @@ export default function RegisterPage() {
           />
           <h1 className="text-2xl font-semibold mt-6">Đăng ký</h1>
         </div>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           {isRegisterFailure && (
             <div className="bg-[#FFE5EA] flex flex-row text-center rounded-md p-2">

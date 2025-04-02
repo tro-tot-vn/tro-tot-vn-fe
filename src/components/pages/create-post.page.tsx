@@ -198,7 +198,7 @@ export default function CreatePostPage() {
     formData.append("acreage", acreage);
     formData.append("interiorStatus", interiorStatus);
     formData.append("city", selectedProvince?.province_name ?? "");
-    formData.append("ward", selectedWard?.ward_id ?? "");
+    formData.append("ward", selectedWard?.ward_name ?? "");
     formData.append("district", selectedDistrict?.district_name ?? "");
     formData.append("streetNumber", houseNumber);
     formData.append("street", streetName);

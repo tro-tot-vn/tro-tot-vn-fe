@@ -1,6 +1,7 @@
 import { axios_auth } from "@/config/axios-auth";
 import ResponseData from "@/types/response.type";
 import { GetPostByStatusResponse } from "./types/get-list-post-by-status-reponse";
+import { GetDetailPostResponse } from "./types/get-detail-post.response";
 
 export class PostService {
   createPost = async (data: FormData) => {
@@ -16,7 +17,7 @@ export class PostService {
     console.log(res.data);
     return res;
   };
-  getListPost = async (status: string, cursor?: number , limit: number = 10) => {
+  getListPost = async (status: string, cursor?: number, limit: number = 10) => {
     const res = await axios_auth.get<ResponseData<GetPostByStatusResponse>>(
       "api/post/list",
       {
@@ -27,6 +28,10 @@ export class PostService {
         },
       }
     );
+    return res;
+  };
+  getDetailPost = async (postId: number) => {
+    const res = await axios_auth.get<ResponseData<GetDetailPostResponse>>(`api/post/${postId}/detail`);
     return res;
   };
 }

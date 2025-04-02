@@ -1,78 +1,161 @@
 import { Card } from "@/components/ui/card";
-import { Link } from "react-router";
-import { ImageGallery } from "../elements/image-gallery";
-import { PropertyDetails } from "../elements/property-details";
-import { SellerInfo } from "../elements/seller-info";
-import { SimilarListings } from "../elements/similar-listings";
+import { ImageGallery } from "@/components/elements/image-gallery";
+import { PropertyDetails } from "@/components/elements/property-details";
+import { SellerInfo } from "@/components/elements/seller-info";
+import { SimilarListings } from "@/components/elements/similar-listings";
+import { RatingsReviews } from "@/components/elements/ratings-reviews";
+import { useEffect, useState } from "react";
+import { PostService } from "@/services/post.service";
+import { GetDetailPostResponse } from "@/services/types/get-detail-post.response";
+import { Button } from "../ui/button";
+import useAuth from "@/hooks/use-auth";
+import { toast } from "sonner";
+import { useNavigate, useParams } from "react-router";
+import { LoaderCircle } from "lucide-react";
+import NotFoundPage from "./not-found.page";
+
+const postService = new PostService();
 
 export default function PostDetailPage() {
+  const auth = useAuth();
+  const navigate = useNavigate();
+  const [postData, setPostData] = useState<GetDetailPostResponse | null>(null);
+  const [isNotFound, setNotFound] = useState(false);
+  const { postId } = useParams();
+  useEffect(() => {
+    postService.getDetailPost(Number(postId)).then((res) => {
+      if (res.status === 200) {
+        setPostData(res.data.data);
+      } else if (res.status === 404) {
+        setNotFound(true);
+      } else {
+        toast.error("Lỗi khi tải dữ liệu bài đăng");
+      }
+    });
+  }, [postId]);
   return (
     <>
-      <main className="flex-1 py-8">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-3 gap-8">
-            <div className="col-span-2">
-              <ImageGallery />
-              <h1 className="text-2xl font-bold mt-6 mb-4">
-                ACE mô giới bán hộ mình với chú chủ nhà tên hàng chỉ là chủ nhà
-              </h1>
-              <div className="flex items-center space-x-4 text-sm text-gray-600 mb-4">
-                <span>3 PN - Hướng Đông Bắc - Nhà ngõ, hẻm</span>
-              </div>
-              <div className="flex items-center space-x-4 mb-6">
-                <span className="text-3xl font-bold text-orange-500">
-                  3.7 tỷ
-                </span>
-                <span className="text-xl">123,33 triệu/m²</span>
-                <span className="text-xl">30 m²</span>
-                <Link to="#" className="text-blue-500 hover:underline">
-                  Xem lịch sử giá
-                </Link>
-              </div>
-              <PropertyDetails />
-              <div className="mt-8">
-                <h2 className="text-xl font-bold mb-4">Mô tả chi tiết</h2>
-                <div className="bg-gray-100 p-4 rounded-lg">
-                  <p className="mb-2">
-                    SĐT Liên hệ: 037684 ***{" "}
-                    <button className="text-blue-500 hover:underline">
-                      Hiện SĐT
-                    </button>
-                  </p>
-                  <p>Tiện ích: Gần trường tiểu học</p>
-                  <p>
-                    Pháp lý: Sổ hồng chính chủ, cho tộp tác mua bán công chứng
-                    nhanh.
-                  </p>
-                  {/* Add more description text here */}
+      {postData ? (
+        <main className="flex-1 py-8 px-8">
+          <div className="container mx-auto px-4">
+            {/* Thay đổi layout từ grid sang flex-col */}
+            <div className="flex flex-col">
+              {/* Phần hình ảnh và thông tin chính */}
+              <div>
+                <ImageGallery data={postData.multimediaFiles} />
+                <h1 className="text-2xl font-bold mt-6 mb-4">
+                  {postData.title}
+                </h1>
+                <div className="flex items-center space-x-4 mb-6">
+                  <span className="text-3xl font-bold text-orange-500">
+                    {postData.price.toLocaleString("vi-VN")} VNĐ / tháng
+                  </span>
                 </div>
-              </div>
-              <div className="mt-8">
-                <h2 className="text-xl font-bold mb-4">Xem trên bản đồ</h2>
-                <div className="h-64 bg-gray-300 rounded-lg">
-                  {/* Add map component here */}
-                  <p className="text-center pt-24">Map placeholder</p>
+                <PropertyDetails postData={postData} />
+                <div className="mt-8">
+                  <h2 className="text-xl font-bold mb-4">Mô tả chi tiết</h2>
+                  <div className="bg-gray-100 p-4 rounded-lg">
+                    <p className="mb-2">
+                      SĐT Liên hệ:{" "}
+                      {auth.isAuthenticated
+                        ? postData.owner.account.phone
+                        : postData.owner.account.phone.slice(0, -3) + "***"}
+                      {!auth.isAuthenticated && (
+                        <Button
+                          onClick={() => {
+                            toast.error("Vui lòng đăng nhập để xem SĐT", {
+                              duration: 3000,
+                              action: {
+                                label: "Đăng nhập",
+                                onClick: () => {
+                                  navigate("/login");
+                                },
+                              },
+                            });
+                          }}
+                          variant="ghost"
+                          className="text-blue-500 hover:underline"
+                        >
+                          Hiện SĐT
+                        </Button>
+                      )}
+                    </p>
+                    <div className="relative">
+                      <div
+                        className="overflow-hidden max-h-24 transition-all duration-300"
+                        id="description-content"
+                      >
+                        <p>{postData.description}</p>
+                      </div>
+                      <button
+                        className="text-blue-500 hover:underline mt-2"
+                        onClick={(event) => {
+                          const content = document.getElementById(
+                            "description-content"
+                          );
+                          if (content) {
+                            if (content.style.maxHeight === "none") {
+                              content.style.maxHeight = "6rem";
+                              (event.target as HTMLButtonElement).innerText =
+                                "Xem thểm";
+                            } else {
+                              content.style.maxHeight = "none";
+                              (event.target as HTMLButtonElement).innerText =
+                                "Thu gọn";
+                            }
+                          }
+                        }}
+                      >
+                        Xem thêm
+                      </button>
+                    </div>
+                  </div>
                 </div>
+                <div className="mt-8">
+                  <h2 className="text-xl font-bold mb-4">Xem trên bản đồ</h2>
+                  <div className="h-64 bg-gray-300 rounded-lg">
+                    {/* Add map component here */}
+                    <p className="text-center pt-24">Map placeholder</p>
+                  </div>
+                </div>
+                <h2 className="text-xl font-bold mb-4 mt-4">
+                  Thông tin người đăng
+                </h2>
+
+                {/* Thông tin người đăng - đã di chuyển xuống dưới phần bản đồ */}
+                <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="md:col-span-2">
+                    <SellerInfo customerInformation={postData.owner} />
+                  </div>
+                  <Card className="p-4">
+                    <h2 className="font-bold mb-2">Tin đăng này có phải là:</h2>
+                    <div className="space-y-2">
+                      <button className="w-full text-left px-3 py-2 bg-gray-100 rounded hover:bg-gray-200">
+                        Nhà này còn không ạ?
+                      </button>
+                      <button className="w-full text-left px-3 py-2 bg-gray-100 rounded hover:bg-gray-200">
+                        Thời hạn thuê?
+                      </button>
+                    </div>
+                  </Card>
+                </div>
+
+                {/* Phần đánh giá */}
+                <RatingsReviews />
               </div>
             </div>
-            <div>
-              <SellerInfo />
-              <Card className="mt-6 p-4">
-                <h2 className="font-bold mb-2">Tin đăng này có phải là:</h2>
-                <div className="space-y-2">
-                  <button className="w-full text-left px-3 py-2 bg-gray-100 rounded hover:bg-gray-200">
-                    Nhà này còn không ạ?
-                  </button>
-                  <button className="w-full text-left px-3 py-2 bg-gray-100 rounded hover:bg-gray-200">
-                    Thời hạn thuê?
-                  </button>
-                </div>
-              </Card>
-            </div>
+            <SimilarListings />
           </div>
-          <SimilarListings />
+        </main>
+      ) : (
+        <div className="flex flex-1 justify-center items-center h-screen">
+          {isNotFound ? (
+            <NotFoundPage></NotFoundPage>
+          ) : (
+            <LoaderCircle className="animate-spin"></LoaderCircle>
+          )}
         </div>
-      </main>
+      )}
     </>
   );
 }

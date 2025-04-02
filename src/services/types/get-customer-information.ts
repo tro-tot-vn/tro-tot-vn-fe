@@ -48,6 +48,6 @@ export interface File {
   createdAt: Date;
 }
 export enum FileType {
-  IMAGE = "IMAGE",
-  VIDEO = "VIDEO",
+  IMAGE = "Image",
+  VIDEO = "Video",
 }

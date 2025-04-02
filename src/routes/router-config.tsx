@@ -100,7 +100,7 @@ const appRouterConfig: RouteObject[] = [
         element: <ProtectedRouteAuth element={<CreatePostPage />} />,
       },
       {
-        path: "posts/detail/:postId",
+        path: "posts/:postId/detail",
         element: <PostDetailPage />,
       },
     ],

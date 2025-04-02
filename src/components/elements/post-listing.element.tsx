@@ -8,7 +8,7 @@ interface PostRecent {
 
 export function PostRecent({ post }: PostRecent) {
   return (
-    <Link to={`/post/${post.postId}`}>
+    <Link to={`/posts/${post.postId}/detail`}>
       <div className="overflow-hidden hover:shadow-md transition-shadow h-full flex flex-col rounded-xl bg-white border border-gray-200">
         <div className="relative w-[300px] h-[150px] overflow-hidden">
           <img

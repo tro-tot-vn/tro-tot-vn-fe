@@ -12,7 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { AlertTriangle, FileText, Home, Shield } from "lucide-react";
+import { FileText, Home, Shield } from "lucide-react";
 import { Link, useLocation } from "react-router";
 import { Label } from "../ui/label";
 import useAuth from "@/hooks/use-auth";
@@ -35,7 +35,6 @@ export function AdminSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>
-            {" "}
             <Label className="font-bold text-black">Bảng chức năng</Label>
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -44,7 +43,9 @@ export function AdminSidebar() {
                 <SidebarMenuButton asChild isActive={isActive("/admin")}>
                   <Link to="/admin">
                     <Home className="h-5 w-5" />
-                    <span className={`${isActive("/admin") ? "font-bold" : ""}`}>
+                    <span
+                      className={`${isActive("/admin") ? "font-bold" : ""}`}
+                    >
                       Tổng quan
                     </span>
                   </Link>
@@ -69,73 +70,10 @@ export function AdminSidebar() {
                     <FileText className="h-5 w-5" />
                     <span
                       className={`${
-                        isActive("/admin/posts/review-post/")
-                          ? "font-bold"
-                          : ""
+                        isActive("/admin/posts/review-post/") ? "font-bold" : ""
                       }`}
                     >
                       Tin chờ duyệt
-                    </span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>
-            <Label className="font-bold text-black">Báo cáo</Label>
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive("/admin/reports/users")}
-                >
-                  <Link to="reports/users">
-                    <AlertTriangle className="h-5 w-5" />
-                    <span
-                      className={`${
-                        isActive("/admin/reports/users") ? "font-bold" : ""
-                      }`}
-                    >
-                      Người dùng
-                    </span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive("/admin/reports/posts")}
-                >
-                  <Link to="reports/posts">
-                    <AlertTriangle className="h-5 w-5" />
-                    <span
-                      className={`${
-                        isActive("/admin/reports/posts") ? "font-bold" : ""
-                      }`}
-                    >
-                      Bài viết
-                    </span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive("/admin/reports/comments")}
-                >
-                  <Link to="reports/comments">
-                    <AlertTriangle className="h-5 w-5" />
-                    <span
-                      className={`${
-                        isActive("/admin/reports/comments") ? "font-bold" : ""
-                      }`}
-                    >
-                      Bình luận
                     </span>
                   </Link>
                 </SidebarMenuButton>

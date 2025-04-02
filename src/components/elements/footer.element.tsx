@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="container ">
           <div className="flex flex-row gap-8 justify-center mt-8">
             <div>
-              <h3 className="font-semibold mb-4">TẢI ỨNG DỤNG CHỢ TỐT</h3>
+              <h3 className="font-semibold mb-4">TẢI ỨNG DỤNG TRỌ TỐT</h3>
               <img
                 src="/google-play-store-logo.svg"
                 alt="QR Code"
@@ -57,7 +57,7 @@ export default function Footer() {
             </div>
 
             <div>
-              <h3 className="font-semibold mb-4">VỀ CHỢ TỐT</h3>
+              <h3 className="font-semibold mb-4">VỀ TRỌ TỐT</h3>
               <ul className="space-y-2 text-sm">
                 <li>
                   <Link

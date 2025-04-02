@@ -93,10 +93,17 @@ export function SiteHeader() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
-                    <Link to={`/user/profile`}>
+                    <Link
+                      to={`/customer/${
+                        auth.user?.customer.customerId
+                      }/profile`}
+                    >
                       <DropdownMenuItem>Trang cá nhân</DropdownMenuItem>
                     </Link>
-                    <Link to="/user/setting">
+                    <Link to="/customer/function">
+                      <DropdownMenuItem>Chức năng người dùng </DropdownMenuItem>
+                    </Link>
+                    <Link to="/customer/setting">
                       <DropdownMenuItem>Cài đặt tài khoản</DropdownMenuItem>
                     </Link>
 

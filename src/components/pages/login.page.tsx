@@ -167,7 +167,7 @@ export default function LoginPage() {
         <div className="text-center text-sm">
           Chưa có tài khoản?{" "}
           <Link
-            to="#"
+            to="/register"
             className="text-primary hover:underline text-blue-700 font-bold"
           >
             Đăng ký tài khoản mới

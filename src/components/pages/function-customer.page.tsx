@@ -1,31 +1,26 @@
-"use client";
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { AccountSettingsSidebar } from "../elements/account-settings-sidebar.element";
 import { PasswordChangeForm } from "../elements/password-change-form.element";
 import { ProfileInfoForm } from "../elements/profile-info-form.element";
 import { SocialConnections } from "../elements/social-connections.element";
-import { LoginHistory } from "../elements/login-history.element";
+import { FunctionCustomerSidebar } from "../elements/functoion-sidebar.element";
 
-export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState("profile");
+export default function FunctionCustomerPage() {
+  const [activeTab, setActiveTab] = useState("savedPost");
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
-
         <h1 className="text-2xl font-bold mb-6">
-          {activeTab === "password" && "Cài đặt tài khoản"}
-          {activeTab === "profile" && "Thông tin cá nhân"}
-          {activeTab === "social" && "Liên kết mạng xã hội"}
-          {activeTab === "login-history" && "Quản lý lịch sử đăng nhập"}
+          {activeTab === "savedPost" && "Bài viết đã lưu "}
+          {activeTab === "historyView" && "Lịch sử xem tin"}
+          {activeTab === "appointment" && "Cuộc hẹn"}
         </h1>
 
         <div className="flex flex-col md:flex-row gap-6">
           {/* Sidebar */}
           <div className="w-full md:w-1/4">
-            <AccountSettingsSidebar
+            <FunctionCustomerSidebar
               activeTab={activeTab}
               setActiveTab={setActiveTab}
             />
@@ -34,10 +29,9 @@ export default function SettingsPage() {
           {/* Main Content */}
           <div className="w-full md:w-3/4">
             <Card className="p-6">
-              {activeTab === "password" && <PasswordChangeForm />}
-              {activeTab === "profile" && <ProfileInfoForm />}
-              {activeTab === "social" && <SocialConnections />}
-              {activeTab === "login-history" && <LoginHistory />}
+              {activeTab === "savedPost" && <PasswordChangeForm />}
+              {activeTab === "historyView" && <ProfileInfoForm />}
+              {activeTab === "appointment" && <SocialConnections />}
             </Card>
           </div>
         </div>

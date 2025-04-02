@@ -25,12 +25,13 @@ import ProtectedRouteAuth from "@/components/elements/protect-route-auth.element
 import ProtectRouteRole from "@/components/elements/protect-role.element";
 import { Role } from "@/utils/role.enum";
 import SettingsPage from "@/components/pages/settings.page";
-import UserProfilePage from "@/components/pages/user-profile.page";
+import CustomerProfilePage from "@/components/pages/user-profile.page";
 import SubscriptionsPage from "@/components/pages/post-subscriptions.page";
 import ForgotPassword from "@/components/pages/forgot-password.page";
 import VerifyOtp from "@/components/pages/verify-otp-password.page";
 import ResetPassword from "@/components/pages/reset-password.page";
 import VerifyOtpRegister from "@/components/pages/verify-otp.pages";
+import FunctionCustomerPage from "@/components/pages/function-customer.page";
 
 const appRouterConfig: RouteObject[] = [
   {
@@ -70,7 +71,7 @@ const appRouterConfig: RouteObject[] = [
         element: <PostListings />,
       },
       {
-        path: "user",
+        path: "customer",
         element: <Outlet />,
         children: [
           {
@@ -78,8 +79,12 @@ const appRouterConfig: RouteObject[] = [
             element: <ProtectedRouteAuth element={<SettingsPage />} />,
           },
           {
-            path: "profile",
-            element: <UserProfilePage />,
+            path: "function",
+            element: <ProtectedRouteAuth element={<FunctionCustomerPage />} />,
+          },
+          {
+            path: ":customerId/profile",
+            element: <CustomerProfilePage />,
           },
         ],
       },

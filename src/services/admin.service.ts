@@ -15,6 +15,7 @@ class AuthService {
           return axiosError.response ?? null; // Trả về response hoặc null nếu không có
         }
     }
+    
     async createModerator(data: any) {
         try {
             const res = await axios_base.post<ResponseData<any>>(

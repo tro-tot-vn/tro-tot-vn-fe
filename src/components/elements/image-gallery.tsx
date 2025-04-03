@@ -12,15 +12,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { MultimediaFileDetailPost } from "@/services/types/get-detail-post.response";
 import { FileType } from "@/services/types/get-list-post-by-status-reponse";
+import { useLightbox } from "@/hooks/use-lightbox";
 
 export function ImageGallery({ data }: { data: MultimediaFileDetailPost[] }) {
-  console.log("ImageGallery data", data);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-
+  const { openLightbox, LightboxComponent } = useLightbox();
   const goToNext = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % data.length);
   };
@@ -81,6 +81,7 @@ export function ImageGallery({ data }: { data: MultimediaFileDetailPost[] }) {
   return (
     <div className="relative rounded-lg overflow-hidden">
       {/* Main Content (Image or Video) */}
+      <LightboxComponent />
       <div className="relative aspect-[2/1] bg-gray-100">
         {isCurrentItemVideo ? (
           // Video Player
@@ -93,6 +94,7 @@ export function ImageGallery({ data }: { data: MultimediaFileDetailPost[] }) {
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
               onEnded={() => setIsPlaying(false)}
+            onClick={() => openLightbox(data[currentIndex])}
             />
             {!isPlaying && (
               <div
@@ -113,6 +115,7 @@ export function ImageGallery({ data }: { data: MultimediaFileDetailPost[] }) {
             }
             alt={`Hình ảnh ${currentIndex + 1}`}
             className="w-full h-full object-contain"
+            onClick={() => openLightbox(data[currentIndex])}
           />
         )}
 

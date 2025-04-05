@@ -3,67 +3,59 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, CheckCircle, XCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import adminService from "@/services/admin.service";
 import { message } from "antd";
+import useAuth from "@/hooks/use-auth";
+import { PostMoratorHistoryResponse } from "@/services/types/postModerateHistory-response";
+import { PostResponse } from "@/services/types/post-response";
 
 export default function PendingPostDetailPage() {
+  const { user } = useAuth();
+  const  accountId  = user?.accountId;
   const params = useParams();
   const location = useLocation();
-  const postData = location.state;
-  const postId = params.postId;
-  const postDetail = postData.find((item) => item.postId.toString() === postId);
-  const address = `${postDetail.street} ${postDetail.ward}, ${postDetail.district}, ${postDetail.city}`
+  const postDetail = location.state as PostResponse ;
+  const address = `${postDetail?.streetNumber} , ${postDetail.street} ${postDetail.ward}, ${postDetail.district}, ${postDetail.city}`
   const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
+  const [history, setHistory] = useState<PostMoratorHistoryResponse[]>([]);
   
   const [tabValue, setTabValue] = useState("Approved");
   const [approvalNotes, setApprovalNotes] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
 
-  const listing = {
-    id: Number.parseInt(params.postId?.toString() || "0"),
-    title: "3-bedroom apartment in District 2",
-    address: "123 Nguyen Van Linh, District 2, HCMC",
-    price: "15,000,000 VND",
-    area: "85 m²",
-    rooms: 3,
-    bathrooms: 2,
-    electricityPrice: "3,500 VND/kWh",
-    waterPrice: "15,000 VND/m³",
-    internetPrice: "300,000 VND/month",
-    cleaningFee: "200,000 VND/month",
-    parkingFee: "100,000 VND/month",
-    description:
-      "Spacious 3-bedroom apartment in a quiet neighborhood. Fully furnished with modern amenities. Close to shopping centers, schools, and public transportation. Perfect for families or professionals.",
-    amenities: [
-      "Air conditioning",
-      "Washing machine",
-      "Refrigerator",
-      "TV",
-      "Balcony",
-      "Security 24/7",
-      "Elevator",
-      "Swimming pool",
-    ],
-    landlord: {
-      name: "Nguyen Van A",
-      phone: "0901234567",
-      email: "nguyenvana@example.com",
-    },
-    images: [
-      "/placeholder.svg?height=300&width=500",
-      "/placeholder.svg?height=300&width=500",
-      "/placeholder.svg?height=300&width=500",
-      "/placeholder.svg?height=300&width=500",
-    ],
-    submittedAt: "2025-03-12T08:30:00Z",
-  };
 
   if (!postDetail) {
     return <div>Không tìm thấy bài viết.</div>;
   }
+
+  const fetchApi = async () => {
+    try {
+      const result = await adminService.getPostModeratorHistory(postDetail.postId);
+      console.log("result", result);
+      if (result) {
+        if (result.status === 200) {
+          if (result.data) {
+            setHistory(Array.isArray(result.data) ? result.data : []);
+          }
+        } else if (result.status === 404) {
+          console.log("Không tìm thấy lịch sử bài viết");
+        } else if (result.status === 500) {
+          console.log("Lỗi hệ thống, vui lòng thử lại sau");
+        } else {
+          console.log("Đã có lỗi xảy ra");
+        }
+      }
+    }
+    catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+  useEffect(() => {
+    fetchApi();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,6 +65,11 @@ export default function PendingPostDetailPage() {
       if(result){
         if(result.status === 200){
           messageApi.success("Duyệt bài đăng thành công");
+          if (accountId !== undefined) {
+            await adminService.savePostModeratorHistory(accountId, postDetail.postId, tabValue, approvalNotes);
+          } else {
+            messageApi.error("Account ID is missing. Unable to save moderator history.");
+          }
           setTimeout(() => navigate('/admin/posts/review-post'), 1000);
         }else if(result.status === 404){
           messageApi.error("Không tìm thấy bài viết hoặc trạng thái không thay đổi");
@@ -87,6 +84,13 @@ export default function PendingPostDetailPage() {
       if(result){
         if(result.status === 200){
           messageApi.success("Từ chối bài đăng thành công");
+          if (accountId !== undefined) {
+            await adminService.savePostModeratorHistory(accountId, postDetail.postId ,tabValue, rejectionReason);
+            console.log("result", rejectionReason);
+          } else {
+            messageApi.error("Account ID is missing. Unable to save moderator history.");
+          }
+
           setTimeout(() => navigate('/admin/posts/review-post'), 1000);
         }else if(result.status == 400){
           messageApi.error("Lý do từ chối là bắt buộc khi trạng thái là 'Từ chối'");
@@ -100,6 +104,7 @@ export default function PendingPostDetailPage() {
       }
     }
   };
+  console.log(postDetail.description);
 
   return (
     <>
@@ -148,60 +153,20 @@ export default function PendingPostDetailPage() {
                   </div>
 
                   <div className="mb-6">
-                    <h3 className="font-medium mb-2">Pricing Details</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      <div>
-                        <p className="text-sm text-muted-foreground">
-                          Electricity
-                        </p>
-                        <p>3,500 VND/kWh</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Water</p>
-                        <p>15,000 VND/m³</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Internet</p>
-                        <p>300,000 VND/month</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Cleaning</p>
-                        <p>200,000 VND/month</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Parking</p>
-                        <p>100,000 VND/month</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mb-6">
                     <h3 className="font-medium mb-2">Description</h3>
                     <p>{postDetail.description}</p>
                   </div>
 
-                  <div className="mb-6">
-                    <h3 className="font-medium mb-2">Amenities</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                      {listing.amenities.map((amenity, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <div className="h-2 w-2 rounded-full bg-primary" />
-                          <span>{amenity}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
+                  <div  >
                     <h3 className="font-medium mb-2">Images</h3>
                     <div className="grid grid-cols-2 gap-4">
-                      {listing.images.map((image, index) => (
+                      {postDetail.multimediaFiles.map((image, index) => (
                         <div
                           key={index}
                           className="relative aspect-video rounded-md overflow-hidden"
                         >
                           <img
-                            src={image || "/placeholder.svg"}
+                            src={`http://localhost:3333/api/files/${image.fileId}`}
                             alt={`Property image ${index + 1}`}
                             className="object-cover"
                           />
@@ -304,15 +269,23 @@ export default function PendingPostDetailPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="border-l-2 border-muted pl-4 py-1">
-                      <p className="text-sm font-medium">Listing submitted</p>
-                      <p className="text-xs text-muted-foreground">
-                        3/12/2025, 3:30:00 PM by Nguyen Van A
-                      </p>
-                    </div>
+                    {history.length > 0 ? (
+                     history.map((item, index) => (
+                      <div key={item.historyId ?? index} className="border-l-2 border-muted pl-4 py-1">
+                        <p className="text-sm font-medium">Listing {item.actionType}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(item.execAt).toLocaleString()} by Admin {item.admin.lastName} {item.admin.firstName}
+                        </p>
+                        <p className="text-xs">Result: {item.reason}</p>
+                      </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No history available</p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
+
             </div>
           </div>
         </form>

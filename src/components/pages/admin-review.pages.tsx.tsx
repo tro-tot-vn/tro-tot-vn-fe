@@ -72,7 +72,7 @@ export default function AdminReviewPage() {
                   {postData.map((post) => (
                     <TableRow
                       key={post.postId}
-                      onClick={() => navigation(`/admin/posts/review-post/${post.postId}`, {state: postData})}
+                      onClick={() => navigation(`/admin/posts/review-post/${post.postId}`, {state: post})}
                       className="cursor-pointer hover:bg-gray-200 border border-gray-100"
                     >
                       <TableCell className="font-semibold whitespace-normal break-words p-5">

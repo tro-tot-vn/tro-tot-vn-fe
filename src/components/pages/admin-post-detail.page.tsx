@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, CheckCircle, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import adminService from "@/services/admin.service";
 import { message } from "antd";
 import useAuth from "@/hooks/use-auth";
@@ -14,7 +14,6 @@ import { PostResponse } from "@/services/types/post-response";
 export default function PendingPostDetailPage() {
   const { user } = useAuth();
   const  accountId  = user?.accountId;
-  const params = useParams();
   const location = useLocation();
   const postDetail = location.state as PostResponse ;
   const address = `${postDetail?.streetNumber} , ${postDetail.street} ${postDetail.ward}, ${postDetail.district}, ${postDetail.city}`

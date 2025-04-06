@@ -1,197 +1,199 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Eye, Lock, Unlock, UserPlus } from "lucide-react";
-import { Link } from "react-router";
+import { Card, Table, Button, Tag, Modal, Input, Form, Select, DatePicker, message } from "antd";
+import { EyeOutlined, LockOutlined, UnlockOutlined, UserAddOutlined } from "@ant-design/icons";
+import adminService from "@/services/admin.service";
+import { getMorderatorListResponse } from "@/services/types/morderator-response";
+import { useEffect, useState } from "react";
 
-// Mock data for moderators
-const moderators = [
-  {
-    id: 1,
-    name: "Nguyen Van Moderator",
-    email: "moderator1@example.com",
-    phone: "0901234567",
-    status: "active",
-    lastActive: "2025-03-13T08:30:00Z",
-    createdAt: "2024-10-15T09:00:00Z",
-  },
-  {
-    id: 2,
-    name: "Tran Thi Reviewer",
-    email: "moderator2@example.com",
-    phone: "0912345678",
-    status: "active",
-    lastActive: "2025-03-13T09:15:00Z",
-    createdAt: "2024-11-20T10:30:00Z",
-  },
-  {
-    id: 3,
-    name: "Le Van Admin",
-    email: "moderator3@example.com",
-    phone: "0923456789",
-    status: "inactive",
-    lastActive: "2025-03-10T14:45:00Z",
-    createdAt: "2025-01-05T08:15:00Z",
-  },
-  {
-    id: 4,
-    name: "Pham Thi Moderator",
-    email: "moderator4@example.com",
-    phone: "0934567890",
-    status: "active",
-    lastActive: "2025-03-13T07:20:00Z",
-    createdAt: "2025-02-10T11:45:00Z",
-  },
-];
+const { Option } = Select;
 
 export default function ModeratorsPage() {
+  const [moderatorList, setModeratorList] = useState<getMorderatorListResponse[]>([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
+  const [form] = Form.useForm();
+
+
+  const fetchApi = async () => {
+  const result = await adminService.getMorderator();
+  if (result) {
+    if (result.status === 200) {
+      if (result.data) {
+        if (Array.isArray(result.data)) {
+          setModeratorList(result.data);
+        }
+      }
+    }
+  }
+  };
+
+  useEffect(() => {
+    fetchApi();
+  }, []);
+
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleOk = async () => {
+    // Handle form submission logic here
+    try {
+      const values = await form.validateFields();
+      // const { firstName, lastName, email, phone, gender, birthday, password} = values;
+      // console.log(firstName,lastName, email, phone, gender, birthday, password);
+      const result = await adminService.createModerator(values);
+      if (result) { 
+        if (result.status === 200) {
+          messageApi.success("Thêm mới thành công");
+          fetchApi();
+        }else if (result.status === 400) {
+          messageApi.error("Email đã tồn tại");
+        }
+        else if (result.status === 404) {
+          messageApi.error("Không tìm thấy người dùng");
+        }
+        else if (result.status === 500) {
+          messageApi.error("Lỗi hệ thống, vui lòng thử lại sau");
+        }
+        else {
+          messageApi.error("Không thể thêm mới người dùng");
+        }
+      }
+      // Reset the form fields after successful submission
+      setIsModalVisible(false);
+      form.resetFields();
+    } catch (errorInfo) {
+      console.log('Failed to receive values from form: ', errorInfo);
+      messageApi.error("Không thể kết nối đến server");
+    }
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+    form.resetFields();
+  };
+
+  const columns = [
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+      render: (_text: any, record: any) => `${record.firstName} ${record.lastName}`,
+    },
+    {
+      title: "Email",
+      dataIndex: ["account", "email"],
+      key: "email",
+    },
+    {
+      title: "Phone",
+      dataIndex: ["account", "phone"],
+      key: "phone",
+    },
+    {
+      title: "Status",
+      dataIndex: ["account", "status"],
+      key: "status",
+      render: (status: string) => (
+        <Tag color={status === "Active" ? "green" : "red"}>
+          {status.charAt(0).toUpperCase() + status.slice(1)}
+        </Tag>
+      ),
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_text: any, record: any) => (
+        <div className="flex justify-start gap-2">
+          <Button type="link" icon={<EyeOutlined />} href={`/users/moderators/${record.adminId}`} />
+          <Button
+            type="link"
+            icon={record.account.status === "Active" ? <LockOutlined /> : <UnlockOutlined />}
+            className={record.account.status === "Active" ? "text-red-500" : "text-green-500"}
+          />
+        </div>
+      ),
+    },
+  ];
+
   return (
+    <>
+    {contextHolder}
     <div className="flex flex-1 overflow-hidden">
       <main className="flex-1 p-6">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold">Moderators</h1>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button>
-                <UserPlus className="mr-2 h-4 w-4" />
-                Add Moderator
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add New Moderator</DialogTitle>
-                <DialogDescription>
-                  Create a new moderator account. They will receive an email
-                  with login instructions.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="name" className="text-right">
-                    Full Name
-                  </Label>
-                  <Input id="name" className="col-span-3" />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="email" className="text-right">
-                    Email
-                  </Label>
-                  <Input id="email" type="email" className="col-span-3" />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="phone" className="text-right">
-                    Phone
-                  </Label>
-                  <Input id="phone" type="tel" className="col-span-3" />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="submit">Create Account</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button type="primary" icon={<UserAddOutlined />} onClick={showModal}>
+            Add Moderator
+          </Button>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Moderator Accounts</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Last Active</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {moderators.map((moderator) => (
-                  <TableRow
-                    key={moderator.id}
-                    className="cursor-pointer hover:bg-gray-200 border border-gray-100"
-                  >
-                    <TableCell className="font-bold whitespace-normal break-words p-4">
-                      {moderator.name}
-                    </TableCell>
-                    <TableCell className="font-medium whitespace-normal break-words p-4">
-                      {moderator.email}
-                    </TableCell>
-                    <TableCell className="font-medium whitespace-normal break-words p-4">
-                      {moderator.phone}
-                    </TableCell>
-                    <TableCell className="font-medium whitespace-normal break-words p-4">
-                      <Badge
-                        variant={
-                          moderator.status === "active"
-                            ? "default"
-                            : "secondary"
-                        }
-                      >
-                        {moderator.status.charAt(0).toUpperCase() +
-                          moderator.status.slice(1)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="font-medium whitespace-normal break-words p-4">
-                      {new Date(moderator.lastActive).toLocaleString()}
-                    </TableCell>
-                    <TableCell className="font-medium whitespace-normal break-words p-4">
-                      {new Date(moderator.createdAt).toLocaleString()}
-                    </TableCell>
-                    <TableCell className="font-medium whitespace-normal break-words p-4 text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="outline" size="icon" asChild>
-                          <Link to={`/users/moderators/${moderator.id}`}>
-                            <Eye className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className={
-                            moderator.status === "active"
-                              ? "text-red-500"
-                              : "text-green-500"
-                          }
-                        >
-                          {moderator.status === "active" ? (
-                            <Lock className="h-4 w-4" />
-                          ) : (
-                            <Unlock className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
+        <Card title="Moderator Accounts">
+          <Table columns={columns} dataSource={moderatorList} rowKey="adminId" />
         </Card>
+
+        <Modal
+          title="Add New Moderator"
+          open={isModalVisible}
+          onOk={handleOk}
+          onCancel={handleCancel}
+        >
+          <Form form={form} layout="vertical">
+            <Form.Item
+              label="First Name"
+              name="firstName"
+              rules={[{ required: true, message: 'Please input the first name!' }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label="Last Name"
+              name="lastName"
+              rules={[{ required: true, message: 'Please input the last name!' }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label="Email"
+              name="email"
+              rules={[{ required: true, message: 'Please input the email!' }]}
+            >
+              <Input type="email" />
+            </Form.Item>
+            <Form.Item
+              label="Phone"
+              name="phone"
+              rules={[{ required: true, message: 'Please input the phone number!' }]}
+            >
+              <Input type="tel" />
+            </Form.Item>
+            <Form.Item
+              label="Gender"
+              name="gender"
+              rules={[{ required: true, message: 'Please select the gender!' }]}
+            >
+              <Select>
+                <Option value="Male">Male</Option>
+                <Option value="Female">Female</Option>
+              </Select>
+            </Form.Item>
+            <Form.Item
+              label="Birthday"
+              name="birthday"
+              rules={[{ required: true, message: 'Please select the birthday!' }]}
+            >
+              <DatePicker style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item
+              label="Password"
+              name="password"
+              rules={[{ required: true, message: 'Please input the password!' }]}
+            >
+              <Input.Password />
+            </Form.Item>
+          </Form>
+        </Modal>
       </main>
     </div>
+    </>
   );
 }

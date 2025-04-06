@@ -96,7 +96,7 @@ export function SiteHeader() {
                     <Link to={`/user/profile`}>
                       <DropdownMenuItem>Trang cá nhân</DropdownMenuItem>
                     </Link>
-                    <Link to="/me/setting">
+                    <Link to="/user/setting">
                       <DropdownMenuItem>Cài đặt tài khoản</DropdownMenuItem>
                     </Link>
 

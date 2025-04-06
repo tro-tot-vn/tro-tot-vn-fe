@@ -10,6 +10,7 @@ import { message } from "antd";
 import useAuth from "@/hooks/use-auth";
 import { PostMoratorHistoryResponse } from "@/services/types/postModerateHistory-response";
 import { PostResponse } from "@/services/types/post-response";
+import { Image } from 'antd';
 
 export default function PendingPostDetailPage() {
   const { user } = useAuth();
@@ -158,20 +159,17 @@ export default function PendingPostDetailPage() {
 
                   <div  >
                     <h3 className="font-medium mb-2">Images</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      {postDetail.multimediaFiles.map((image, index) => (
-                        <div
-                          key={index}
-                          className="relative aspect-video rounded-md overflow-hidden"
-                        >
-                          <img
-                            src={`http://localhost:3333/api/files/${image.fileId}`}
-                            alt={`Property image ${index + 1}`}
-                            className="object-cover"
-                          />
-                        </div>
-                      ))}
-                    </div>
+                    <Image.PreviewGroup>
+                    {postDetail.multimediaFiles.map((image, index) => (
+                      <Image
+                        key={index}
+                        width={300}
+                        src={`http://localhost:3333/api/files/${image.fileId}`}
+                        alt={`Property image ${index + 1}`}
+                        style={{ borderRadius: 8 }}
+                      />
+                    ))}
+                  </Image.PreviewGroup>
                   </div>
                 </CardContent>
               </Card>

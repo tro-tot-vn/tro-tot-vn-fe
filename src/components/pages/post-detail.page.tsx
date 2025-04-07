@@ -138,9 +138,19 @@ export default function PostDetailPage() {
                 </div>
                 <div className="mt-8">
                   <h2 className="text-xl font-bold mb-4">Xem trên bản đồ</h2>
-                  <div className="h-64 bg-gray-300 rounded-lg">
-                    {/* Add map component here */}
-                    <p className="text-center pt-24">Map placeholder</p>
+                  <div className="h-64 bg-gray-300 rounded-lg overflow-hidden">
+                    <iframe
+                      className="w-full h-full"
+                      style={{ border: 0 }}
+                      referrerPolicy="no-referrer-when-downgrade"
+                      src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyDDNu6RXhhzn6OpjxnD886FhA7owrg2yYk&&q=${
+                        postData.streetNumber +
+                        postData.street +
+                        postData.ward +
+                        postData.district +
+                        postData.city
+                      }`}
+                    ></iframe>
                   </div>
                 </div>
                 <h2 className="text-xl font-bold mb-4 mt-4">

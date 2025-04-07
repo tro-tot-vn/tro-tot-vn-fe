@@ -1,22 +1,25 @@
-"use client";
-
 import { useState, useRef, useEffect } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Heart,
-  Share2,
-  MoreVertical,
-  Play,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, MoreVertical, Play } from "lucide-react";
 import { MultimediaFileDetailPost } from "@/services/types/get-detail-post.response";
 import { FileType } from "@/services/types/get-list-post-by-status-reponse";
 import { useLightbox } from "@/hooks/use-lightbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import useAuth from "@/hooks/use-auth";
 
-export function ImageGallery({ data }: { data: MultimediaFileDetailPost[] }) {
+export function ImageGallery({
+  data,
+  addToSavedPosts,
+}: {
+  data: MultimediaFileDetailPost[];
+  addToSavedPosts: () => void;
+}) {
+  const auth = useAuth();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isLiked, setIsLiked] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -52,10 +55,6 @@ export function ImageGallery({ data }: { data: MultimediaFileDetailPost[] }) {
     // Reset video playing state when changing items
     setIsPlaying(false);
   }, [currentIndex, data.length]);
-
-  const toggleLike = () => {
-    setIsLiked(!isLiked);
-  };
 
   const toggleVideoPlay = () => {
     if (videoRef.current) {
@@ -94,7 +93,7 @@ export function ImageGallery({ data }: { data: MultimediaFileDetailPost[] }) {
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
               onEnded={() => setIsPlaying(false)}
-            onClick={() => openLightbox(data[currentIndex])}
+              onClick={() => openLightbox(data[currentIndex])}
             />
             {!isPlaying && (
               <div
@@ -137,43 +136,33 @@ export function ImageGallery({ data }: { data: MultimediaFileDetailPost[] }) {
         </button>
 
         {/* Action Buttons */}
-        <div className="absolute top-4 right-4 flex gap-2 z-10">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="bg-white/80 hover:bg-white text-gray-700 rounded-full h-10 w-10"
-            onClick={toggleLike}
-          >
-            <Heart
-              className={`h-5 w-5 ${
-                isLiked ? "fill-red-500 text-red-500" : ""
-              }`}
-            />
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="bg-white/80 hover:bg-white text-gray-700 rounded-full h-10 w-10"
-          >
-            <Share2 className="h-5 w-5" />
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="bg-white/80 hover:bg-white text-gray-700 rounded-full h-10 w-10"
-          >
-            <MoreVertical className="h-5 w-5" />
-          </Button>
-        </div>
-
+        {auth.isAuthenticated ? (
+          <div className="absolute top-4 right-4 flex gap-2 z-10">
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <div className="bg-white/80 hover:bg-white text-gray-700 rounded-full h-10 w-10 flex flex-col items-center justify-center cursor-pointer">
+                  <MoreVertical className="h-5 w-5" />
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  onClick={() => {
+                    addToSavedPosts();
+                  }}
+                >
+                  Thêm tin vào danh sách đã lưu
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ) : (
+          <></>
+        )}
         {/* Counter */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white px-3 py-1 rounded-full text-sm z-10">
           {currentIndex + 1} / {data.length}
         </div>
       </div>
-
       {/* Thumbnails */}
       <div
         ref={scrollContainerRef}

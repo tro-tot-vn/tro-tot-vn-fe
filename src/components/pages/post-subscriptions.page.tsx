@@ -1,80 +1,85 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Bell, Plus } from "lucide-react";
 import { SubscriptionList } from "../elements/subscription-list.element";
-import { SubscriptionDialog } from "../elements/subscription-dialog.element";
+import { CreateSubscriptionDialog } from "../elements/create-subscription-dialog.element";
+import { GetSubscriptionResponse } from "@/services/types/get-subscription";
+import { CustomerService } from "@/services/customer.service";
+import { toast } from "sonner";
 
 // Mock data for subscriptions
-const generateMockSubscriptions = (count: number, startIndex = 0) => {
-  return Array.from({ length: count }, (_, i) => ({
-    subscriptionId: startIndex + i + 1,
-    customerId: 1,
-    ward:
-      i % 3 === 0
-        ? undefined
-        : `Phường ${
-            ["Tân Phong", "Bến Nghé", "Phú Mỹ", "Tân Quy", "An Phú"][i % 5]
-          }`,
-    district: `Quận ${["1", "2", "3", "7", "Bình Thạnh", "Thủ Đức"][i % 6]}`,
-    city: ["TP. Hồ Chí Minh", "Hà Nội", "Đà Nẵng", "Cần Thơ"][i % 4],
-    createdAt: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString(),
-  }));
-};
-
+const customerService = new CustomerService();
 export default function SubscriptionsPage() {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [subscriptions, setSubscriptions] = useState(
-    generateMockSubscriptions(10)
+  const [isDialogOpen, setDialogOpen] = useState(false);
+  const [subscriptions, setSubscriptions] = useState<GetSubscriptionResponse[]>(
+    []
   );
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const loadMoreSubscriptions = async () => {
-    if (isLoading || !hasMore) return;
-
-    setIsLoading(true);
-
-    // Simulate API call with delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    const newSubscriptions = generateMockSubscriptions(10, page * 10);
-
-    // After 5 pages, we'll say there's no more data
-    if (page >= 5) {
-      setHasMore(false);
-    }
-
-    setSubscriptions((prev) => [...prev, ...newSubscriptions]);
-    setPage((prev) => prev + 1);
-    setIsLoading(false);
-  };
-
-  const handleAddSubscription = (data: {
-    city: string;
-    district: string;
-    ward?: string;
-  }) => {
-    const newSubscription = {
-      subscriptionId: Math.floor(Math.random() * 1000) + 100,
-      customerId: 1,
-      ward: data.ward || undefined,
-      district: data.district,
-      city: data.city,
-      createdAt: new Date().toISOString(),
-    };
-
-    setSubscriptions((prev) => [newSubscription, ...prev]);
-    setIsDialogOpen(false);
+  const handleAddSubscription = (data: { city: string; district: string }) => {
+    customerService.addSubscription(data.city, data.district).then((res) => {
+      if (res.status === 200) {
+        console.log("res", res.data.data);
+        setSubscriptions((prev) =>
+          res.data.data
+            ? [
+                {
+                  ...res.data.data,
+                },
+                ...prev,
+              ]
+            : prev
+        );
+        setDialogOpen(false);
+      }
+      if (res.status === 400) {
+        if (res.data.message === "SUBSCRIPTION_ALREADY_EXISTS") {
+          toast.error("Đăng ký đã tồn tại");
+          return;
+        }
+        toast.error("Đăng ký không thành công, vui lòng thử lại sau");
+      }
+      if (res.status === 500) {
+        toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+      }
+      setDialogOpen(false);
+    });
   };
 
   const handleDeleteSubscription = (id: number) => {
-    setSubscriptions((prev) => prev.filter((sub) => sub.subscriptionId !== id));
+    customerService.deleteSubscription(id).then((res) => {
+      if (res.status === 200) {
+        toast.success("Đã xóa đăng ký thành công");
+        setSubscriptions((prev) =>
+          prev.filter((subscription) => subscription.subscriptionId !== id)
+        );
+      }
+      if (res.status === 400) {
+        toast.error("Đăng ký không tồn tại");
+      }
+      if (res.status === 500) {
+        toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+      }
+    });
   };
 
+  useEffect(() => {
+    customerService.getSubscriptions().then((res) => {
+      if (res.status === 200 && res.data.data) {
+        setSubscriptions(res.data.data);
+      }
+      setIsLoading(false);
+    });
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className=" bg-gray-50 py-8">
+      <CreateSubscriptionDialog
+        open={isDialogOpen}
+        setOpen={setDialogOpen}
+        onSubmit={handleAddSubscription}
+      />
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center mb-6">
           <div>
@@ -86,7 +91,7 @@ export default function SubscriptionsPage() {
             </p>
           </div>
           <Button
-            onClick={() => setIsDialogOpen(true)}
+            onClick={() => setDialogOpen(true)}
             className="bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -112,16 +117,8 @@ export default function SubscriptionsPage() {
 
         <SubscriptionList
           subscriptions={subscriptions}
-          onLoadMore={loadMoreSubscriptions}
           isLoading={isLoading}
-          hasMore={hasMore}
           onDelete={handleDeleteSubscription}
-        />
-
-        <SubscriptionDialog
-          open={isDialogOpen}
-          onOpenChange={setIsDialogOpen}
-          onSubmit={handleAddSubscription}
         />
       </div>
     </div>

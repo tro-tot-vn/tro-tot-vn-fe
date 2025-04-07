@@ -1,12 +1,10 @@
-"use client";
-
 import type React from "react";
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import authService from "@/services/auth.service";
+import { toast } from "sonner";
 
 export function PasswordChangeForm() {
   const [formData, setFormData] = useState({
@@ -21,13 +19,33 @@ export function PasswordChangeForm() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSwitchChange = (checked: boolean) => {
-    setFormData((prev) => ({ ...prev, showPhone: checked }));
-  };
+  // const handleSwitchChange = (checked: boolean) => {
+  //   setFormData((prev) => ({ ...prev, showPhone: checked }));
+  // };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Implement password change logic here
+    if (formData.newPassword !== formData.confirmPassword) {
+      toast("Mật khẩu mới và xác nhận mật khẩu không khớp.");
+      return;
+    }
+    authService
+      .changePassword(formData.currentPassword, formData.newPassword)
+      .then((response) => {
+        if (response.status === 200) {
+          toast("Mật khẩu đã được thay đổi thành công.");
+        } else if (response.status === 400 && response.data.message === "PASSWORD_NOT_MATCH") {
+          toast("Mật khẩu hiện tại không đúng.");
+        } else {
+          toast("Đã xảy ra lỗi khi thay đổi mật khẩu.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error changing password:", error);
+        toast("Đã xảy ra lỗi khi thay đổi mật khẩu.");
+      });
+    // You can also send the formData to your backend API
     console.log("Password change submitted:", formData);
   };
 
@@ -90,7 +108,7 @@ export function PasswordChangeForm() {
         </form>
       </div>
 
-      <div className="pt-6 border-t">
+      {/* <div className="pt-6 border-t">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-medium">
@@ -107,13 +125,13 @@ export function PasswordChangeForm() {
             className="data-[state=checked]:bg-[#ff6d0b]"
           />
         </div>
-      </div>
+      </div> */}
 
-      <div className="pt-6 border-t">
+      {/* <div className="pt-6 border-t">
         <Button variant="link" className="text-blue-600 p-0 h-auto">
           Yêu cầu chấm dứt tài khoản
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 }

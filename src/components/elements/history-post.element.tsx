@@ -8,14 +8,22 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { ListPostRes } from "@/services/types/get-list-post-by-status-reponse";
 import { formatDistance, subDays } from "date-fns";
-
-export function ListSuspendedPost({
-  listPostRes,
-}: {
-  listPostRes: ListPostRes[];
-}) {
+import { useEffect, useState } from "react";
+import { CustomerService } from "@/services/customer.service";
+import { ListPostRes } from "@/services/types/get-list-post-by-status-reponse";
+const customerService = new CustomerService();
+export function HistoryPostElement() {
+  const [listPostRes, setListPostRes] = useState<ListPostRes[]>([]);
+  useEffect(() => {
+    customerService.getListSavedPost().then((res) => {
+      if (res.status === 200) {
+        if (res.data.data) {
+          setListPostRes(res.data.data);
+        }
+      }
+    });
+  }, []);
   return (
     <div>
       {listPostRes.length > 0 ? (

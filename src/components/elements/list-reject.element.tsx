@@ -1,6 +1,6 @@
 import NoPostElement from "./no-post.element";
 import { Clock, MapPin } from "lucide-react";
-import { Link } from "react-router";
+import { useNavigate } from "react-router";
 import {
   Card,
   CardContent,
@@ -10,12 +10,14 @@ import {
 } from "../ui/card";
 import { ListPostRes } from "@/services/types/get-list-post-by-status-reponse";
 import { formatDistance, subDays } from "date-fns";
+import { Button } from "../ui/button";
 
 export function ListRejectPost({
   listPostRes,
 }: {
   listPostRes: ListPostRes[];
 }) {
+  const nav = useNavigate();
   return (
     <div>
       {listPostRes.length > 0 ? (
@@ -23,11 +25,7 @@ export function ListRejectPost({
           <div className="grid grid-container grid-cols-1 md:grid-cols-2 gap-2 mb-4">
             {listPostRes.map((post) => {
               return (
-                <Link
-                  to={`/post/${post.postId}`}
-                  key={post.postId}
-                  className="grid"
-                >
+
                   <Card className="overflow-hidden hover:shadow-md transition-shadow flex flex-col mt-3">
                     <CardHeader>
                       <CardTitle>{post.title}</CardTitle>
@@ -38,7 +36,13 @@ export function ListRejectPost({
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="relative"></div>
+                      <div className="relative">
+                        <img
+                          src={`http://localhost:3333/api/files/${post.multimediaFiles[0].fileId}`}
+                          alt={post.title}
+                          className="w-full h-32 object-cover"
+                        />
+                      </div>
                       <div className="flex-1 flex flex-col">
                         {/* <h3 className="font-medium text-sm line-clamp-2 mb-2 flex-1">
                       {post.title}
@@ -79,9 +83,24 @@ export function ListRejectPost({
                           </div>
                         </div>
                       </div>
+                      <div className="flex flex-col space-y-2">
+                        <Button
+                          onClick={() => {
+                            nav(`/posts/my-posts/${post.postId}/edit`);
+                          }}
+                          className=" bg-[#ff6d0b] hover:bg-[#ff6d0b] text-white 
+                        font-bold py-2 px-4 rounded"
+                        >
+                          Chỉnh sửa
+                        </Button>
+                      </div>
+                      <div>
+                        <p className="text-red-500 font-bold mt-3">
+                          {"Lý do từ chối: "}
+                        </p>
+                      </div>
                     </CardContent>
                   </Card>
-                </Link>
               );
             })}
           </div>

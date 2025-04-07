@@ -1,5 +1,5 @@
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,20 +12,54 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DatePicker } from "antd";
-import useAuth from "@/hooks/use-auth";
+import { CustomerService } from "@/services/customer.service";
+import { toast } from "sonner";
+import moment from "moment";
+
+const customerService = new CustomerService();
 
 export function ProfileInfoForm() {
-  const auth = useAuth();
   const [formData, setFormData] = useState({
-    phone: auth.user?.phone || "",
-    bio: auth.user?.customer.bio || "",
-    lastName: auth.user?.customer.lastName || "",
-    firstName: auth.user?.customer.firstName || "",
-    // nickname: "",
-    email: auth.user?.email || "",
-    gender: auth.user?.customer.gender || "",
-    birthDate: auth.user?.customer.birthday || "",
+    phone: "",
+    bio: "",
+    lastName: "",
+    firstName: "",
+    email: "",
+    gender: "",
+    birthDate: "",
   });
+
+  useEffect(() => {
+    customerService
+      .getMyProfile()
+      .then((res) => {
+        if (res.status === 200) {
+          const data = res.data.data;
+          if (!data) {
+            toast("Đã xảy ra lỗi khi tải thông tin cá nhân");
+            return;
+          }
+          console.log("Profile data:", data);
+          setFormData({
+            phone: data.account.phone || "",
+            bio: data.bio || "",
+            lastName: data.lastName || "",
+            firstName: data.firstName || "",
+            email: data.account.email || "",
+            gender: data.gender || "",
+            birthDate: data.birthday
+              ? new Date(data.birthday).toISOString().split("T")[0]
+              : "",
+          });
+        } else {
+          toast("Đã xảy ra lỗi khi tải thông tin cá nhân");
+        }
+      })
+      .catch((err) => {
+        console.log("Error fetching profile:", err);
+        toast("Đã xảy ra lỗi khi tải thông tin cá nhân");
+      });
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -40,8 +74,27 @@ export function ProfileInfoForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Implement profile update logic here
     console.log("Profile update submitted:", formData);
+    customerService
+      .updateMyProfile({
+        ...formData,
+      })
+      .then((res) => {
+        console.log("Profile update response:", res);
+        if (res.status === 200) {
+          toast("Cập nhật thông tin cá nhân thành công");
+        } else if (res.status === 400) {
+          if (res.data.message === "EMAIL_ALREADY_EXISTS") {
+            toast("Email đã tồn tại, vui lòng thử lại");
+          }
+        } else {
+          toast("Đã xảy ra lỗi khi cập nhật thông tin cá nhân");
+        }
+      })
+      .catch((err) => {
+        console.log("Error updating profile:", err);
+        toast("Đã xảy ra lỗi khi cập nhật thông tin cá nhân");
+      });
   };
 
   return (
@@ -51,7 +104,7 @@ export function ProfileInfoForm() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="lastName">
-              Họ và tên <span className="text-red-500">*</span>
+              Họ <span className="text-red-500">*</span>
             </Label>
             <Input
               id="lastName"
@@ -63,7 +116,7 @@ export function ProfileInfoForm() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="firstName">
-              Họ và tên <span className="text-red-500">*</span>
+              Tên <span className="text-red-500">*</span>
             </Label>
             <Input
               id="firstName"
@@ -167,7 +220,21 @@ export function ProfileInfoForm() {
 
           <div className="space-y-2">
             <Label htmlFor="birthDate">Ngày, tháng, năm sinh</Label>
-            <DatePicker format="DD/MM/YYYY"></DatePicker>
+            <DatePicker
+              format="DD/MM/YYYY"
+              value={
+                formData.birthDate
+                  ? moment(formData.birthDate, "DD-MM-YYYY")
+                  : null
+              }
+              onChange={(date, dateString) => {
+                console.log("Selected date:", date, dateString);
+                handleSelectChange(
+                  "birthDate",
+                  Array.isArray(dateString) ? dateString[0] : dateString
+                );
+              }}
+            />
           </div>
         </div>
 

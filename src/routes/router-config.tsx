@@ -31,6 +31,7 @@ import ForgotPassword from "@/components/pages/forgot-password.page";
 import VerifyOtp from "@/components/pages/verify-otp-password.page";
 import ResetPassword from "@/components/pages/reset-password.page";
 import FunctionCustomerPage from "@/components/pages/function-customer.page";
+import EditPostPage from "@/components/pages/edit-post.page";
 
 const appRouterConfig: RouteObject[] = [
   {
@@ -90,6 +91,10 @@ const appRouterConfig: RouteObject[] = [
       {
         path: "posts/my-posts",
         element: <ProtectedRouteAuth element={<MyPostPage />} />,
+      },
+      {
+        path: "posts/my-posts/:postId/edit",
+        element: <ProtectedRouteAuth element={<EditPostPage />} />,
       },
       {
         path: "posts/subscriptions",

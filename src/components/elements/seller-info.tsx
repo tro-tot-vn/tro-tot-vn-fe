@@ -5,8 +5,6 @@ import {
   Phone,
   MessageCircle,
   Flag,
-  Clock,
-  Star,
   MapPin,
   User,
 } from "lucide-react";
@@ -41,13 +39,8 @@ export function SellerInfo({
                   " " +
                   customerInformation.firstName}
               </h3>
-              <div className="flex items-center text-sm text-gray-500 mt-1">
-                <Clock className="h-3 w-3 mr-1" />
-                <span>
-                  Hoạt động {Math.floor(Math.random() * 10)} giờ trước
-                </span>
-              </div>
-              <div className="flex items-center gap-1 mt-1">
+
+              {/* <div className="flex items-center gap-1 mt-1">
                 <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
                 <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
                 <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
@@ -56,7 +49,7 @@ export function SellerInfo({
                 <span className="text-sm text-gray-500 ml-1">
                   (15 đánh giá)
                 </span>
-              </div>
+              </div> */}
             </div>
           </div>
 
@@ -92,15 +85,18 @@ export function SellerInfo({
           <Button
             className="w-full bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white"
             onClick={() => {
-              toast.error("Vui lòng đăng nhập để xem SĐT", {
-                duration: 2000,
-                action: {
-                  label: "Đăng nhập",
-                  onClick: () => {
-                    navigate("/login");
+              if (auth.isAuthenticated) {
+                // toast("test 123")
+              } else {
+                toast.error("Vui lòng đăng nhập để sử dụng tính năng này", {
+                  action: {
+                    label: "Đăng nhập",
+                    onClick: () => {
+                      navigate("/login");
+                    },
                   },
-                },
-              });
+                });
+              }
             }}
           >
             <Phone className="h-4 w-4 mr-2" />

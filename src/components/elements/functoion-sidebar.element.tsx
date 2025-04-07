@@ -2,7 +2,7 @@
 
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { User, Calendar1, History } from "lucide-react";
+import { User, Calendar1 } from "lucide-react";
 
 interface AccountSettingsSidebarProps {
   activeTab: string;
@@ -20,13 +20,8 @@ export function FunctionCustomerSidebar({
       icon: <User className="h-4 w-4 mr-2" />,
     },
     {
-      id: "historyView",
-      label: "Lịch sử xem tin",
-      icon: <History className="h-4 w-4 mr-2" />,
-    },
-    {
-      id: "appointment",
-      label: "Cuộc hẹn",
+      id: "post-subscription",
+      label: "Đăng kí nhận tin theo khu vực",
       icon: <Calendar1 className="h-4 w-4 mr-2" />,
     },
   ];

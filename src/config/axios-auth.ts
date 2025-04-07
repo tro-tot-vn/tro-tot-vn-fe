@@ -1,6 +1,7 @@
 import { RefreshTokenResponse } from "@/services/types/refresh-token.response";
 import ResponseData from "@/types/response.type";
 import axios, { InternalAxiosRequestConfig } from "axios";
+import { toast } from "sonner";
 
 // Extend the InternalAxiosRequestConfig interface to include _retry property
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
@@ -163,5 +164,16 @@ axios_auth.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
+axios_auth.interceptors.response.use(async (response) => {
+  if (response.data.message === "Invalid Request" && response.status === 400) {
+    try {
+      toast("Yêu cầu không hợp lệ, vui lòng thử lại");
+    } catch (error) {
+      console.log("Interceptor Axios", error);
+      // If the refresh token is invalid
+    }
+    return response;
+  }
+  return response;
+});
 export { axios_auth, axios_base };

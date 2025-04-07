@@ -1,13 +1,15 @@
-import { axios_base } from "@/config/axios-auth";
+import { axios_auth, axios_base } from "@/config/axios-auth";
 import ResponseData from "@/types/response.type";
 import { LoginResponse } from "./types/login-response";
 import { RegisterResponse } from "./types/register-response";
-import { ForgotPasswordResponse, ResetPasswordResponse, VerifyOtpResponse } from "./types/forgot-pasword-response";
+import {
+  ForgotPasswordResponse,
+  ResetPasswordResponse,
+  VerifyOtpResponse,
+} from "./types/forgot-pasword-response";
 import { AxiosError } from "axios";
 
 class AuthService {
-
-  
   async registerAccount(
     phone: string,
     email: string,
@@ -17,6 +19,14 @@ class AuthService {
     gender: string,
     password: string
   ) {
+    console.log("registerAccount", {
+      phone,
+      email,
+      firstName,
+      lastName,
+      birthday,
+      password,
+    });
     try {
       // Gửi yêu cầu POST tới API để đăng ký người dùng
       const res = await axios_base.post<ResponseData<RegisterResponse>>(
@@ -58,13 +68,15 @@ class AuthService {
     try {
       const res = await axios_base.post<ResponseData<ForgotPasswordResponse>>(
         "api/auth/forgot-password",
-          {
-           email
-          }
-        );
+        {
+          email,
+        }
+      );
       return res;
     } catch (error) {
-      const axiosError = error as AxiosError<ResponseData<ForgotPasswordResponse>>;
+      const axiosError = error as AxiosError<
+        ResponseData<ForgotPasswordResponse>
+      >;
       return axiosError.response ?? null; // Trả về response hoặc null nếu không có
     }
   }
@@ -73,10 +85,11 @@ class AuthService {
     try {
       const res = await axios_base.post<ResponseData<VerifyOtpResponse>>(
         "api/auth/verify-otp",
-          {
-            email,
-            otp
-          });
+        {
+          email,
+          otp,
+        }
+      );
       return res;
     } catch (error) {
       const axiosError = error as AxiosError<ResponseData<VerifyOtpResponse>>;
@@ -90,13 +103,22 @@ class AuthService {
         "api/auth/reset-password",
         {
           password,
-          resetToken
-        });
+          resetToken,
+        }
+      );
       return res;
     } catch (error) {
-      const axiosError = error as AxiosError<ResponseData<ResetPasswordResponse>>;
+      const axiosError = error as AxiosError<
+        ResponseData<ResetPasswordResponse>
+      >;
       return axiosError.response ?? null; // Trả về response hoặc null nếu không có
     }
+  }
+  changePassword(oldPassword: string, newPassword: string) {
+    return axios_auth.post<ResponseData<unknown>>("api/auth/change-password", {
+      oldPassword,
+      newPassword,
+    });
   }
 }
 

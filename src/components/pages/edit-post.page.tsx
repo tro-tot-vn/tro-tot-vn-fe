@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Camera, LoaderCircle, VideoIcon, X } from "lucide-react";
-import { Link } from "react-router";
+import { Link, useParams } from "react-router";
 import {
   Dialog,
   DialogContent,
@@ -31,11 +31,28 @@ import locationService, {
   ResultProvinceResponse,
   ResultWardResponse,
 } from "@/services/location.service";
+import {
+  GetDetailPostResponse,
+  MultimediaFileDetailPost,
+} from "@/services/types/get-detail-post.response";
+import { FileType } from "@/services/types/get-list-post-by-status-reponse";
 const postService = new PostService();
 
-export default function CreatePostPage() {
-  const [imgFiles, setImgFiles] = useState<File[]>([]);
+export default function EditPostPage() {
+  const postId = Number(useParams().postId);
+
+  const [postData, setPostData] = useState<GetDetailPostResponse>();
+
+  const [newFile, setNewImgFiles] = useState<File[]>([]);
   const [videoFiles, setVideoFiles] = useState<File[]>([]);
+
+  const [oldFile, setOldFile] = useState<MultimediaFileDetailPost[]>([]);
+
+  //   const [newImgFiles, setNewImgFiles] = useState<File[]>([]);
+  //   const [newVideoFile, setNewVideoFile] = useState<File[]>([]);
+
+  const [isFirstLoadAddress, setIsFirstLoadAddress] = useState(true);
+
   const [open, setOpen] = useState(false);
   const locationRef = useRef<HTMLInputElement>(null);
   const ipSelectImage = useRef<HTMLInputElement>(null);
@@ -59,6 +76,53 @@ export default function CreatePostPage() {
   const [interiorStatus, setInteriorStatus] = useState("");
   const [description, setDescription] = useState("");
 
+  useEffect(() => {
+    if (locationRef.current && postData) {
+      locationRef.current.value = `${postData.streetNumber} ${postData.street}, ${postData.ward}, ${postData?.district}, ${postData.city}`;
+      setStreetName(postData.street);
+      setHouseNumber(postData.streetNumber);
+    }
+  }, [postData, locationRef]);
+
+  useEffect(() => {
+    if (isFirstLoadAddress) {
+      if (listOfProvinces.length > 0) {
+        const province = listOfProvinces.find(
+          (province) => province.province_name === postData?.city
+        );
+        if (province) {
+          console.log("province", province);
+          setProvince(province);
+        }
+      }
+      if (listOfDistrict.length > 0) {
+        const district = listOfDistrict.find(
+          (district) => district.district_name === postData?.district
+        );
+        if (district) {
+          console.log("district", district);
+          setDistrict(district);
+        }
+      }
+      if (listOfWard.length > 0) {
+        const ward = listOfWard.find(
+          (ward) => ward.ward_name === postData?.ward
+        );
+        if (ward) {
+          console.log("ward", ward);
+          setWard(ward);
+          setIsFirstLoadAddress(false);
+        }
+      }
+    }
+  }, [
+    listOfProvinces,
+    listOfDistrict,
+    listOfWard,
+    isFirstLoadAddress,
+    postData,
+  ]);
+
   // State để lưu trữ các thông báo lỗi
   const [errors, setErrors] = useState({
     images: "",
@@ -74,7 +138,6 @@ export default function CreatePostPage() {
     locationService.getAllProvinces().then((res) => {
       if (res) {
         if (res.status === 200) {
-          console.log(res.data.results);
           setListProvince(res.data.results);
         }
       }
@@ -82,12 +145,44 @@ export default function CreatePostPage() {
   }, []);
 
   useEffect(() => {
+    postService
+      .getDetailMyPost(postId)
+      .then((res) => {
+        console.log(res);
+        if (res.status === 200) {
+          if (res.data.data) {
+            setPostData(res.data.data);
+            setOldFile(res.data.data.multimediaFiles);
+            setTitle(res.data.data.title);
+            setPrice(res.data.data.price.toString());
+            setAcreage(res.data.data.acreage.toString());
+            setInteriorStatus(res.data.data.interiorCondition);
+            setDescription(res.data.data.description);
+            setStreetName(res.data.data.street);
+            setHouseNumber(res.data.data.streetNumber);
+          }
+        } else if (res.status === 400) {
+          if (res.data.message === "POST_NOT_FOUND")
+            toast("Lỗi", {
+              description: "Không tìm thấy bài viết",
+            });
+        } else {
+          toast("Lỗi", {
+            description: "Đã xảy ra lỗi khi lấy thông tin bài viết",
+          });
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  }, [postId]);
+
+  useEffect(() => {
     console.log(selectedProvince);
     if (selectedProvince) {
       locationService
         .getDistrictsByProvinceId(selectedProvince.province_id)
         .then((res) => {
-          console.log(res.data.results);
           setListDistrict(res.data.results);
         })
         .catch((e) => {
@@ -126,7 +221,7 @@ export default function CreatePostPage() {
     let isValid = true;
 
     // Kiểm tra hình ảnh
-    if (imgFiles.length === 0) {
+    if (newFile.length + oldFile.length === 0) {
       newErrors.images = "Vui lòng tải lên ít nhất 1 hình ảnh";
       isValid = false;
     }
@@ -174,8 +269,8 @@ export default function CreatePostPage() {
     if (!description.trim()) {
       newErrors.description = "Vui lòng nhập mô tả chi tiết";
       isValid = false;
-    } else if (description.length > 1000) {
-      newErrors.description = "Mô tả không được vượt quá 1000 ký tự";
+    } else if (description.length > 999) {
+      newErrors.description = "Mô tả không được vượt quá 999 ký tự";
       isValid = false;
     }
 
@@ -183,7 +278,7 @@ export default function CreatePostPage() {
     return isValid;
   };
 
-  const createPost = async () => {
+  const editPost = async () => {
     // Kiểm tra validation trước khi submit
     if (!validateForm()) {
       toast("Vui lòng kiểm tra lại thông tin", {
@@ -204,28 +299,33 @@ export default function CreatePostPage() {
     formData.append("street", streetName);
     formData.append("description", description);
 
-    for (const img of imgFiles) {
-      formData.append("imgs", img);
+    for (const img of newFile) {
+      formData.append("newImgs", img);
     }
     for (const video of videoFiles) {
-      formData.append("video", video);
+      formData.append("newVideo", video);
     }
+    formData.append(
+      "oldFiles",
+      JSON.stringify(oldFile.map((v) => v.fileId))
+    );
     setLoading(true);
     postService
-      .createPost(formData)
+      .editPost(formData, postId)
       .then((res) => {
+        console.log(res);
         setLoading(false);
         if (res) {
           if (res.status === 200) {
-            toast("Đăng tin thành công");
+            toast("Sửa tin thành công");
           } else if (res.status === 400) {
-            toast("Đăng tin thất bại", {
+            toast("Sửa tin thất bại", {
               description:
                 "Thông tin nhập không hợp lí. Vui lòng kiểm tra lại.",
             });
           } else {
-            toast("Đăng tin thất bại", {
-              description: "Đã xảy ra lỗi khi đăng tin. Vui lòng thử lại sau.",
+            toast("Sửa tin thất bại", {
+              description: "Đã xảy ra lỗi khi Sửa tin. Vui lòng thử lại sau.",
             });
           }
         }
@@ -233,8 +333,8 @@ export default function CreatePostPage() {
       .catch((e) => {
         console.log(e);
         setLoading(false);
-        toast("Đăng tin thất bại", {
-          description: "Đã xảy ra lỗi khi đăng tin. Vui lòng thử lại sau.",
+        toast("Sửa tin thất bại", {
+          description: "Đã xảy ra lỗi khi Sửa tin. Vui lòng thử lại sau.",
         });
       });
   };
@@ -249,9 +349,16 @@ export default function CreatePostPage() {
           return;
         }
       }
-      setImgFiles((currentFiles) => {
+      setNewImgFiles((currentFiles) => {
         if (e.target.files) {
-          if (currentFiles.length + e.target.files.length <= 12) {
+          const oldImageCount = oldFile.reduce((count, file) => {
+            return file.file.fileType === FileType.IMAGE ? count + 1 : count;
+          }, 0);
+
+          if (
+            currentFiles.length + e.target.files.length + oldImageCount <=
+            12
+          ) {
             // Xóa lỗi khi người dùng đã tải lên hình ảnh
             if (errors.images) {
               setErrors((prev) => ({ ...prev, images: "" }));
@@ -278,7 +385,13 @@ export default function CreatePostPage() {
       }
       setVideoFiles((current) => {
         if (e.target.files) {
-          if (current.length + e.target.files.length <= 1) {
+          if (
+            current.length +
+              e.target.files.length +
+              oldFile.filter((v) => v.file.fileType === FileType.VIDEO)
+                .length <=
+            1
+          ) {
             return [...current, ...Array.from(e.target.files)];
           } else {
             toast("Chỉ được đăng tối đa 1 video", {});
@@ -289,10 +402,23 @@ export default function CreatePostPage() {
     }
   };
 
-  const removeImage = (index: number) => {
-    setImgFiles(imgFiles.filter((_, i) => i !== index));
+  const removeOldFile = (fildeId: number) => {
+    console.log("removeOldFile", fildeId);
+    setOldFile(oldFile.filter((value) => fildeId !== value.fileId));
     // Kiểm tra nếu không còn hình ảnh nào thì hiển thị lỗi
-    if (imgFiles.length <= 1) {
+    if (newFile.length + oldFile.length <= 1) {
+      setErrors((prev) => ({
+        ...prev,
+        images: "Vui lòng tải lên ít nhất 1 hình ảnh",
+      }));
+    }
+    console.log("oldFile", oldFile);
+  };
+
+  const removeNewImage = (index: number) => {
+    setNewImgFiles(newFile.filter((_, i) => i !== index));
+    // Kiểm tra nếu không còn hình ảnh nào thì hiển thị lỗi
+    if (newFile.length + oldFile.length <= 1) {
       setErrors((prev) => ({
         ...prev,
         images: "Vui lòng tải lên ít nhất 1 hình ảnh",
@@ -300,10 +426,12 @@ export default function CreatePostPage() {
     }
   };
 
-  const removeVideo = (index: number) => {
+  const removeNewVideo = (index: number) => {
     setVideoFiles(videoFiles.filter((_, i) => i !== index));
   };
-
+  useEffect(() => {
+    console.log("oldFile", oldFile);
+  }, [oldFile]);
   return (
     <div className="max-w-3xl mx-auto p-4 space-y-8">
       <Dialog open={isLoading} onOpenChange={setLoading}>
@@ -327,7 +455,7 @@ export default function CreatePostPage() {
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-medium">Hình ảnh và Video sản phẩm *</h2>
           <Link to="#" className="text-primary text-sm hover:underline">
-            Xem thêm về Quy định đăng tin của Trọ Tốt
+            Xem thêm về Quy định Sửa tin của Trọ Tốt
           </Link>
         </div>
 
@@ -345,7 +473,10 @@ export default function CreatePostPage() {
               ĐĂNG TỐI ĐA 12 HÌNH
             </p>
             <p className="text-xs text-center text-muted-foreground mt-1">
-              {imgFiles.length}/12 hình ảnh
+              {newFile.length +
+                oldFile.filter((v) => v.file.fileType === FileType.IMAGE)
+                  .length}
+              /12 hình ảnh
             </p>
           </Card>
           <Input
@@ -367,7 +498,13 @@ export default function CreatePostPage() {
               ĐĂNG TỐI ĐA 01 VIDEO
             </p>
             <p className="text-xs text-center text-muted-foreground mt-1">
-              {videoFiles.length}/1 video
+              {videoFiles.length +
+                oldFile.filter((v) => {
+                  if (v.file.fileType === FileType.VIDEO) {
+                    return v;
+                  }
+                }).length}
+              /1 video
             </p>
           </Card>
           <Input
@@ -384,11 +521,11 @@ export default function CreatePostPage() {
         )}
 
         {/* Image Preview */}
-        {imgFiles.length > 0 && (
+        {newFile.length > 0 && (
           <div className="mt-6">
             <h3 className="text-sm font-medium mb-2">Hình ảnh đã chọn</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {imgFiles.map((file, index) => (
+              {newFile.map((file, index) => (
                 <div key={`img-${index}`} className="relative group">
                   <div className="aspect-square rounded-md overflow-hidden border">
                     <img
@@ -401,7 +538,7 @@ export default function CreatePostPage() {
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      removeImage(index);
+                      removeNewImage(index);
                     }}
                     className="absolute top-1 right-1 bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                   >
@@ -436,7 +573,7 @@ export default function CreatePostPage() {
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      removeVideo(index);
+                      removeNewVideo(index);
                     }}
                     className="absolute top-2 right-2 bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                   >
@@ -444,6 +581,79 @@ export default function CreatePostPage() {
                   </button>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Image Preview */}
+        {oldFile.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-sm font-medium mb-2">Hình ảnh hiện tại</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {oldFile.map((file, index) =>
+                file.file.fileType === FileType.IMAGE ? (
+                  <div key={`img-${file.fileId}`} className="relative group">
+                    <div className="aspect-square rounded-md overflow-hidden border">
+                      <img
+                        src={`http://localhost:3333/api/files/${file.fileId}`}
+                        alt={`Preview ${index}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeOldFile(file.fileId);
+                      }}
+                      className="absolute top-1 right-1 bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                    {index === 0 && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-[#ff6d0b] text-white text-xs py-1 text-center">
+                        Ảnh bìa
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <></>
+                )
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Video Preview For Old File */}
+        {oldFile.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-sm font-medium mb-2">Video hiện tại</h3>
+            <div className="grid grid-cols-1 gap-3">
+              {oldFile.map((file, index) =>
+                file.file.fileType === FileType.VIDEO ? (
+                  <div key={`video-${index}`} className="relative group">
+                    <div className="aspect-video rounded-md overflow-hidden border bg-black">
+                      <video
+                        src={`http://localhost:3333/api/files/${file.fileId}`}
+                        controls
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeOldFile(file.fileId);
+                      }}
+                      className="absolute top-2 right-2 bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <></>
+                )
+              )}
             </div>
           </div>
         )}
@@ -462,150 +672,165 @@ export default function CreatePostPage() {
           {errors.address && (
             <p className="text-sm text-red-500">{errors.address}</p>
           )}
+
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger />
             <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Chọn địa chỉ</DialogTitle>
-                <DialogDescription></DialogDescription>
-              </DialogHeader>
-              <div className="flex flex-col gap-4 py-4">
-                <div className="items-center gap-4">
-                  <Label htmlFor="city">Chọn thành phố *</Label>
-                  <Select
-                    defaultValue={selectedProvince?.province_id ?? undefined}
-                    onValueChange={(value) => {
-                      setProvince(
-                        listOfProvinces.find(
-                          (province) => province.province_id === value
-                        )
-                      );
-                      setDistrict(undefined);
-                      setListDistrict([]);
-                      setListWard([]);
-                    }}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Chọn thành phố" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {listOfProvinces.map((province) => (
-                          <SelectItem
-                            key={province.province_id}
-                            value={province.province_id}
-                          >
-                            {province.province_name}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="items-center gap-4">
-                  <Label htmlFor="ward">Chọn quận, huyện *</Label>
-                  <Select
-                    defaultValue={selectedDistrict?.district_id ?? undefined}
-                    onValueChange={(value) => {
-                      setDistrict(
-                        listOfDistrict.find(
-                          (district) => district.district_id === value
-                        )
-                      );
-                    }}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Chọn quận, huyện" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {listOfDistrict.map((district) => (
-                          <SelectItem
-                            key={district.district_id}
-                            onClick={() => {
-                              console.log(district);
-                              setDistrict(district);
-                            }}
-                            value={district.district_id}
-                          >
-                            {district.district_name}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="items-center gap-4">
-                  <Label htmlFor="ward">Chọn phường, xã, thị trấn *</Label>
-                  <Select
-                    defaultValue={selectedWard?.ward_id ?? undefined}
-                    onValueChange={(value) =>
-                      setWard(listOfWard.find((ward) => ward.ward_id === value))
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Chọn phường, xã, thị trấn" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {listOfWard.map((ward) => (
-                          <SelectItem key={ward.ward_id} value={ward.ward_id}>
-                            {ward.ward_name}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="items-center gap-4">
-                  <Label htmlFor="">Tên đường *</Label>
-                  <Input
-                    value={streetName}
-                    required
-                    onChange={(e) => {
-                      setStreetName(e.target.value);
-                    }}
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="items-center gap-4">
-                  <Label htmlFor="">Số nhà *</Label>
-                  <Input
-                    value={houseNumber}
-                    required
-                    onChange={(e) => {
-                      setHouseNumber(e.target.value);
-                    }}
-                    className="col-span-3"
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  onClick={() => {
-                    if (
-                      !houseNumber.trim() ||
-                      !streetName.trim() ||
-                      !selectedProvince ||
-                      !selectedDistrict ||
-                      !selectedWard
-                    ) {
-                      toast("Vui lòng nhập đủ địa chỉ", {});
-                      return;
-                    }
-                    setOpen(false);
-                    if (locationRef.current) {
-                      locationRef.current.value = `${houseNumber} ${streetName}, ${selectedWard.ward_name}, ${selectedDistrict?.district_name}, ${selectedProvince?.province_name}`;
-                      // Xóa lỗi khi người dùng đã nhập địa chỉ
-                      if (errors.address) {
-                        setErrors((prev) => ({ ...prev, address: "" }));
-                      }
-                    }
-                  }}
-                >
-                  Lưu thay đổi
-                </Button>
-              </DialogFooter>
+              {isFirstLoadAddress ? (
+                <LoaderCircle className="animate-spin " />
+              ) : (
+                <>
+                  <DialogHeader>
+                    <DialogTitle>Chọn địa chỉ</DialogTitle>
+                    <DialogDescription></DialogDescription>
+                  </DialogHeader>
+                  <div className="flex flex-col gap-4 py-4">
+                    <div className="items-center gap-4">
+                      <Label htmlFor="city">Chọn thành phố *</Label>
+                      <Select
+                        defaultValue={
+                          selectedProvince?.province_id ?? undefined
+                        }
+                        onValueChange={(value) => {
+                          setProvince(
+                            listOfProvinces.find(
+                              (province) => province.province_id === value
+                            )
+                          );
+                          setDistrict(undefined);
+                          setListDistrict([]);
+                          setListWard([]);
+                        }}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Chọn thành phố" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {listOfProvinces.map((province) => (
+                              <SelectItem
+                                key={province.province_id}
+                                value={province.province_id}
+                              >
+                                {province.province_name}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="items-center gap-4">
+                      <Label htmlFor="ward">Chọn quận, huyện *</Label>
+                      <Select
+                        defaultValue={
+                          selectedDistrict?.district_id ?? undefined
+                        }
+                        onValueChange={(value) => {
+                          setDistrict(
+                            listOfDistrict.find(
+                              (district) => district.district_id === value
+                            )
+                          );
+                        }}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Chọn quận, huyện" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {listOfDistrict.map((district) => (
+                              <SelectItem
+                                key={district.district_id}
+                                onClick={() => {
+                                  setDistrict(district);
+                                }}
+                                value={district.district_id}
+                              >
+                                {district.district_name}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="items-center gap-4">
+                      <Label htmlFor="ward">Chọn phường, xã, thị trấn *</Label>
+                      <Select
+                        defaultValue={selectedWard?.ward_id ?? undefined}
+                        onValueChange={(value) =>
+                          setWard(
+                            listOfWard.find((ward) => ward.ward_id === value)
+                          )
+                        }
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Chọn phường, xã, thị trấn" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {listOfWard.map((ward) => (
+                              <SelectItem
+                                key={ward.ward_id}
+                                value={ward.ward_id}
+                              >
+                                {ward.ward_name}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="items-center gap-4">
+                      <Label htmlFor="">Tên đường *</Label>
+                      <Input
+                        value={streetName}
+                        required
+                        onChange={(e) => {
+                          setStreetName(e.target.value);
+                        }}
+                        className="col-span-3"
+                      />
+                    </div>
+                    <div className="items-center gap-4">
+                      <Label htmlFor="">Số nhà *</Label>
+                      <Input
+                        value={houseNumber}
+                        required
+                        onChange={(e) => {
+                          setHouseNumber(e.target.value);
+                        }}
+                        className="col-span-3"
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button
+                      onClick={() => {
+                        if (
+                          !houseNumber.trim() ||
+                          !streetName.trim() ||
+                          !selectedProvince ||
+                          !selectedDistrict ||
+                          !selectedWard
+                        ) {
+                          toast("Vui lòng nhập đủ địa chỉ", {});
+                          return;
+                        }
+                        setOpen(false);
+                        if (locationRef.current) {
+                          locationRef.current.value = `${houseNumber} ${streetName}, ${selectedDistrict?.district_name}, ${selectedProvince?.province_name}`;
+                          // Xóa lỗi khi người dùng đã nhập địa chỉ
+                          if (errors.address) {
+                            setErrors((prev) => ({ ...prev, address: "" }));
+                          }
+                        }
+                      }}
+                    >
+                      Lưu thay đổi
+                    </Button>
+                  </DialogFooter>
+                </>
+              )}
             </DialogContent>
           </Dialog>
         </div>
@@ -613,6 +838,7 @@ export default function CreatePostPage() {
         <div>
           <Label>Tình trạng nội thất *</Label>
           <Select
+            value={interiorStatus}
             onValueChange={(value) => {
               setInteriorStatus(value);
               // Xóa lỗi khi người dùng đã chọn
@@ -728,7 +954,7 @@ Ví dụ: Phòng trọ 30m2 đường Nguyễn X, Bình Thạnh, nội thất đ
               <p className="text-sm text-red-500">{errors.description}</p>
             )}
             <p className="text-xs text-muted-foreground mt-1">
-              {description.length}/1000 kí tự
+              {description.length}/999 kí tự
             </p>
           </div>
         </div>
@@ -739,10 +965,10 @@ Ví dụ: Phòng trọ 30m2 đường Nguyễn X, Bình Thạnh, nội thất đ
           Xem trước
         </Button>
         <Button
-          onClick={createPost}
+          onClick={editPost}
           className="flex-1 bg-[#ff6d0b] hover:bg-[#ff6d0b]/90"
         >
-          Đăng tin
+          Sửa tin
         </Button>
       </div>
     </div>

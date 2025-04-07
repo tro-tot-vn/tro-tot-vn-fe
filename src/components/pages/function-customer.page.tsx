@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { PasswordChangeForm } from "../elements/password-change-form.element";
-import { ProfileInfoForm } from "../elements/profile-info-form.element";
-import { SocialConnections } from "../elements/social-connections.element";
 import { FunctionCustomerSidebar } from "../elements/functoion-sidebar.element";
+import { ListSavedPost } from "../elements/saved-post.element";
+import SubscriptionsPage from "./post-subscriptions.page";
 
 export default function FunctionCustomerPage() {
   const [activeTab, setActiveTab] = useState("savedPost");
@@ -13,8 +12,8 @@ export default function FunctionCustomerPage() {
       <div className="container mx-auto px-4">
         <h1 className="text-2xl font-bold mb-6">
           {activeTab === "savedPost" && "Bài viết đã lưu "}
-          {activeTab === "historyView" && "Lịch sử xem tin"}
-          {activeTab === "appointment" && "Cuộc hẹn"}
+          {/* {activeTab === "historyView" && "Lịch sử xem tin"} */}
+          {activeTab === "post-subscription" && "Đăng kí nhận tin theo khu vực"}
         </h1>
 
         <div className="flex flex-col md:flex-row gap-6">
@@ -29,9 +28,9 @@ export default function FunctionCustomerPage() {
           {/* Main Content */}
           <div className="w-full md:w-3/4">
             <Card className="p-6">
-              {activeTab === "savedPost" && <PasswordChangeForm />}
-              {activeTab === "historyView" && <ProfileInfoForm />}
-              {activeTab === "appointment" && <SocialConnections />}
+              {activeTab === "savedPost" && <ListSavedPost />}
+              {/* {activeTab === "historyView" && <ProfileInfoForm />} */}
+              {activeTab === "post-subscription" && <SubscriptionsPage></SubscriptionsPage>}
             </Card>
           </div>
         </div>

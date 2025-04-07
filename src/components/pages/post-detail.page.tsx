@@ -2,7 +2,6 @@ import { Card } from "@/components/ui/card";
 import { ImageGallery } from "@/components/elements/image-gallery";
 import { PropertyDetails } from "@/components/elements/property-details";
 import { SellerInfo } from "@/components/elements/seller-info";
-import { SimilarListings } from "@/components/elements/similar-listings";
 import { RatingsReviews } from "@/components/elements/ratings-reviews";
 import { useEffect, useState } from "react";
 import { PostService } from "@/services/post.service";
@@ -13,15 +12,32 @@ import { toast } from "sonner";
 import { useNavigate, useParams } from "react-router";
 import { LoaderCircle } from "lucide-react";
 import NotFoundPage from "./not-found.page";
+import { CustomerService } from "@/services/customer.service";
 
 const postService = new PostService();
+const customerService = new CustomerService();
 
 export default function PostDetailPage() {
   const auth = useAuth();
+  const postId = Number(useParams().postId);
   const navigate = useNavigate();
   const [postData, setPostData] = useState<GetDetailPostResponse | null>(null);
   const [isNotFound, setNotFound] = useState(false);
-  const { postId } = useParams();
+
+  const addToSavedPosts = async (postId: number) => {
+    const res = await customerService.addToSavedPosts(postId);
+    if (res.status === 200) {
+      toast.success("Đã thêm vào danh sách đã lưu");
+    } else if (res.status === 400) {
+      if (res.data.message === "POST_ALREADY_SAVED") {
+        toast.error("Bài viết đã có trong danh sách đã lưu");
+      } else if (res.data.message === "POST_NOT_FOUND") {
+        toast.error("Bài viết không tồn tại");
+      }
+    } else {
+      toast.error("Lỗi khi thêm vào danh sách đã lưu");
+    }
+  };
   useEffect(() => {
     postService.getDetailPost(Number(postId)).then((res) => {
       if (res.status === 200) {
@@ -33,6 +49,10 @@ export default function PostDetailPage() {
       }
     });
   }, [postId]);
+
+  if (isNaN(postId)) {
+    return <NotFoundPage />;
+  }
   return (
     <>
       {postData ? (
@@ -42,7 +62,12 @@ export default function PostDetailPage() {
             <div className="flex flex-col">
               {/* Phần hình ảnh và thông tin chính */}
               <div>
-                <ImageGallery data={postData.multimediaFiles} />
+                <ImageGallery
+                  data={postData.multimediaFiles}
+                  addToSavedPosts={() => {
+                    addToSavedPosts(postData.postId);
+                  }}
+                />
                 <h1 className="text-2xl font-bold mt-6 mb-4">
                   {postData.title}
                 </h1>
@@ -128,7 +153,7 @@ export default function PostDetailPage() {
                     <SellerInfo customerInformation={postData.owner} />
                   </div>
                   <Card className="p-4">
-                    <h2 className="font-bold mb-2">Tin đăng này có phải là:</h2>
+                    <h2 className="font-bold mb-2">Nhắn tin nhanh:</h2>
                     <div className="space-y-2">
                       <button className="w-full text-left px-3 py-2 bg-gray-100 rounded hover:bg-gray-200">
                         Nhà này còn không ạ?
@@ -141,10 +166,9 @@ export default function PostDetailPage() {
                 </div>
 
                 {/* Phần đánh giá */}
-                <RatingsReviews />
+                <RatingsReviews postId={postId} />
               </div>
             </div>
-            <SimilarListings />
           </div>
         </main>
       ) : (

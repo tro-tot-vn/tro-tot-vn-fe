@@ -4,7 +4,6 @@ import {
   Clock,
   MapPin,
   MessageCircle,
-  CheckCircle,
   LoaderCircle,
 } from "lucide-react";
 import { PostRecent } from "../elements/post-listing.element";
@@ -118,12 +117,12 @@ export default function CustomerProfilePage() {
             {/* Profile Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
               <div className="space-y-3">
-                <div className="flex items-center gap-2">
+                {/* <div className="flex items-center gap-2">
                   <MessageCircle className="h-4 w-4 text-gray-500" />
                   <span className="text-sm text-gray-600">
                     Phản hồi chat: <strong>Thỉnh thoảng</strong>
                   </span>
-                </div>
+                </div> */}
 
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-gray-500" />
@@ -132,23 +131,6 @@ export default function CustomerProfilePage() {
                     <strong>
                       {formatJoinedDuration(customerInformation.joinedAt)}
                     </strong>
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm text-gray-600">
-                    Đã xác thực:
-                    <div className="flex flex-row gap-2 items-center">
-                      <img src="/facebook-logo.svg" width="24" height="24" />
-                      <img
-                        src="/google-logo.svg"
-                        alt="Google"
-                        width={24}
-                        height={24}
-                        className="mr-2"
-                      />
-                    </div>
                   </span>
                 </div>
 

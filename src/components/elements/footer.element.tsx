@@ -4,7 +4,7 @@ export default function Footer() {
   return (
     <footer>
       <div className="border-t">
-        <div className="container ">
+        <div className="container min-w-screen">
           <div className="flex flex-row gap-8 justify-center mt-8">
             <div>
               <h3 className="font-semibold mb-4">TẢI ỨNG DỤNG TRỌ TỐT</h3>
@@ -117,8 +117,6 @@ export default function Footer() {
             </div>
           </div>
         </div>
-      </div>
-      <div className="container mb-4  ">
         <p className="text-center text-gray-600 ">
           © 2025 NhaTot. All rights reserved.
         </p>

@@ -1,6 +1,9 @@
 import { axios_auth } from "@/config/axios-auth";
 import ResponseData from "@/types/response.type";
-import { GetPostByStatusResponse } from "./types/get-list-post-by-status-reponse";
+import {
+  GetPostByStatusResponse,
+  ListPostRes,
+} from "./types/get-list-post-by-status-reponse";
 import { GetDetailPostResponse } from "./types/get-detail-post.response";
 
 export class PostService {
@@ -31,7 +34,56 @@ export class PostService {
     return res;
   };
   getDetailPost = async (postId: number) => {
-    const res = await axios_auth.get<ResponseData<GetDetailPostResponse>>(`api/post/${postId}/detail`);
+    const res = await axios_auth.get<ResponseData<GetDetailPostResponse>>(
+      `api/post/${postId}/detail`
+    );
+    return res;
+  };
+  getLatestPost = async (limit: number = 4) => {
+    const res = await axios_auth.get<ResponseData<Array<ListPostRes>>>(
+      "api/post/latest-post",
+      {
+        params: {
+          limit,
+        },
+      }
+    );
+    return res;
+  };
+  editPost = async (data: FormData, postId: number) => {
+    const res = await axios_auth.post<ResponseData<ListPostRes>>(
+      `api/post/${postId}/edit`,
+      data,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return res;
+  };
+  getDetailMyPost = async (postId: number) => {
+    const res = await axios_auth.get<ResponseData<GetDetailPostResponse>>(
+      `api/post/${postId}/my-post`
+    );
+    return res;
+  };
+  hidePost = async (postId: number) => {
+    const res = await axios_auth.post<ResponseData<object>>(
+      `api/post/hide-post`,
+      {
+        postId,
+      }
+    );
+    return res;
+  };
+  unHidePost = async (postId: number) => {
+    const res = await axios_auth.post<ResponseData<object>>(
+      `api/post/un-hide-post`,
+      {
+        postId,
+      }
+    );
     return res;
   };
 }

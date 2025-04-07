@@ -9,13 +9,11 @@ import { Input } from "@/components/ui/input";
 import useAuth from "@/hooks/use-auth";
 import { Role } from "@/utils/role.enum";
 import {
-  Bell,
   Menu,
   MessageSquare,
   Search,
   LayoutGrid,
   CircleUserRound,
-  FilterIcon,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 
@@ -24,7 +22,7 @@ export function SiteHeader() {
   const auth = useAuth();
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white ">
-      <div className="container flex h-16 items-center justify-between w-full">
+      <div className="container flex h-16 items-center justify-between min-w-screen">
         <Link to="/" className="flex-shrink-0">
           <img
             src="/tro-tot-logo-png.jpeg"
@@ -39,10 +37,7 @@ export function SiteHeader() {
           <Menu className="!w-5 !h-5" />
         </Button>
 
-        <div className="flex-1 flex max-w-xl">
-          <Button variant="ghost" size="icon" className="">
-            <FilterIcon className="!w-5 !h-5" />
-          </Button>
+        <div className="flex-1 flex max-w-xl ">
           <div className="flex-1 relative">
             <Input placeholder="Tìm phòng trọ " className="pl-4 pr-10" />
             <Button
@@ -55,14 +50,7 @@ export function SiteHeader() {
         </div>
 
         {auth.user ? (
-          <div className="flex items-center gap-6">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="hidden md:inline-flex"
-            >
-              <Bell className="!w-5 !h-5" />
-            </Button>
+          <div className="flex items-center gap-6 pr-10">
             <Link to="/messages">
               <Button
                 variant="ghost"
@@ -76,7 +64,7 @@ export function SiteHeader() {
               auth.user.role.roleName === Role.Manager ||
               auth.user.role.roleName === Role.Moderator
             ) ? (
-              <div className="container flex h-16 items-center justify-between">
+              <div className="container flex h-16 items-center gap-6 justify-between">
                 <Link to="/posts/my-posts">
                   <Button
                     variant="ghost"
@@ -142,7 +130,7 @@ export function SiteHeader() {
             )}
           </div>
         ) : (
-          <div className="space-x-4">
+          <div className="space-x-4 pr-10">
             <Link to="/login">
               <Button className="hidden md:inline-flex bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white">
                 Đăng nhập

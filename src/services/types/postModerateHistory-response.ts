@@ -13,4 +13,7 @@ export interface PostMoratorHistoryResponse {
     reason: string;
     execAt: string;
     updatedAt: string;
+    post: {
+        title: string;
+    };
 }

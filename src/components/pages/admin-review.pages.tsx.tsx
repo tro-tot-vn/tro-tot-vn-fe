@@ -35,9 +35,6 @@ export default function AdminReviewPage() {
 
   console.log(postData)
 
-
-
-
   const navigation = useNavigate();
   return (
     <>
@@ -46,26 +43,26 @@ export default function AdminReviewPage() {
         
         <main className="h-full w-full overflow-auto p-6">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-bold">Pending Post</h1>
+            <h1 className="text-3xl font-bold">Bài Đăng Chờ Duyệt</h1>
             <div className="text-sm text-muted-foreground">
-              Total: {postData.length} posts
+              Tổng cộng: {postData.length} bài đăng
             </div>
           </div>
 
           <Card>
             <CardHeader>
-              <CardTitle>Post Awaiting Review</CardTitle>
+              <CardTitle>Bài Đăng Đang Chờ Duyệt</CardTitle>
             </CardHeader>
             <CardContent>
               <Table className="">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Address</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Area</TableHead>
-                    <TableHead>Landlord</TableHead>
-                    <TableHead>Submitted</TableHead>
+                    <TableHead>Tiêu Đề</TableHead>
+                    <TableHead>Địa Chỉ</TableHead>
+                    <TableHead>Giá</TableHead>
+                    <TableHead>Diện Tích</TableHead>
+                    <TableHead>Chủ Nhà</TableHead>
+                    <TableHead>Ngày Đăng</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -103,5 +100,5 @@ export default function AdminReviewPage() {
       </div>
       )}
     </>
-    )
+  );
 }

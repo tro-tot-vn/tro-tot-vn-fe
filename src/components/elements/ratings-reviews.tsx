@@ -154,7 +154,9 @@ export function RatingsReviews({ postId }: RatingsReviewsProps) {
   useEffect(() => {
     if (postId) {
       loadMoreRates();
-      loadMyRate();
+      if (auth.isAuthenticated) {
+        loadMyRate();
+      }
       loadStatsPost();
     }
     // customerService.getRatingStats(postId).then((res) => {

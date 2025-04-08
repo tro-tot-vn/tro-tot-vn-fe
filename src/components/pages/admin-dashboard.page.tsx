@@ -31,9 +31,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">24</div>
-              <p className="text-xs text-muted-foreground">
-                +5 since yesterday
-              </p>
+              <p className="text-xs text-muted-foreground"></p>
             </CardContent>
           </Card>
           <Card>
@@ -47,10 +45,10 @@ export default function DashboardPage() {
               />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">145</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-2xl font-bold">20</div>
+              {/* <p className="text-xs text-muted-foreground">
                 +12 since last week
-              </p>
+              </p> */}
             </CardContent>
           </Card>
           <Card>
@@ -62,9 +60,9 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">8</div>
-              <p className="text-xs text-muted-foreground">
+              {/* <p className="text-xs text-muted-foreground">
                 +2 since yesterday
-              </p>
+              </p> */}
             </CardContent>
           </Card>
           <Card>
@@ -75,15 +73,15 @@ export default function DashboardPage() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">573</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-2xl font-bold">55</div>
+              {/* <p className="text-xs text-muted-foreground">
                 +18 since last week
-              </p>
+              </p> */}
             </CardContent>
           </Card>
         </div>
 
-        <div className="mt-6">
+        {/* <div className="mt-6">
           <Tabs defaultValue="pending-tasks">
             <TabsList>
               <TabsTrigger value="pending-tasks">Pending Tasks</TabsTrigger>
@@ -282,7 +280,7 @@ export default function DashboardPage() {
               </Card>
             </TabsContent>
           </Tabs>
-        </div>
+        </div> */}
       </main>
     </div>
   );

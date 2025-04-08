@@ -38,7 +38,7 @@ export default function AdminReviewPage() {
   const navigation = useNavigate();
   return (
     <>
-      {postData.length > 0 && (
+      {/* {postData.length > 0 && ( */}
         <div className="flex-1 flex overflow-hidden">
           <main className="h-full w-full overflow-auto p-6">
             <div className="flex items-center justify-between mb-6">
@@ -108,7 +108,7 @@ export default function AdminReviewPage() {
             </Card>
           </main>
         </div>
-      )}
+      {/* )} */}
     </>
   );
 }

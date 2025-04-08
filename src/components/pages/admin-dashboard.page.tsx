@@ -1,14 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  AlertTriangle,
   CheckCircle,
   Clock,
-  FileText,
   Users,
   XCircle,
 } from "lucide-react";
-import { Link } from "react-router";
 
 export default function DashboardPage() {
   return (

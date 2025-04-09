@@ -190,7 +190,7 @@ export default function PendingPostDetailPage() {
                                 Your browser does not support the video tag.
                               </video>
                             ) : (
-                              <></>
+                              <> </>
                             )
                           )}
                         </Image.PreviewGroup>

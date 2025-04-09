@@ -31,6 +31,7 @@ export class PostService {
         },
       }
     );
+    console.log(status, res.data);
     return res;
   };
   getDetailPost = async (postId: number) => {

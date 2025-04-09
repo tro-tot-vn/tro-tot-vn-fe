@@ -126,13 +126,11 @@ export default function HomePage() {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {popularLocations.map((location) => (
-                <Link key={location.id} to={`/location/${location.id}`}>
-                  <Card className="hover:border-[#ff6d0b]/50 transition-colors h-full">
-                    <CardContent className="p-4 flex flex-col items-center text-center">
-                      <h3 className="font-medium mb-1">{location.name}</h3>
-                    </CardContent>
-                  </Card>
-                </Link>
+                <Card className="hover:border-[#ff6d0b]/50 transition-colors h-full">
+                  <CardContent className="p-4 flex flex-col items-center text-center">
+                    <h3 className="font-medium mb-1">{location.name}</h3>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </div>

@@ -25,82 +25,88 @@ export function ListRejectPost({
           <div className="grid grid-container grid-cols-1 md:grid-cols-2 gap-2 mb-4">
             {listPostRes.map((post) => {
               return (
-
-                  <Card className="overflow-hidden hover:shadow-md transition-shadow flex flex-col mt-3">
-                    <CardHeader>
-                      <CardTitle>{post.title}</CardTitle>
-                      <CardDescription>
-                        {post.description.length > 100
-                          ? post.description.substring(0, 100) + "..."
-                          : post.description}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="relative">
-                        <img
-                          src={`http://localhost:3333/api/files/${post.multimediaFiles[0].fileId}`}
-                          alt={post.title}
-                          className="w-full h-32 object-cover"
-                        />
-                      </div>
-                      <div className="flex-1 flex flex-col">
-                        {/* <h3 className="font-medium text-sm line-clamp-2 mb-2 flex-1">
+                <Card className="overflow-hidden hover:shadow-md transition-shadow flex flex-col mt-3">
+                  <CardHeader>
+                    <CardTitle>{post.title}</CardTitle>
+                    <CardDescription>
+                      {post.description.length > 100
+                        ? post.description.substring(0, 100) + "..."
+                        : post.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="relative">
+                      <img
+                        src={`http://localhost:3333/api/files/${post.multimediaFiles[0].fileId}`}
+                        alt={post.title}
+                        className="w-full h-32 object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 flex flex-col">
+                      {/* <h3 className="font-medium text-sm line-clamp-2 mb-2 flex-1">
                       {post.title}
                     </h3> */}
-                        <div className="">
-                          <p className="font-bold text-[#ff6d0b]">
-                            {Number(post.price).toLocaleString("it-IT", {
-                              style: "currency",
-                              currency: "VND",
-                            })}{" "}
-                            VND
-                          </p>
-                          <div className="flex flex-col  justify-start mt-2 text-xs text-gray-500">
-                            <div className="flex items-center">
-                              <MapPin className="h-3 w-3 mr-1" />
-                              <span>
-                                {post.streetNumber +
-                                  ", " +
-                                  post.street +
-                                  ", " +
-                                  post.ward +
-                                  ", " +
-                                  post.district +
-                                  ", " +
-                                  post.city}
-                              </span>
-                            </div>
-                            <div className="flex items-center">
-                              <Clock className="h-3 w-3 mr-1" />
-                              <span>
-                                {formatDistance(
-                                  subDays(post.createdAt, 3),
-                                  new Date(),
-                                  { addSuffix: true }
-                                )}
-                              </span>
-                            </div>
+                      <div className="">
+                        <p className="font-bold text-[#ff6d0b]">
+                          {Number(post.price).toLocaleString("it-IT", {
+                            style: "currency",
+                            currency: "VND",
+                          })}{" "}
+                          VND
+                        </p>
+                        <div className="flex flex-col  justify-start mt-2 text-xs text-gray-500">
+                          <div className="flex items-center">
+                            <MapPin className="h-3 w-3 mr-1" />
+                            <span>
+                              {post.streetNumber +
+                                ", " +
+                                post.street +
+                                ", " +
+                                post.ward +
+                                ", " +
+                                post.district +
+                                ", " +
+                                post.city}
+                            </span>
+                          </div>
+                          <div className="flex items-center">
+                            <Clock className="h-3 w-3 mr-1" />
+                            <span>
+                              {formatDistance(
+                                subDays(post.createdAt, 3),
+                                new Date(),
+                                { addSuffix: true }
+                              )}
+                            </span>
                           </div>
                         </div>
                       </div>
-                      <div className="flex flex-col space-y-2">
-                        <Button
-                          onClick={() => {
-                            nav(`/posts/my-posts/${post.postId}/edit`);
-                          }}
-                          className=" bg-[#ff6d0b] hover:bg-[#ff6d0b] text-white 
+                    </div>
+                    <div className="flex flex-col space-y-2">
+                      <Button
+                        onClick={() => {
+                          nav(`/posts/my-posts/${post.postId}/edit`);
+                        }}
+                        className=" bg-[#ff6d0b] hover:bg-[#ff6d0b] text-white 
                         font-bold py-2 px-4 rounded"
-                        >
-                          Chỉnh sửa
-                        </Button>
-                      </div>
-                      <div>
-                        <p className="text-red-500 font-bold mt-3">
-                          {"Lý do từ chối: "}
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      >
+                        Chỉnh sửa
+                      </Button>
+                    </div>
+                    <div>
+                      <p className="text-red-500 font-bold mt-3">
+                        {post.moderationHistories[
+                          post.moderationHistories.length - 1
+                        ]
+                          ? "Lý do từ chối: " +
+                            post.moderationHistories[
+                              post.moderationHistories.length - 1
+                            ].reason
+                          : ""}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
               );
             })}
           </div>

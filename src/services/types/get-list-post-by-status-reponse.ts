@@ -20,6 +20,15 @@ export interface ListPostRes {
   interiorCondition: string;
   acreage: number;
   multimediaFiles: MultimediaFile[];
+  moderationHistories: ModerationHistory[];
+}
+export interface ModerationHistory {
+  historyId:  number;
+  postId:     number;
+  adminId:    number;
+  actionType: string;
+  reason:     string;
+  execAt:     Date;
 }
 
 export interface MultimediaFile {

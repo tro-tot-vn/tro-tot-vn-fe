@@ -122,13 +122,6 @@ export class CustomerService {
       }
     );
   }
-  async addHistortyViewPost(postId: number) {
-    return axios_auth.post<ResponseData<PostViewHistoryResponse>>(
-      `api/customer/history-view-post`,{
-        postId
-      }
-    );
-  }
   async getHistoryViewPost() {
     return axios_auth.get<ResponseData<PostViewHistoryResponse>>(
       `api/customer/history-view-post`

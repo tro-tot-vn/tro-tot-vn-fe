@@ -7,19 +7,17 @@ import {
   MapPin,
   Heart,
   DollarSignIcon,
-  ArrowLeft,
   ArrowRight,
   Loader2,
 } from "lucide-react";
 import { Link, useSearchParams, useNavigate } from "react-router";
-import {
-  ListPostRes,
-} from "@/services/types/get-list-post-by-status-reponse";
+import { ListPostRes } from "@/services/types/get-list-post-by-status-reponse";
 import { AreaRangeFilter } from "../elements/area-range-filter";
 import { InteriorConditionFilter } from "../elements/interior-condition-filter";
 import { LocationFilter } from "../elements/location-filter";
 import { PriceRangeFilter } from "../elements/price-range-filter";
 import { PostService } from "@/services/post.service";
+import { tr } from "date-fns/locale";
 
 const postService = new PostService();
 
@@ -52,12 +50,17 @@ export default function SearchPage() {
   const [results, setResults] = useState<ListPostRes[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
-  const [nextCursor, setNextCursor] = useState<number>(0);
+  const [nextCursor, setNextCursor] = useState<Date | null>(null);
   const [totalResults, setTotalResults] = useState(0);
 
   // Mock API call to fetch search results
-  const fetchSearchResults = async (cursor = 0) => {
+  const fetchSearchResults = async (cursor: Date | null = null) => {
+    // Reset state for new search
     setLoading(true);
+    setResults([]);
+    setNextCursor(null);
+    setHasMore(false);
+    setTotalResults(0);
 
     postService
       .searchPost(
@@ -74,13 +77,14 @@ export default function SearchPage() {
       )
       .then((res) => {
         if (res.status === 200 || res.status === 304) {
+          console.log("Search results:", res.data.data);
           setResults((prev) => [...prev, ...(res.data.data?.dataPag || [])]);
-          setNextCursor(res.data.data?.nextCursor || 0);
+          setNextCursor(res.data.data?.nextCursor || null);
           setHasMore(res.data.data?.hasMore || false);
           setTotalResults(res.data.data?.dataPag.length || 0);
         } else {
           setResults([]);
-          setNextCursor(0);
+          setNextCursor(null);
           setHasMore(false);
           setTotalResults(0);
         }
@@ -88,7 +92,7 @@ export default function SearchPage() {
       .catch((err) => {
         console.error("Error fetching search results:", err);
         setResults([]);
-        setNextCursor(0);
+        setNextCursor(null);
         setHasMore(false);
         setTotalResults(0);
       })
@@ -122,7 +126,7 @@ export default function SearchPage() {
   // Handle search
   const handleSearch = () => {
     updateSearchParams();
-    fetchSearchResults(0);
+    fetchSearchResults(null);
   };
 
   // Handle filter changes
@@ -302,7 +306,7 @@ export default function SearchPage() {
         {/* Results Summary */}
         <div className="mb-4">
           <h1 className="text-xl font-semibold">
-            {loading && nextCursor === 0 ? (
+            {loading && nextCursor === null ? (
               "Đang tìm kiếm..."
             ) : (
               <>
@@ -314,7 +318,7 @@ export default function SearchPage() {
         </div>
 
         {/* Results Grid */}
-        {loading && nextCursor === 0 ? (
+        {loading && nextCursor === null ? (
           <div className="flex justify-center items-center py-20">
             <Loader2 className="h-10 w-10 animate-spin text-[#ff6d0b]" />
           </div>
@@ -344,7 +348,7 @@ export default function SearchPage() {
                 });
                 setSearchQuery("");
                 navigate("/search");
-                fetchSearchResults(0);
+                fetchSearchResults(nextCursor);
               }}
             >
               Xóa bộ lọc
@@ -361,9 +365,9 @@ export default function SearchPage() {
                   <div className="relative">
                     <img
                       src={
-                        post.multimediaFiles[0]?.fileId
-                          ? `/placeholder.svg?height=300&width=400&text=Phòng+${post.postId}`
-                          : "/placeholder.svg?height=300&width=400"
+                        post.multimediaFiles[0]
+                          ? `http://localhost:3333/api/files/${post.multimediaFiles[0].fileId}`
+                          : ""
                       }
                       alt={post.title}
                       className="w-full h-48 object-cover"
@@ -437,68 +441,6 @@ export default function SearchPage() {
                 </Button>
               </div>
             )}
-
-            {/* Pagination */}
-            <div className="flex justify-center mb-8">
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  disabled={nextCursor <= 1}
-                  onClick={() => {
-                    if (nextCursor > 1) {
-                      fetchSearchResults(0);
-                    }
-                  }}
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={nextCursor === 1 ? "default" : "outline"}
-                  className={
-                    nextCursor === 1 ? "bg-[#ff6d0b] hover:bg-[#ff6d0b]/90" : ""
-                  }
-                  size="sm"
-                  onClick={() => fetchSearchResults(0)}
-                >
-                  1
-                </Button>
-                <Button
-                  variant={nextCursor === 2 ? "default" : "outline"}
-                  className={
-                    nextCursor === 2 ? "bg-[#ff6d0b] hover:bg-[#ff6d0b]/90" : ""
-                  }
-                  size="sm"
-                  onClick={() => fetchSearchResults(1)}
-                >
-                  2
-                </Button>
-                <Button
-                  variant={nextCursor === 3 ? "default" : "outline"}
-                  className={
-                    nextCursor === 3 ? "bg-[#ff6d0b] hover:bg-[#ff6d0b]/90" : ""
-                  }
-                  size="sm"
-                  onClick={() => fetchSearchResults(2)}
-                >
-                  3
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  disabled={!hasMore}
-                  onClick={() => {
-                    if (hasMore) {
-                      fetchSearchResults(nextCursor);
-                    }
-                  }}
-                >
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
           </>
         )}
       </main>

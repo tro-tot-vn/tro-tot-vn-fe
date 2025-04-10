@@ -5,6 +5,7 @@ import {
   ListPostRes,
 } from "./types/get-list-post-by-status-reponse";
 import { GetDetailPostResponse } from "./types/get-detail-post.response";
+import { CursorPaging } from "./types/paging-response";
 
 export class PostService {
   createPost = async (data: FormData) => {
@@ -97,7 +98,7 @@ export class PostService {
     district?: string,
     ward?: string,
     interiorCondition?: string,
-    cursor?: number,
+    cursor: Date | null = null,
     limit: number = 10
   ) => {
     const params: Record<string, unknown> = { keyword, limit };
@@ -121,7 +122,7 @@ export class PostService {
     if (interiorCondition) params.interiorCondition = interiorCondition;
     if (cursor !== undefined) params.cursor = cursor;
 
-    return axios_auth.get<ResponseData<GetPostByStatusResponse>>(
+    return axios_auth.get<ResponseData<CursorPaging<ListPostRes, Date>>>(
       "api/post/search",
       { params: params }
     );

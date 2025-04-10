@@ -3,7 +3,6 @@ import { Card } from "@/components/ui/card";
 import { FunctionCustomerSidebar } from "../elements/functoion-sidebar.element";
 import { ListSavedPost } from "../elements/saved-post.element";
 import SubscriptionsPage from "./post-subscriptions.page";
-import { ProfileInfoForm } from "../elements/profile-info-form.element";
 import { HistoryPostElement } from "../elements/history-post.element";
 
 export default function FunctionCustomerPage() {

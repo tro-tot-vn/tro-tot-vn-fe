@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { FunctionCustomerSidebar } from "../elements/functoion-sidebar.element";
 import { ListSavedPost } from "../elements/saved-post.element";
 import SubscriptionsPage from "./post-subscriptions.page";
+import { HistoryPostElement } from "../elements/history-post.element";
 
 export default function FunctionCustomerPage() {
   const [activeTab, setActiveTab] = useState("savedPost");
@@ -12,7 +13,7 @@ export default function FunctionCustomerPage() {
       <div className="container mx-auto px-4">
         <h1 className="text-2xl font-bold mb-6">
           {activeTab === "savedPost" && "Bài viết đã lưu "}
-          {/* {activeTab === "historyView" && "Lịch sử xem tin"} */}
+          {activeTab === "historyView" && "Lịch sử xem tin"}
           {activeTab === "post-subscription" && "Đăng kí nhận tin theo khu vực"}
         </h1>
 
@@ -29,7 +30,7 @@ export default function FunctionCustomerPage() {
           <div className="w-full md:w-3/4">
             <Card className="p-6">
               {activeTab === "savedPost" && <ListSavedPost />}
-              {/* {activeTab === "historyView" && <ProfileInfoForm />} */}
+              {activeTab === "historyView" && <HistoryPostElement />}
               {activeTab === "post-subscription" && <SubscriptionsPage></SubscriptionsPage>}
             </Card>
           </div>

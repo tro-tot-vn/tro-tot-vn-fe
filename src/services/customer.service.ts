@@ -8,6 +8,7 @@ import { RateResponse } from "./types/get-list-rate.response";
 import { GetMyRateFromPostRes } from "./types/get-my-rate-from-post.response";
 import { StatsPostResponse } from "./types/get-stats-post.response";
 import { GetSubscriptionResponse } from "./types/get-subscription";
+import { PostViewHistoryResponse } from "./types/history-view-post-response";
 
 export class CustomerService {
   async createAppointment(postId: number, appointmentAt: Date) {
@@ -121,4 +122,10 @@ export class CustomerService {
       }
     );
   }
+  async getHistoryViewPost() {
+    return axios_auth.get<ResponseData<PostViewHistoryResponse>>(
+      `api/customer/history-view-post`
+    );
+  }
+
 }

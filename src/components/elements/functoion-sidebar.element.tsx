@@ -20,6 +20,11 @@ export function FunctionCustomerSidebar({
       icon: <User className="h-4 w-4 mr-2" />,
     },
     {
+      id: "historyView",
+      label: "Lịch sử xem tin",
+      icon: <Calendar1 className="h-4 w-4 mr-2" />,
+    },
+    {
       id: "post-subscription",
       label: "Đăng kí nhận tin theo khu vực",
       icon: <Calendar1 className="h-4 w-4 mr-2" />,

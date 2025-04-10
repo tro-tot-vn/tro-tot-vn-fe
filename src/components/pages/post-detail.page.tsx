@@ -48,6 +48,7 @@ export default function PostDetailPage() {
         toast.error("Lỗi khi tải dữ liệu bài đăng");
       }
     });
+    
   }, [postId]);
 
   if (isNaN(postId)) {

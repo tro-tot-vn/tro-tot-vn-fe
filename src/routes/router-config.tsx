@@ -18,7 +18,6 @@ import PostReportsPage from "@/components/pages/post-report.page";
 import PostReportDetailPage from "@/components/pages/post-report-detail.page";
 import CommentReportsPage from "@/components/pages/comment-report.page";
 import CommentReportDetailPage from "@/components/pages/comment-report-detail";
-import { PostListings } from "@/components/pages/post-listing.page";
 import HomePage from "@/components/pages/home.page";
 import PostDetailPage from "@/components/pages/post-detail.page";
 import ProtectedRouteAuth from "@/components/elements/protect-route-auth.element";
@@ -32,6 +31,7 @@ import VerifyOtp from "@/components/pages/verify-otp-password.page";
 import ResetPassword from "@/components/pages/reset-password.page";
 import FunctionCustomerPage from "@/components/pages/function-customer.page";
 import EditPostPage from "@/components/pages/edit-post.page";
+import SearchPage from "@/components/pages/search-post.page";
 
 const appRouterConfig: RouteObject[] = [
   {
@@ -64,7 +64,7 @@ const appRouterConfig: RouteObject[] = [
       },
       {
         path: "search",
-        element: <PostListings />,
+        element: <SearchPage />,
       },
       {
         path: "customer",

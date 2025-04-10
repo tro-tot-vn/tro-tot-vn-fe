@@ -106,23 +106,29 @@ export function RatingsReviews({ postId }: RatingsReviewsProps) {
   };
 
   const loadStatsPost = async () => {
-    customerService.getRatingStats(postId).then((res) => {
-      if (res.status === 200) {
-        if (res.data.data) {
-          setRateStats(res.data.data);
-        } else {
-          toast.error("Không có đánh giá nào");
+    customerService
+      .getRatingStats(postId)
+      .then((res) => {
+        if (res.status === 200) {
+          if (res.data.data) {
+            setRateStats(res.data.data);
+          } else {
+            toast.error("Không có đánh giá nào");
+          }
+        } else if (res.status === 404) {
+          console.log(res.data);
+          if (res.data.message === "POST_NOT_FOUND") {
+            console.log("Không có đánh giá nào");
+            setRateStats(null);
+          } else {
+            toast.error("Lỗi khi tải dữ liệu đánh giá");
+          }
         }
-      } else if (res.status === 404) {
-        console.log(res.data);
-        if (res.data.message === "POST_NOT_FOUND") {
-          console.log("Không có đánh giá nào");
-          setRateStats(null);
-        } else {
-          toast.error("Lỗi khi tải dữ liệu đánh giá");
-        }
-      }
-    });
+      })
+      .catch((err) => {
+        console.log(err);
+        toast.error("Lỗi khi tải dữ liệu đánh giá");
+      });
   };
 
   const addRate = async (rating: number, comment: string) => {

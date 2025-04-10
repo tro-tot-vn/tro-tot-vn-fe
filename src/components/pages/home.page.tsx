@@ -1,19 +1,19 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  SearchIcon,
-  MapPin,
-  Heart,
-  ChevronRight,
-  DollarSignIcon,
-} from "lucide-react";
+import { SearchIcon, MapPin, Heart, DollarSignIcon } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import useAuth from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { PostService } from "@/services/post.service";
 import { useEffect, useState } from "react";
-import { ListPostRes } from "@/services/types/get-list-post-by-status-reponse";
+import type { ListPostRes } from "@/services/types/get-list-post-by-status-reponse";
+import { AreaRangeFilter } from "../elements/area-range-filter";
+import { InteriorConditionFilter } from "../elements/interior-condition-filter";
+import { LocationFilter } from "../elements/location-filter";
+import { PriceRangeFilter } from "../elements/price-range-filter";
 
 const popularLocations = [
   { id: 1, name: "TP. Hồ Chí Minh", count: 100 },
@@ -23,11 +23,21 @@ const popularLocations = [
   { id: 5, name: "Bình Dương", count: 80 },
 ];
 
-// Sample new listings
-
 const postService = new PostService();
 export default function HomePage() {
   const [latestPost, setLatestPost] = useState<ListPostRes[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState({
+    minPrice: null as number | null,
+    maxPrice: null as number | null,
+    minArea: null as number | null,
+    maxArea: null as number | null,
+    city: null as string | null,
+    district: null as string | null,
+    ward: null as string | null,
+    interiorCondition: null as string | null,
+  });
+
   useEffect(() => {
     postService.getLatestPost(4).then((res) => {
       console.log(res.data);
@@ -36,6 +46,106 @@ export default function HomePage() {
       }
     });
   }, []);
+
+  const handleSearch = () => {
+    // In a real application, you would use the search query and filters to fetch filtered results
+    console.log("Search with:", {
+      query: searchQuery,
+      filters,
+    });
+
+    // For demonstration purposes, show a toast with the filter values
+    const filterText = [];
+    if (filters.minPrice !== null || filters.maxPrice !== null) {
+      filterText.push(
+        `Giá: ${filters.minPrice || 0} - ${
+          filters.maxPrice || "không giới hạn"
+        }`
+      );
+    }
+    if (filters.minArea !== null || filters.maxArea !== null) {
+      filterText.push(
+        `Diện tích: ${filters.minArea || 0} - ${
+          filters.maxArea || "không giới hạn"
+        } m²`
+      );
+    }
+    if (filters.city) {
+      let locationText = `Vị trí: ${filters.city}`;
+      if (filters.district) {
+        locationText += `, ${filters.district}`;
+        if (filters.ward) {
+          locationText += `, ${filters.ward}`;
+        }
+      }
+      filterText.push(locationText);
+    }
+    if (filters.interiorCondition) {
+      filterText.push(
+        `Nội thất: ${
+          filters.interiorCondition === "Full" ? "Đầy đủ nội thất" : "Trống"
+        }`
+      );
+    }
+
+    nav(
+      `/search?` +
+        new URLSearchParams({
+          keyword: searchQuery,
+          minPrice: filters.minPrice?.toString() || "",
+          maxPrice: filters.maxPrice?.toString() || "",
+          minArea: filters.minArea?.toString() || "",
+          maxArea: filters.maxArea?.toString() || "",
+          city: filters.city || "",
+          district: filters.district || "",
+          ward: filters.ward || "",
+          interiorCondition: filters.interiorCondition || "",
+        }).toString()
+    );
+  };
+
+  const handlePriceFilterChange = (
+    minPrice: number | null,
+    maxPrice: number | null
+  ) => {
+    setFilters((prev) => ({
+      ...prev,
+      minPrice,
+      maxPrice,
+    }));
+  };
+
+  const handleAreaFilterChange = (
+    minArea: number | null,
+    maxArea: number | null
+  ) => {
+    setFilters((prev) => ({
+      ...prev,
+      minArea,
+      maxArea,
+    }));
+  };
+
+  const handleLocationFilterChange = (
+    city: string | null,
+    district: string | null,
+    ward: string | null
+  ) => {
+    setFilters((prev) => ({
+      ...prev,
+      city,
+      district,
+      ward,
+    }));
+  };
+
+  const handleInteriorConditionFilterChange = (condition: string | null) => {
+    setFilters((prev) => ({
+      ...prev,
+      interiorCondition: condition,
+    }));
+  };
+
   const nav = useNavigate();
   const auth = useAuth();
   return (
@@ -61,9 +171,14 @@ export default function HomePage() {
                       <Input
                         placeholder="Tìm phòng trọ ..."
                         className="pl-10 py-6 border-gray-300"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                       />
                     </div>
-                    <Button className="bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white py-6">
+                    <Button
+                      className="bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white py-6"
+                      onClick={handleSearch}
+                    >
                       Tìm Kiếm
                     </Button>
                   </div>
@@ -75,35 +190,18 @@ export default function HomePage() {
                   <div className="flex flex-wrap items-center gap-3">
                     <span className="text-sm font-medium">Lọc theo:</span>
                     <div className="flex flex-wrap gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="rounded-full text-xs"
-                      >
-                        Giá <ChevronRight className="h-3 w-3 ml-1" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="rounded-full text-xs"
-                      >
-                        Diện tích <ChevronRight className="h-3 w-3 ml-1" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="rounded-full text-xs"
-                      >
-                        Vị trí <ChevronRight className="h-3 w-3 ml-1" />
-                      </Button>
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="rounded-full text-xs"
-                      >
-                        Thêm bộ lọc <ChevronRight className="h-3 w-3 ml-1" />
-                      </Button>
+                      <LocationFilter
+                        onFilterChange={handleLocationFilterChange}
+                      />
+                      <PriceRangeFilter
+                        onFilterChange={handlePriceFilterChange}
+                      />
+                      <AreaRangeFilter
+                        onFilterChange={handleAreaFilterChange}
+                      />
+                      <InteriorConditionFilter
+                        onFilterChange={handleInteriorConditionFilterChange}
+                      />
                     </div>
                   </div>
                 </div>
@@ -126,7 +224,10 @@ export default function HomePage() {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {popularLocations.map((location) => (
-                <Card className="hover:border-[#ff6d0b]/50 transition-colors h-full">
+                <Card
+                  key={location.id}
+                  className="hover:border-[#ff6d0b]/50 transition-colors h-full"
+                >
                   <CardContent className="p-4 flex flex-col items-center text-center">
                     <h3 className="font-medium mb-1">{location.name}</h3>
                   </CardContent>

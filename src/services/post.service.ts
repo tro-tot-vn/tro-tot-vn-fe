@@ -87,4 +87,43 @@ export class PostService {
     );
     return res;
   };
+  searchPost = async (
+    keyword: string,
+    minPrice?: string,
+    maxPrice?: string,
+    minAcreage?: string,
+    maxAcreage?: string,
+    city?: string,
+    district?: string,
+    ward?: string,
+    interiorCondition?: string,
+    cursor?: number,
+    limit: number = 10
+  ) => {
+    const params: Record<string, unknown> = { keyword, limit };
+
+    // Handle acreage range properly
+    if (minAcreage !== undefined || maxAcreage !== undefined) {
+      params.acreage = `${minAcreage || 0}-${maxAcreage || ""}`;
+    }
+
+    // Handle price range properly
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      params.price = `${minPrice || 0}-${maxPrice || ""}`;
+    }
+
+    // Only include defined location parameters
+    if (city) params.city = city;
+    if (district) params.district = district;
+    if (ward) params.ward = ward;
+
+    // Add other optional parameters if defined
+    if (interiorCondition) params.interiorCondition = interiorCondition;
+    if (cursor !== undefined) params.cursor = cursor;
+
+    return axios_auth.get<ResponseData<GetPostByStatusResponse>>(
+      "api/post/search",
+      { params: params }
+    );
+  };
 }

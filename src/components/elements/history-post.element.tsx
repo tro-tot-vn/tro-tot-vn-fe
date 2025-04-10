@@ -14,74 +14,6 @@ import { CustomerService } from "@/services/customer.service";
 import { PostResponse } from "@/services/types/post-response";
 const customerService = new CustomerService();
 
-// Dữ liệu mẫu cứng
-const mockData = [
-  {
-    postId: "1",
-    title: "Cho thuê căn hộ cao cấp Vinhomes Central Park",
-    description:
-      "Căn hộ 2PN, nội thất đầy đủ, view sông Sài Gòn, gần Landmark 81, thuận tiện di chuyển.",
-    price: 15000000,
-    streetNumber: "720A",
-    street: "Điện Biên Phủ",
-    ward: "Phường 22",
-    district: "Bình Thạnh",
-    city: "TP. Hồ Chí Minh",
-    createdAt: new Date("2024-04-01"),
-  },
-  {
-    postId: "2",
-    title: "Nhà nguyên căn 1 trệt 1 lầu Quận 7, gần Lotte Mart",
-    description:
-      "Diện tích 60m², nhà sạch sẽ, thoáng mát, khu dân cư yên tĩnh, phù hợp gia đình nhỏ.",
-    price: 12000000,
-    streetNumber: "101",
-    street: "Nguyễn Thị Thập",
-    ward: "Tân Hưng",
-    district: "Quận 7",
-    city: "TP. Hồ Chí Minh",
-    createdAt: new Date("2024-03-30"),
-  },
-  {
-    postId: "3",
-    title: "Nhà nguyên căn 1 trệt 1 lầu Quận 7, gần Lotte Mart",
-    description:
-      "Diện tích 60m², nhà sạch sẽ, thoáng mát, khu dân cư yên tĩnh, phù hợp gia đình nhỏ.",
-    price: 12000000,
-    streetNumber: "101",
-    street: "Nguyễn Thị Thập",
-    ward: "Tân Hưng",
-    district: "Quận 7",
-    city: "TP. Hồ Chí Minh",
-    createdAt: new Date("2024-03-30"),
-  },
-  {
-    postId: "4",
-    title: "Nhà nguyên căn 1 trệt 1 lầu Quận 7, gần Lotte Mart",
-    description:
-      "Diện tích 60m², nhà sạch sẽ, thoáng mát, khu dân cư yên tĩnh, phù hợp gia đình nhỏ.",
-    price: 12000000,
-    streetNumber: "101",
-    street: "Nguyễn Thị Thập",
-    ward: "Tân Hưng",
-    district: "Quận 7",
-    city: "TP. Hồ Chí Minh",
-    createdAt: new Date("2024-03-30"),
-  },
-  {
-    postId: "5",
-    title: "Nhà nguyên căn 1 trệt 1 lầu Quận 7, gần Lotte Mart",
-    description:
-      "Diện tích 60m², nhà sạch sẽ, thoáng mát, khu dân cư yên tĩnh, phù hợp gia đình nhỏ.",
-    price: 12000000,
-    streetNumber: "101",
-    street: "Nguyễn Thị Thập",
-    ward: "Tân Hưng",
-    district: "Quận 7",
-    city: "TP. Hồ Chí Minh",
-    createdAt: new Date("2024-03-30"),
-  },
-];
 
 export function HistoryPostElement() {
   const [listPostRes, setListPostRes] = useState<PostResponse[]>([]);
@@ -93,7 +25,7 @@ export function HistoryPostElement() {
         if (response.status === 200) {
           if(response.data){
             if(response.data.data){
-              setListPostRes(response.data.data);
+              setListPostRes(response.data.data as unknown as PostResponse[]);
             }
           }
         }else if (response.status === 400) {

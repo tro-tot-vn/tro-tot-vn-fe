@@ -11,22 +11,109 @@ import {
 import { formatDistance, subDays } from "date-fns";
 import { useEffect, useState } from "react";
 import { CustomerService } from "@/services/customer.service";
-import { ListPostRes } from "@/services/types/get-list-post-by-status-reponse";
+import { PostResponse } from "@/services/types/post-response";
 const customerService = new CustomerService();
+
+// Dữ liệu mẫu cứng
+const mockData = [
+  {
+    postId: "1",
+    title: "Cho thuê căn hộ cao cấp Vinhomes Central Park",
+    description:
+      "Căn hộ 2PN, nội thất đầy đủ, view sông Sài Gòn, gần Landmark 81, thuận tiện di chuyển.",
+    price: 15000000,
+    streetNumber: "720A",
+    street: "Điện Biên Phủ",
+    ward: "Phường 22",
+    district: "Bình Thạnh",
+    city: "TP. Hồ Chí Minh",
+    createdAt: new Date("2024-04-01"),
+  },
+  {
+    postId: "2",
+    title: "Nhà nguyên căn 1 trệt 1 lầu Quận 7, gần Lotte Mart",
+    description:
+      "Diện tích 60m², nhà sạch sẽ, thoáng mát, khu dân cư yên tĩnh, phù hợp gia đình nhỏ.",
+    price: 12000000,
+    streetNumber: "101",
+    street: "Nguyễn Thị Thập",
+    ward: "Tân Hưng",
+    district: "Quận 7",
+    city: "TP. Hồ Chí Minh",
+    createdAt: new Date("2024-03-30"),
+  },
+  {
+    postId: "3",
+    title: "Nhà nguyên căn 1 trệt 1 lầu Quận 7, gần Lotte Mart",
+    description:
+      "Diện tích 60m², nhà sạch sẽ, thoáng mát, khu dân cư yên tĩnh, phù hợp gia đình nhỏ.",
+    price: 12000000,
+    streetNumber: "101",
+    street: "Nguyễn Thị Thập",
+    ward: "Tân Hưng",
+    district: "Quận 7",
+    city: "TP. Hồ Chí Minh",
+    createdAt: new Date("2024-03-30"),
+  },
+  {
+    postId: "4",
+    title: "Nhà nguyên căn 1 trệt 1 lầu Quận 7, gần Lotte Mart",
+    description:
+      "Diện tích 60m², nhà sạch sẽ, thoáng mát, khu dân cư yên tĩnh, phù hợp gia đình nhỏ.",
+    price: 12000000,
+    streetNumber: "101",
+    street: "Nguyễn Thị Thập",
+    ward: "Tân Hưng",
+    district: "Quận 7",
+    city: "TP. Hồ Chí Minh",
+    createdAt: new Date("2024-03-30"),
+  },
+  {
+    postId: "5",
+    title: "Nhà nguyên căn 1 trệt 1 lầu Quận 7, gần Lotte Mart",
+    description:
+      "Diện tích 60m², nhà sạch sẽ, thoáng mát, khu dân cư yên tĩnh, phù hợp gia đình nhỏ.",
+    price: 12000000,
+    streetNumber: "101",
+    street: "Nguyễn Thị Thập",
+    ward: "Tân Hưng",
+    district: "Quận 7",
+    city: "TP. Hồ Chí Minh",
+    createdAt: new Date("2024-03-30"),
+  },
+];
+
 export function HistoryPostElement() {
-  const [listPostRes, setListPostRes] = useState<ListPostRes[]>([]);
+  const [listPostRes, setListPostRes] = useState<PostResponse[]>([]);
+  
   useEffect(() => {
-    customerService.getListSavedPost().then((res) => {
-      if (res.status === 200) {
-        if (res.data.data) {
-          setListPostRes(res.data.data);
+    const fetchData = async () => {
+      try {
+        const response = await customerService.getHistoryViewPost();
+        if (response.status === 200) {
+          if(response.data){
+            if(response.data.data){
+              setListPostRes(response.data.data);
+            }
+          }
+        }else if (response.status === 400) {
+          console.log("Lỗi khi lấy dữ liệu lịch sử xem bài viết");
+        }else if (response.status === 404) {
+        console.log("Không tìm thấy dữ liệu lịch sử xem bài viết");
+        } else {
+          console.log("Lỗi không xác định khi lấy dữ liệu lịch sử xem bài viết");
         }
+    
+      } catch (error) {
+        console.error("Error fetching data:", error);
       }
-    });
+    };
+    fetchData();
   }, []);
+  console.log("listPostRes", listPostRes);
   return (
-    <div>
-      {listPostRes.length > 0 ? (
+    <>
+    {listPostRes.length > 0 ? (
         <>
           <div className="grid grid-container grid-cols-1 md:grid-cols-2 gap-2 mb-4">
             {listPostRes.map((post) => {
@@ -48,9 +135,6 @@ export function HistoryPostElement() {
                     <CardContent>
                       <div className="relative"></div>
                       <div className="flex-1 flex flex-col">
-                        {/* <h3 className="font-medium text-sm line-clamp-2 mb-2 flex-1">
-                      {post.title}
-                    </h3> */}
                         <div className="">
                           <p className="font-bold text-[#ff6d0b]">
                             {Number(post.price).toLocaleString("it-IT", {
@@ -97,6 +181,6 @@ export function HistoryPostElement() {
       ) : (
         <NoPostElement />
       )}
-    </div>
+    </>
   );
 }

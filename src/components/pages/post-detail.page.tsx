@@ -48,6 +48,15 @@ export default function PostDetailPage() {
         toast.error("Lỗi khi tải dữ liệu bài đăng");
       }
     });
+    customerService.addHistortyViewPost(postId).then((res) => {
+      if (res.status === 200) {
+        console.log("Thêm lịch sử xem thành công");
+      } else {
+        console.log("Lỗi khi thêm lịch sử xem bài viết");
+      }
+    }
+    );
+    
   }, [postId]);
 
   if (isNaN(postId)) {

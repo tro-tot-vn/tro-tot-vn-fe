@@ -12,7 +12,7 @@ export default function FunctionCustomerPage() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
         <h1 className="text-2xl font-bold mb-6">
-          {activeTab === "savedPost" && "Bài viết đã lưu "}
+          {activeTab === "savedPost" && "tin đã lưu "}
           {activeTab === "historyView" && "Lịch sử xem tin"}
           {activeTab === "post-subscription" && "Đăng kí nhận tin theo khu vực"}
         </h1>

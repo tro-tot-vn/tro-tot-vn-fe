@@ -313,7 +313,7 @@ export default function ModeratorsPage() {
             <Table
               columns={[
                 {
-                  title: 'Tiêu đề bài viết',
+                  title: 'Tiêu đề tin',
                   key: 'title',
                   render: (record: PostMoratorHistoryResponse) => record.post?.title || "Không có",
                 },

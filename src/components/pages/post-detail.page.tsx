@@ -30,9 +30,9 @@ export default function PostDetailPage() {
       toast.success("Đã thêm vào danh sách đã lưu");
     } else if (res.status === 400) {
       if (res.data.message === "POST_ALREADY_SAVED") {
-        toast.error("Bài viết đã có trong danh sách đã lưu");
+        toast.error("tin đã có trong danh sách đã lưu");
       } else if (res.data.message === "POST_NOT_FOUND") {
-        toast.error("Bài viết không tồn tại");
+        toast.error("tin không tồn tại");
       }
     } else {
       toast.error("Lỗi khi thêm vào danh sách đã lưu");

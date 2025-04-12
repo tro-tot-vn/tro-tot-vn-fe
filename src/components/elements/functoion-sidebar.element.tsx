@@ -16,7 +16,7 @@ export function FunctionCustomerSidebar({
   const menuItems = [
     {
       id: "savedPost",
-      label: "Bài viết đã lưu",
+      label: "tin đã lưu",
       icon: <User className="h-4 w-4 mr-2" />,
     },
     {

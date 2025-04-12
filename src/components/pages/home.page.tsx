@@ -91,7 +91,7 @@ export default function HomePage() {
     nav(
       `/search?` +
         new URLSearchParams({
-          keyword: searchQuery,
+          q: searchQuery,
           minPrice: filters.minPrice?.toString() || "",
           maxPrice: filters.maxPrice?.toString() || "",
           minArea: filters.minArea?.toString() || "",

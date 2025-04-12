@@ -9,15 +9,16 @@ import { Input } from "@/components/ui/input";
 import useAuth from "@/hooks/use-auth";
 import { Role } from "@/utils/role.enum";
 import {
-  Menu,
   MessageSquare,
   Search,
   LayoutGrid,
   CircleUserRound,
 } from "lucide-react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 export function SiteHeader() {
+  const [q, setQ] = useState("");
   const nav = useNavigate();
   const auth = useAuth();
   return (
@@ -33,15 +34,27 @@ export function SiteHeader() {
           />
         </Link>
 
-        <Button variant="ghost" size="icon" className="md:hidden">
-          <Menu className="!w-5 !h-5" />
-        </Button>
-
         <div className="flex-1 flex max-w-xl ">
           <div className="flex-1 relative">
-            <Input placeholder="Tìm phòng trọ " className="pl-4 pr-10" />
+            <Input
+              placeholder="Tìm phòng trọ "
+              className="pl-4 pr-10"
+              value={q}
+              onChange={(e) => {
+                setQ(e.target.value);
+              }}
+            />
             <Button
               size="icon"
+              onClick={() => {
+                nav(
+                  `/search?` +
+                    new URLSearchParams({
+                      q: q,
+                    })
+                );
+                setQ("");
+              }}
               className="absolute right-0 top-0 h-full rounded-l-none bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white"
             >
               <Search className="h-4 w-4" />
@@ -82,9 +95,7 @@ export function SiteHeader() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
                     <Link
-                      to={`/customer/${
-                        auth.user?.customer.customerId
-                      }/profile`}
+                      to={`/customer/${auth.user?.customer.customerId}/profile`}
                     >
                       <DropdownMenuItem>Trang cá nhân</DropdownMenuItem>
                     </Link>

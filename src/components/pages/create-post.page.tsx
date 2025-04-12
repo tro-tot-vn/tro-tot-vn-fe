@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Camera, LoaderCircle, VideoIcon, X } from "lucide-react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import {
   Dialog,
   DialogContent,
@@ -34,6 +34,7 @@ import locationService, {
 const postService = new PostService();
 
 export default function CreatePostPage() {
+  const nav = useNavigate();
   const [imgFiles, setImgFiles] = useState<File[]>([]);
   const [videoFiles, setVideoFiles] = useState<File[]>([]);
   const [open, setOpen] = useState(false);
@@ -217,7 +218,14 @@ export default function CreatePostPage() {
         setLoading(false);
         if (res) {
           if (res.status === 200) {
-            toast("Đăng tin thành công");
+            toast("Đăng tin thành công", {
+              action: {
+                label: "Trang tin",
+                onClick: () => {
+                  nav("/posts/my-posts");
+                },
+              },
+            });
           } else if (res.status === 400) {
             toast("Đăng tin thất bại", {
               description:
@@ -315,7 +323,7 @@ export default function CreatePostPage() {
         >
           <DialogHeader>
             <DialogTitle className="text-center">
-              Vui lòng chờ bài viết của bạn được lưu.
+              Vui lòng chờ tin của bạn được lưu.
             </DialogTitle>
           </DialogHeader>
           <div className="flex flex-row justify-center items-center">

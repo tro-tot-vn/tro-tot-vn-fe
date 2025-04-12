@@ -38,7 +38,7 @@ export default function PendingPostDetailPage() {
             setHistory(Array.isArray(result.data) ? result.data : []);
           }
         } else if (result.status === 404) {
-          console.log("Không tìm thấy lịch sử bài viết");
+          console.log("Không tìm thấy lịch sử tin");
         } else if (result.status === 500) {
           console.log("Lỗi hệ thống, vui lòng thử lại sau");
         } else {
@@ -68,7 +68,7 @@ export default function PendingPostDetailPage() {
           setTimeout(() => navigate("/admin/posts/review-post"), 1000);
         } else if (result.status === 404) {
           messageApi.error(
-            "Không tìm thấy bài viết hoặc trạng thái không thay đổi"
+            "Không tìm thấy tin hoặc trạng thái không thay đổi"
           );
         } else if (result.status === 500) {
           messageApi.error("Lỗi hệ thống, vui lòng thử lại sau");
@@ -93,7 +93,7 @@ export default function PendingPostDetailPage() {
           );
         } else if (result.status === 404) {
           messageApi.error(
-            "Không tìm thấy bài viết hoặc trạng thái không thay đổi"
+            "Không tìm thấy tin hoặc trạng thái không thay đổi"
           );
         } else if (result.status === 500) {
           messageApi.error("Lỗi hệ thống, vui lòng thử lại sau");
@@ -308,7 +308,7 @@ export default function PendingPostDetailPage() {
                               className="border-l-2 border-muted pl-4 py-1"
                             >
                               <p className="text-sm font-medium">
-                                Bài viết {item.actionType}
+                                tin {item.actionType}
                               </p>
                               <p className="text-xs text-muted-foreground">
                                 {new Date(item.execAt).toLocaleString()} bởi

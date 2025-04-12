@@ -74,7 +74,7 @@ export function RatingsReviews({ postId }: RatingsReviewsProps) {
             }
           } else if (res.status === 400) {
             if (res.data.message === "POST_NOT_FOUND") {
-              toast.error("Bài viết không tồn tại");
+              toast.error("tin không tồn tại");
             } else {
               toast.error("Lỗi khi tải dữ liệu đánh giá");
             }

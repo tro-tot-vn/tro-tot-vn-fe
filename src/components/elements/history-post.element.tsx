@@ -14,28 +14,28 @@ import { CustomerService } from "@/services/customer.service";
 import { PostResponse } from "@/services/types/post-response";
 const customerService = new CustomerService();
 
-
 export function HistoryPostElement() {
   const [listPostRes, setListPostRes] = useState<PostResponse[]>([]);
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await customerService.getHistoryViewPost();
         if (response.status === 200) {
-          if(response.data){
-            if(response.data.data){
+          if (response.data) {
+            if (response.data.data) {
               setListPostRes(response.data.data as unknown as PostResponse[]);
             }
           }
-        }else if (response.status === 400) {
-          console.log("Lỗi khi lấy dữ liệu lịch sử xem bài viết");
-        }else if (response.status === 404) {
-        console.log("Không tìm thấy dữ liệu lịch sử xem bài viết");
+        } else if (response.status === 400) {
+          console.log("Lỗi khi lấy dữ liệu lịch sử xem tin");
+        } else if (response.status === 404) {
+          console.log("Không tìm thấy dữ liệu lịch sử xem tin");
         } else {
-          console.log("Lỗi không xác định khi lấy dữ liệu lịch sử xem bài viết");
+          console.log(
+            "Lỗi không xác định khi lấy dữ liệu lịch sử xem tin"
+          );
         }
-    
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -45,7 +45,7 @@ export function HistoryPostElement() {
   console.log("listPostRes", listPostRes);
   return (
     <>
-    {listPostRes.length > 0 ? (
+      {listPostRes.length > 0 ? (
         <>
           <div className="grid grid-container grid-cols-1 md:grid-cols-2 gap-2 mb-4">
             {listPostRes.map((post) => {

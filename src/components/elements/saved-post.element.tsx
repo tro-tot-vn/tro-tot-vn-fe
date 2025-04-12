@@ -32,14 +32,14 @@ export function ListSavedPost() {
   const handleDeletePost = (postId: number) => {
     customerService.deleteSavedPost(postId).then((res) => {
       if (res.status === 200) {
-        toast("Xóa bài viết thành công");
+        toast("Xóa tin thành công");
         setListPostRes((prev) => prev.filter((post) => post.postId !== postId));
       } else if (res.status === 400) {
         if (res.data.message == "POST_NOT_SAVED") {
-          toast("Bài viết không tồn tại trong danh sách đã lưu");
+          toast("tin không tồn tại trong danh sách đã lưu");
         }
       } else {
-        toast("Xóa bài viết không thành công");
+        toast("Xóa tin không thành công");
       }
     });
   };

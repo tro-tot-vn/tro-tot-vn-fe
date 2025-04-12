@@ -164,11 +164,11 @@ export default function EditPostPage() {
         } else if (res.status === 400) {
           if (res.data.message === "POST_NOT_FOUND")
             toast("Lỗi", {
-              description: "Không tìm thấy bài viết",
+              description: "Không tìm thấy tin",
             });
         } else {
           toast("Lỗi", {
-            description: "Đã xảy ra lỗi khi lấy thông tin bài viết",
+            description: "Đã xảy ra lỗi khi lấy thông tin tin",
           });
         }
       })
@@ -443,7 +443,7 @@ export default function EditPostPage() {
         >
           <DialogHeader>
             <DialogTitle className="text-center">
-              Vui lòng chờ bài viết của bạn được lưu.
+              Vui lòng chờ tin của bạn được lưu.
             </DialogTitle>
           </DialogHeader>
           <div className="flex flex-row justify-center items-center">

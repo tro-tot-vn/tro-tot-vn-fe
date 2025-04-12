@@ -17,7 +17,6 @@ import { InteriorConditionFilter } from "../elements/interior-condition-filter";
 import { LocationFilter } from "../elements/location-filter";
 import { PriceRangeFilter } from "../elements/price-range-filter";
 import { PostService } from "@/services/post.service";
-import { tr } from "date-fns/locale";
 
 const postService = new PostService();
 
@@ -56,12 +55,6 @@ export default function SearchPage() {
   // Mock API call to fetch search results
   const fetchSearchResults = async (cursor: Date | null = null) => {
     // Reset state for new search
-    setLoading(true);
-    setResults([]);
-    setNextCursor(null);
-    setHasMore(false);
-    setTotalResults(0);
-
     postService
       .searchPost(
         searchQuery,
@@ -125,8 +118,13 @@ export default function SearchPage() {
 
   // Handle search
   const handleSearch = () => {
+    setLoading(true);
+    setResults([]);
+    setNextCursor(null);
+    setHasMore(false);
+    setTotalResults(0);
     updateSearchParams();
-    fetchSearchResults(null);
+    fetchSearchResults();
   };
 
   // Handle filter changes
@@ -228,8 +226,8 @@ export default function SearchPage() {
     setFilters(initialFilters);
     setSearchQuery(searchParams.get("q") || "");
 
-    fetchSearchResults();
-  }, [searchParams]);
+    fetchSearchResults(nextCursor);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">

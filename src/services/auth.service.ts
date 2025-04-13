@@ -48,8 +48,6 @@ class AuthService {
     }
   }
   async login(identifier: string, password: string) {
-    try {
-      console.log("identifier", identifier);
       const res = await axios_base.post<ResponseData<LoginResponse>>(
         "api/auth/login",
         {
@@ -58,10 +56,6 @@ class AuthService {
         }
       );
       return res;
-    } catch (error) {
-      console.log(error);
-      return null;
-    }
   }
 
   async sendEmail(email: string) {

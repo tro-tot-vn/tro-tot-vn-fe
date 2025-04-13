@@ -11,7 +11,14 @@ import { LogOut, Settings, User } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 import adminService from "@/services/admin.service";
-import { Modal, Form, Input, Button as AntdButton, message } from "antd"; // Chỉ giữ Form, Input và Button từ antd
+import {
+  Modal,
+  Form,
+  Input,
+  Button as AntdButton,
+  message,
+  Select,
+} from "antd"; // Chỉ giữ Form, Input và Button từ antd
 import { Profile } from "@/services/types/morderator-response";
 import { PasswordChangeForm } from "./password-change-form.element";
 
@@ -27,32 +34,29 @@ export function SiteHeader() {
   const fetchApi = async () => {
     try {
       const result = await adminService.getMyProfile();
-      if (result) {
-        if (result.status === 200) {
-          if (result.data) {
-            setMyProfile(result.data as Profile);
-            // Điền dữ liệu vào form ngay khi fetch thành công
-            form.setFieldsValue({
-              fullName: `${(result.data as Profile).firstName} ${
-                (result.data as Profile).lastName
-              }`,
-              gender: (result.data as Profile).gender === "Male" ? "Nam" : "Nữ",
-              birthday: new Date(
-                (result.data as Profile).birthday
-              ).toLocaleDateString(),
-              phone: (result.data as Profile).account.phone,
-              email: (result.data as Profile).account.email,
-            });
-          }
-        } else if (result.status === 404) {
-          console.log("Không tìm thấy dữ liệu");
-        } else if (result.status === 500) {
-          console.log("Lỗi server");
-        } else {
-          console.log("Lỗi không xác định");
+      if (result.status === 200 || result.status === 403) {
+        if (result.data) {
+          setMyProfile(result.data);
+          console.log("Dữ liệu hồ sơ cá nhân:", result.data);
+          form.setFieldsValue({
+            lastName: result.data.lastName || "",
+            firstName: result.data.firstName || "",
+            gender: result.data.gender,
+            birthday: result.data.birthday
+              ? new Date(result.data.birthday).toLocaleDateString()
+              : "",
+            phone: result.data.account?.phone || "",
+            email: result.data.account?.email || "",
+          });
         }
-        setIsProfileModalOpen(true); // Mở modal sau khi fetch
+      } else if (result.status === 404) {
+        console.log("Không tìm thấy dữ liệu");
+      } else if (result.status === 500) {
+        console.log("Lỗi server");
+      } else {
+        console.log("Lỗi không xác định");
       }
+      setIsProfileModalOpen(true); // Mở modal sau khi fetch
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -68,7 +72,11 @@ export function SiteHeader() {
     try {
       const values = await form.validateFields(); // Lấy dữ liệu từ form
 
+      console.log("Giá trị form:", values);
+
       const updatedData: Record<string, any> = {}; // Dữ liệu cập nhật
+
+      console.log("Dữ liệu hồ sơ cá nhân:", myProfile);
 
       // So sánh từng trường, chỉ gửi khi có sự thay đổi
       if (values.phone !== myProfile?.account.phone) {
@@ -78,33 +86,52 @@ export function SiteHeader() {
         updatedData.email = values.email;
       }
 
+      if (values.firstName !== myProfile?.firstName) {
+        updatedData.firstName = values.firstName;
+      }
+      if (values.lastName !== myProfile?.lastName) {
+        updatedData.lastName = values.lastName;
+      }
+      if (values.birthday !== myProfile?.birthday) {
+        updatedData.birthday = values.birthday;
+      }
+      if (values.gender !== myProfile?.gender) {
+        updatedData.gender = values.gender;
+      }
       // Nếu không có thay đổi nào, không gửi request
       if (Object.keys(updatedData).length === 0) {
         messageApi.info("Không có thay đổi nào để lưu.");
         return;
       }
+      console.log("Dữ liệu cập nhật:", updatedData);
 
-      const result = await adminService.updateMyProfile(
-        updatedData.email,
-        updatedData.phone
-      );
-
-      if (result) {
-        if (result.status === 200) {
-          if (result.data) {
-            messageApi.success("Cập nhật thành công");
+      adminService
+        .updateMyProfile(updatedData)
+        .then((result) => {
+          if (result) {
+            if (result.status === 200) {
+              if (result.data) {
+                messageApi.success("Cập nhật thành công");
+                fetchApi(); // Cập nhật lại dữ liệu sau khi lưu
+              }
+            } else if (result.status === 400) {
+              messageApi.error("Số điện thoại hoặc email đã tồn tại");
+            } else if (result.status === 404) {
+              console.log("Không tìm thấy dữ liệu");
+            } else if (result.status === 500) {
+              console.log("Lỗi server");
+            } else {
+              console.log("Lỗi không xác định");
+            }
           }
-        } else if (result.status === 400) {
-          messageApi.error("Số điện thoại hoặc email đã tồn tại");
-        } else if (result.status === 404) {
-          console.log("Không tìm thấy dữ liệu");
-        } else if (result.status === 500) {
-          console.log("Lỗi server");
-        } else {
-          console.log("Lỗi không xác định");
-        }
-      }
-      setIsEditing(false); // Thoát chế độ chỉnh sửa sau khi lưu
+        })
+        .catch((err) => {
+          console.error("Error updating profile:", err);
+          messageApi.error("Cập nhật thất bại");
+        })
+        .finally(() => {
+          setIsEditing(false); // Thoát chế độ chỉnh sửa sau khi lưu
+        });
     } catch (error) {
       console.error("Error saving profile:", error);
     }
@@ -116,8 +143,9 @@ export function SiteHeader() {
       setIsEditing(false); // Thoát chế độ chỉnh sửa
       form.resetFields(); // Reset form về giá trị ban đầu
       form.setFieldsValue({
-        fullName: `${myProfile?.firstName || ""} ${myProfile?.lastName || ""}`,
-        gender: myProfile?.gender === "Male" ? "Nam" : "Nữ",
+        lastName: myProfile?.lastName || "",
+        firstName: myProfile?.firstName || "",
+        gender: myProfile?.gender,
         birthday: myProfile
           ? new Date(myProfile.birthday).toLocaleDateString()
           : "",
@@ -193,14 +221,20 @@ export function SiteHeader() {
               style={{ top: 20 }}
             >
               <Form form={form} layout="vertical">
-                <Form.Item name="fullName" label="Họ và tên">
-                  <Input readOnly />
+                <Form.Item name="lastName" label="Họ">
+                  <Input disabled={!isEditing} />
+                </Form.Item>
+                <Form.Item name="firstName" label="Tên">
+                  <Input disabled={!isEditing} />
                 </Form.Item>
                 <Form.Item name="gender" label="Giới tính">
-                  <Input readOnly />
+                  <Select disabled={!isEditing}>
+                    <Select.Option value="Male">Nam</Select.Option>
+                    <Select.Option value="Female">Nữ</Select.Option>
+                  </Select>
                 </Form.Item>
                 <Form.Item name="birthday" label="Ngày sinh">
-                  <Input readOnly />
+                  <Input disabled={!isEditing} />
                 </Form.Item>
                 <Form.Item
                   name="phone"
@@ -236,7 +270,7 @@ export function SiteHeader() {
               title="Đổi mật khẩu"
               open={isChangePasswordModalOpen}
               onCancel={() => {
-              setIsChangePasswordModalOpen(false);
+                setIsChangePasswordModalOpen(false);
               }}
               footer={null} // Turn off the buttons in the modal footer
               width={600}

@@ -4,7 +4,10 @@ import { AxiosError } from "axios";
 import { PostResponse } from "./types/post-response";
 import { PostMoratorHistoryResponse } from "./types/postModerateHistory-response";
 
-import { getMorderatorListResponse, Profile } from "./types/morderator-response";
+import {
+  getMorderatorListResponse,
+  Profile,
+} from "./types/morderator-response";
 
 class AuthService {
   async getMorderator(keySearch: string) {
@@ -14,7 +17,9 @@ class AuthService {
       );
       return res.data;
     } catch (error) {
-      const axiosError = error as AxiosError<ResponseData<getMorderatorListResponse>>;
+      const axiosError = error as AxiosError<
+        ResponseData<getMorderatorListResponse>
+      >;
       return axiosError.response ?? null; // Trả về response hoặc null nếu không có
     }
   }
@@ -42,13 +47,13 @@ class AuthService {
       return axiosError.response ?? null; // Trả về response hoặc null nếu không có
     }
   }
-  async changStatus(actionType: String, reason: String, postId: number) {
+  async changStatus(actionType: string, reason: string, postId: number) {
     try {
       const res = await axios_auth.post<ResponseData<PostResponse>>(
         `api/admin/posts/review-post/${postId}/moderate`,
         {
           actionType,
-          reason
+          reason,
         }
       );
       return res.data;
@@ -57,100 +62,100 @@ class AuthService {
       return axiosError.response ?? null; // Trả về response hoặc null nếu không có
     }
   }
-  async savePostModeratorHistory(postId: number, actionType: string, reason: string) {
+  async savePostModeratorHistory(
+    postId: number,
+    actionType: string,
+    reason: string
+  ) {
     try {
-      const res = await axios_auth.post<ResponseData<PostMoratorHistoryResponse>>(
-        `api/admin/posts/review-post/${postId}/moderator-history`,
-        {
-          actionType,
-          reason
-        }
-      );
+      const res = await axios_auth.post<
+        ResponseData<PostMoratorHistoryResponse>
+      >(`api/admin/posts/review-post/${postId}/moderator-history`, {
+        actionType,
+        reason,
+      });
       return res.data;
     } catch (error) {
-      const axiosError = error as AxiosError<ResponseData<PostMoratorHistoryResponse>>;
+      const axiosError = error as AxiosError<
+        ResponseData<PostMoratorHistoryResponse>
+      >;
       return axiosError.response ?? null; // Trả về response hoặc null nếu không có
     }
   }
   async getPostModeratorHistory(postId: number) {
     try {
-      const res = await axios_auth.get<ResponseData<PostMoratorHistoryResponse>>(
-        `api/admin/posts/review-post/${postId}/moderate-history`,
-      );
+      const res = await axios_auth.get<
+        ResponseData<PostMoratorHistoryResponse>
+      >(`api/admin/posts/review-post/${postId}/moderate-history`);
       return res.data;
     } catch (error) {
-      const axiosError = error as AxiosError<ResponseData<PostMoratorHistoryResponse>>;
+      const axiosError = error as AxiosError<
+        ResponseData<PostMoratorHistoryResponse>
+      >;
       return axiosError.response ?? null; // Trả về response hoặc null nếu không có
     }
   }
   async getPostModeratorHistorybyId(adminId: number) {
     try {
-      const res = await axios_auth.get<ResponseData<PostMoratorHistoryResponse>>(
-        `/api/admin/manager/moderators/${adminId}/moderator-history/`,
-      );
+      const res = await axios_auth.get<
+        ResponseData<PostMoratorHistoryResponse>
+      >(`/api/admin/manager/moderators/${adminId}/moderator-history/`);
       return res.data;
     } catch (error) {
-      const axiosError = error as AxiosError<ResponseData<PostMoratorHistoryResponse>>;
+      const axiosError = error as AxiosError<
+        ResponseData<PostMoratorHistoryResponse>
+      >;
       return axiosError.response ?? null; // Trả về response hoặc null nếu không có
     }
   }
-  async changStatusModerator(status: String, adminId: number) {
+  async changStatusModerator(status: string, adminId: number) {
     try {
       const res = await axios_auth.put<ResponseData<getMorderatorListResponse>>(
         `api/admin/manager/${adminId}/update-status-moderators`,
         {
-          status
+          status,
         }
       );
       return res.data;
     } catch (error) {
-      const axiosError = error as AxiosError<ResponseData<getMorderatorListResponse>>;
+      const axiosError = error as AxiosError<
+        ResponseData<getMorderatorListResponse>
+      >;
       return axiosError.response ?? null; // Trả về response hoặc null nếu không có
     }
   }
   async getProfileModerator(moderatorId: number) {
     try {
       const res = await axios_auth.get<ResponseData<getMorderatorListResponse>>(
-        `api/admin/manager/moderators/${moderatorId}/profile`,
+        `api/admin/manager/moderators/${moderatorId}/profile`
       );
       return res.data;
     } catch (error) {
-      const axiosError = error as AxiosError<ResponseData<getMorderatorListResponse>>;
+      const axiosError = error as AxiosError<
+        ResponseData<getMorderatorListResponse>
+      >;
       return axiosError.response ?? null; // Trả về response hoặc null nếu không có
     }
   }
   async getMyProfile() {
-    try {
-      const res = await axios_auth.get<ResponseData<Profile>>(
-        `api/admin/get-my-profile/`,
-      );
-      return res.data;
-    } catch (error) {
-      const axiosError = error as AxiosError<ResponseData<Profile>>;
-      return axiosError.response ?? null; // Trả về response hoặc null nếu không có
-    }
+    const res = await axios_auth.get<ResponseData<Profile>>(
+      `api/admin/get-my-profile/`
+    );
+    return res.data;
   }
-  async updateMyProfile(email: String, phone: String) {
-    try {
-      const res = await axios_auth.patch<ResponseData<Profile>>(
-        `api/admin/update-my-profile/`,
-        {
-          email,
-          phone
-        }
-      );
-      return res.data;
-    } catch (error) {
-      const axiosError = error as AxiosError<ResponseData<Profile>>;
-      return axiosError.response ?? null; // Trả về response hoặc null nếu không có
-    }
+  async updateMyProfile(updateMyProfile: any) {
+    const res = await axios_auth.patch<ResponseData<Profile>>(
+      `api/admin/update-my-profile/`,
+      updateMyProfile
+    );
+    return res.data;
   }
-  async resetPasswordAdmin(newPassword: String, moderatorId: number) {
+  async resetPasswordAdmin(newPassword: string, moderatorId: number) {
     try {
       const res = await axios_auth.put<ResponseData<Profile>>(
         `api/admin/manager/${moderatorId}/reset-password`,
         {
-          newPassword
+          newPassword,
         }
       );
       return res.data;

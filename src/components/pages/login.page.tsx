@@ -13,26 +13,40 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoginFailure, setLoginFalure] = useState(false);
+  const [isLoginFailure, setLoginFailure] = useState(false);
   const auth = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await authService.login(phoneNumber, password);
-    if (res && res.status === 200) {
-      if (res.data.data) {
-        auth.authenticate(
-          res.data.data.account,
-          res.data.data.token.accessToken,
-          res.data.data.token.refreshToken
-        );
-        toast("Đăng nhập thành công");
-        navigate("/home");
-      }
-    } else {
-      setLoginFalure(true);
-    }
+    authService
+      .login(phoneNumber, password)
+      .then((res) => {
+        if (res.status === 200) {
+          if (res.data.data) {
+            auth.authenticate(
+              res.data.data.account,
+              res.data.data.token.accessToken,
+              res.data.data.token.refreshToken
+            );
+            toast("Đăng nhập thành công");
+            navigate("/home");
+          }
+        } else if (res.status === 401) {
+          setLoginFailure(true);
+          toast.error("Số điện thoại hoặc mật khẩu chưa đúng");
+        } else if (res.status === 423) {
+          setLoginFailure(true);
+          toast.error("Tài khoản của bạn đã bị khóa");
+        } else {
+          setLoginFailure(true);
+        }
+      })
+      .catch((err) => {
+        setLoginFailure(true);
+        console.error("Login error", err);
+        toast.error("Đăng nhập thất bại");
+      });
   };
 
   const clearPhoneNumber = () => {

@@ -8,6 +8,7 @@ import {
   getMorderatorListResponse,
   Profile,
 } from "./types/morderator-response";
+import GetStaticsResponse from "./types/get-statics.response";
 
 class AuthService {
   async getMorderator(keySearch: string) {
@@ -163,6 +164,11 @@ class AuthService {
       const axiosError = error as AxiosError<ResponseData<Profile>>;
       return axiosError.response ?? null; // Trả về response hoặc null nếu không có
     }
+  }
+  async getStatisticsForDashBoard() {
+    return await axios_auth.get<
+      ResponseData<GetStaticsResponse>
+    >(`api/admin/statistics`);
   }
 }
 export default new AuthService();

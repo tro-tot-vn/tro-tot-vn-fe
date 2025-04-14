@@ -1,13 +1,37 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  CheckCircle,
-  Clock,
-  Users,
-  XCircle,
-} from "lucide-react";
+import adminService from "@/services/admin.service";
+import GetStaticsResponse from "@/services/types/get-statics.response";
+import { CheckCircle, Clock, Users, XCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function DashboardPage() {
-  return (
+  const [statics, setStatistics] = useState<GetStaticsResponse>();
+
+  useEffect(() => {
+    adminService
+      .getStatisticsForDashBoard()
+      .then((res) => {
+        if (res.status === 200 && res.data.data) {
+          setStatistics(res.data.data);
+        } else {
+          toast.error(
+            res.data.message ||
+              "Có lỗi xảy ra trong quá trình lấy thông tin thống kê"
+          );
+        }
+      })
+      .catch((err) => {
+        toast.error(
+          err.message || "Có lỗi xảy ra trong quá trình lấy thông tin thống kê"
+        );
+        console.error(
+          "Có lỗi xảy ra trong quá trình lấy thông tin thống kê",
+          err.message
+        );
+      });
+  }, []);
+  return statics ? (
     <div className="flex flex-1">
       <main className="flex-1 p-6">
         <div className="flex items-center justify-between mb-6">
@@ -26,14 +50,16 @@ export default function DashboardPage() {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">24</div>
+              <div className="text-2xl font-bold">
+                {statics.totalPendingPost}
+              </div>
               <p className="text-xs text-muted-foreground"></p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Tin đã duyệt
+                Tin đã duyệt trong tuần
               </CardTitle>
               <CheckCircle
                 className="h-4 w-4 text-muted-foreground"
@@ -41,38 +67,22 @@ export default function DashboardPage() {
               />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">20</div>
-              {/* <p className="text-xs text-muted-foreground">
-                +12 since last week
-              </p> */}
+              <div className="text-2xl font-bold">
+                {statics.totalApprovedPostInWeek}
+              </div>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Tin đã từ chối
+                Tin đã từ chối trong tuần
               </CardTitle>
               <XCircle className="h-4 w-4 text-muted-foreground" color="red" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">8</div>
-              {/* <p className="text-xs text-muted-foreground">
-                +2 since yesterday
-              </p> */}
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Nguời dùng hoạt động
-              </CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">55</div>
-              {/* <p className="text-xs text-muted-foreground">
-                +18 since last week
-              </p> */}
+              <div className="text-2xl font-bold">
+                {statics.totalRejectedPostInWeek}
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -279,5 +289,7 @@ export default function DashboardPage() {
         </div> */}
       </main>
     </div>
+  ) : (
+    <></>
   );
 }

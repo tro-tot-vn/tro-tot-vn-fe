@@ -149,7 +149,7 @@ export function SiteHeader() {
             </Link>
             <Link to="/register">
               <Button className="hidden md:inline-flex bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white">
-                Đăng kí
+                Đăng ký
               </Button>
             </Link>
           </div>

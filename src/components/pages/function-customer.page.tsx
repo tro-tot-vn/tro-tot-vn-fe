@@ -14,7 +14,7 @@ export default function FunctionCustomerPage() {
         <h1 className="text-2xl font-bold mb-6">
           {activeTab === "savedPost" && "tin đã lưu "}
           {activeTab === "historyView" && "Lịch sử xem tin"}
-          {activeTab === "post-subscription" && "Đăng kí nhận tin theo khu vực"}
+          {activeTab === "post-subscription" && "Đăng ký nhận tin theo khu vực"}
         </h1>
 
         <div className="flex flex-col md:flex-row gap-6">

@@ -26,7 +26,7 @@ export function FunctionCustomerSidebar({
     },
     {
       id: "post-subscription",
-      label: "Đăng kí nhận tin theo khu vực",
+      label: "Đăng ký nhận tin theo khu vực",
       icon: <Calendar1 className="h-4 w-4 mr-2" />,
     },
   ];

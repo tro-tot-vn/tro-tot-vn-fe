@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import adminService from "@/services/admin.service";
 import GetStaticsResponse from "@/services/types/get-statics.response";
-import { CheckCircle, Clock, Users, XCircle } from "lucide-react";
+import { CheckCircle, Clock, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 

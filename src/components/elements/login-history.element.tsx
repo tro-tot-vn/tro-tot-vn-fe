@@ -1,5 +1,3 @@
-"use client"
-
 import { Button } from "@/components/ui/button"
 import { Monitor } from "lucide-react"
 
@@ -79,7 +77,7 @@ export function LoginHistory() {
 
         <div className="pt-4 border-t">
           <p className="text-gray-600 mb-4">
-            Nếu phát hiện thiết bị lạ, Chợ Tốt khuyến khích bạn{" "}
+            Nếu phát hiện thiết bị lạ, Trọ Tốt khuyến khích bạn{" "}
             <a href="/settings/password" className="text-blue-600 hover:underline">
               đổi mật khẩu
             </a>{" "}

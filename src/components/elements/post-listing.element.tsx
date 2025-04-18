@@ -1,74 +1,54 @@
-"use client"
+import { MapPin, Clock } from "lucide-react";
+import { Link } from "react-router";
+import { Post } from "@/services/types/get-customer-information";
 
-import type React from "react"
-
-import { useState } from "react"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Heart, MapPin, Clock } from "lucide-react"
-import { Link } from "react-router"
-
-interface PostListingProps {
-  listing: {
-    id: number
-    title: string
-    price: string
-    location: string
-    timeAgo: string
-    image: string
-  }
+interface PostRecent {
+  post: Post;
 }
 
-export function PostListing({ listing }: PostListingProps) {
-  const [isSaved, setIsSaved] = useState(false)
-
-  const handleSave = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsSaved(!isSaved)
-  }
-
+export function PostRecent({ post }: PostRecent) {
   return (
-    <Link to={`/listing/${listing.id}`}>
-      <Card className="overflow-hidden hover:shadow-md transition-shadow h-full flex flex-col">
-        <div className="relative">
+    <Link to={`/posts/${post.postId}/detail`}>
+      <div className="overflow-hidden hover:shadow-md transition-shadow h-full flex flex-col rounded-xl bg-white border border-gray-200">
+        <div className="relative w-[300px] h-[150px] overflow-hidden">
           <img
-            src={listing.image || "/placeholder.svg"}
-            alt={listing.title}
+            src={
+              post.multimediaFiles.length > 0
+                ? `http://localhost:3333/api/files/${post.multimediaFiles[0].fileId}`
+                : "/default-image.png"
+            }
+            alt={String(post.multimediaFiles[0].fileId)}
             width={300}
-            height={200}
-            className="w-full h-48 object-cover"
+            height={150}
+            className="w-full h-full object-cover transition-transform duration-300 ease-in-out transform hover:scale-105"
           />
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`absolute top-2 right-2 h-8 w-8 rounded-full ${
-              isSaved ? "bg-[#ff6d0b]/10 text-[#ff6d0b]" : "bg-white/80 hover:bg-white"
-            }`}
-            onClick={handleSave}
-          >
-            <Heart className={`h-4 w-4 ${isSaved ? "fill-[#ff6d0b]" : ""}`} />
-            <span className="sr-only">Lưu tin</span>
-          </Button>
         </div>
         <div className="p-3 flex-1 flex flex-col">
-          <h3 className="font-medium text-sm line-clamp-2 mb-2 flex-1">{listing.title}</h3>
+          <h3 className="font-medium text-sm line-clamp-2 flex-1">
+            {post.title}
+          </h3>
+
           <div className="mt-auto">
-            <p className="font-bold text-[#ff6d0b]">{listing.price}</p>
-            <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+            <p className="font-bold text-[#ff6d0b]">{post.price}</p>
+            <div className="flex flex-col text-xs text-gray-500">
               <div className="flex items-center">
                 <MapPin className="h-3 w-3 mr-1" />
-                <span>{listing.location}</span>
+                <span>{post.district + "," + post.city}</span>
               </div>
               <div className="flex items-center">
                 <Clock className="h-3 w-3 mr-1" />
-                <span>{listing.timeAgo}</span>
+                <span>
+                  {new Date(post.createdAt).toLocaleDateString("vi-VN", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  })}
+                </span>
               </div>
             </div>
           </div>
         </div>
-      </Card>
+      </div>
     </Link>
-  )
+  );
 }
-

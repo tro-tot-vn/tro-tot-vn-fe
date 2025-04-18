@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router";
 export default function NotFoundPage() {
   const navigate = useNavigate();
   return (
-    <div className="flex flex-col flex-1 min-w-screen min-h-screen justify-center items-center ">
+    <div className="flex flex-col flex-1  justify-center items-center ">
       <div className="max-w-md  text-center ">
         <img
           src="/404_error.png"

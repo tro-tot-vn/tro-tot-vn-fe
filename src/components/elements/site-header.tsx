@@ -7,22 +7,23 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import useAuth from "@/hooks/use-auth";
+import { Role } from "@/utils/role.enum";
 import {
-  Bell,
-  Menu,
   MessageSquare,
   Search,
   LayoutGrid,
   CircleUserRound,
-  FilterIcon,
 } from "lucide-react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 export function SiteHeader() {
+  const [q, setQ] = useState("");
   const nav = useNavigate();
+  const auth = useAuth();
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white ">
-      <div className="container flex h-16 items-center justify-between w-full">
+      <div className="container flex h-16 items-center justify-between min-w-screen">
         <Link to="/" className="flex-shrink-0">
           <img
             src="/tro-tot-logo-png.jpeg"
@@ -33,18 +34,27 @@ export function SiteHeader() {
           />
         </Link>
 
-        <Button variant="ghost" size="icon" className="md:hidden">
-          <Menu className="!w-5 !h-5" />
-        </Button>
-
-        <div className="flex-1 flex max-w-xl">
-          <Button variant="ghost" size="icon" className="">
-            <FilterIcon className="!w-5 !h-5" />
-          </Button>
+        <div className="flex-1 flex max-w-xl ">
           <div className="flex-1 relative">
-            <Input placeholder="Tìm phòng trọ " className="pl-4 pr-10" />
+            <Input
+              placeholder="Tìm phòng trọ "
+              className="pl-4 pr-10"
+              value={q}
+              onChange={(e) => {
+                setQ(e.target.value);
+              }}
+            />
             <Button
               size="icon"
+              onClick={() => {
+                nav(
+                  `/search?` +
+                    new URLSearchParams({
+                      q: q,
+                    })
+                );
+                setQ("");
+              }}
               className="absolute right-0 top-0 h-full rounded-l-none bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white"
             >
               <Search className="h-4 w-4" />
@@ -52,15 +62,8 @@ export function SiteHeader() {
           </div>
         </div>
 
-        {useAuth().user ? (
-          <div className="flex items-center gap-6">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="hidden md:inline-flex"
-            >
-              <Bell className="!w-5 !h-5" />
-            </Button>
+        {auth.user ? (
+          <div className="flex items-center gap-6 pr-10">
             <Link to="/messages">
               <Button
                 variant="ghost"
@@ -70,44 +73,75 @@ export function SiteHeader() {
                 <MessageSquare className="!w-5 !h-5" />
               </Button>
             </Link>
-            <Link to="/posts/my-posts">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="hidden md:inline-flex"
-              >
-                <LayoutGrid className="!w-5 !h-5" />
-              </Button>
-            </Link>
+            {!(
+              auth.user.role.roleName === Role.Manager ||
+              auth.user.role.roleName === Role.Moderator
+            ) ? (
+              <div className="container flex h-16 items-center gap-6 justify-between">
+                <Link to="/posts/my-posts">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hidden md:inline-flex"
+                  >
+                    <LayoutGrid className="!w-5 !h-5" />
+                  </Button>
+                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <CircleUserRound className="!w-5 !h-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <Link
+                      to={`/customer/${auth.user?.customer.customerId}/profile`}
+                    >
+                      <DropdownMenuItem>Trang cá nhân</DropdownMenuItem>
+                    </Link>
+                    <Link to="/customer/function">
+                      <DropdownMenuItem>Chức năng người dùng </DropdownMenuItem>
+                    </Link>
+                    <Link to="/customer/setting">
+                      <DropdownMenuItem>Cài đặt tài khoản</DropdownMenuItem>
+                    </Link>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <CircleUserRound className="!w-5 !h-5" />
+                    <DropdownMenuItem
+                      onClick={() => {
+                        console.log(auth.user);
+                        auth.signout();
+                        nav("/");
+                      }}
+                    >
+                      Đăng xuất
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            ) : (
+              <></>
+            )}
+
+            {auth.user.role.roleName === Role.Manager ||
+            auth.user.role.roleName === Role.Moderator ? (
+              <Link to="/admin">
+                <Button className="hidden md:inline-flex bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white">
+                  Trang quản trị hệ thống
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <Link to={`/user/profile`}>
-                  <DropdownMenuItem>Trang cá nhân</DropdownMenuItem>
-                </Link>
-                <Link to="/me/setting">
-                  <DropdownMenuItem>Cài đặt tài khoản</DropdownMenuItem>
-                </Link>
-                <DropdownMenuItem>Đăng xuất</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <Button
-              onClick={() => {
-                nav("/my-posts/create-post");
-              }}
-              className="hidden md:inline-flex bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white"
-            >
-              Đăng tin
-            </Button>
+              </Link>
+            ) : (
+              <Button
+                onClick={() => {
+                  nav("/my-posts/create-post");
+                }}
+                className="hidden md:inline-flex bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white"
+              >
+                Đăng tin
+              </Button>
+            )}
           </div>
         ) : (
-          <div className="space-x-4">
+          <div className="space-x-4 pr-10">
             <Link to="/login">
               <Button className="hidden md:inline-flex bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white">
                 Đăng nhập
@@ -115,7 +149,7 @@ export function SiteHeader() {
             </Link>
             <Link to="/register">
               <Button className="hidden md:inline-flex bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white">
-                Đăng kí
+                Đăng ký
               </Button>
             </Link>
           </div>

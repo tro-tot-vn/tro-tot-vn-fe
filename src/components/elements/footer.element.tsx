@@ -4,10 +4,10 @@ export default function Footer() {
   return (
     <footer>
       <div className="border-t">
-        <div className="container ">
+        <div className="container min-w-screen">
           <div className="flex flex-row gap-8 justify-center mt-8">
             <div>
-              <h3 className="font-semibold mb-4">TẢI ỨNG DỤNG CHỢ TỐT</h3>
+              <h3 className="font-semibold mb-4">TẢI ỨNG DỤNG TRỌ TỐT</h3>
               <img
                 src="/google-play-store-logo.svg"
                 alt="QR Code"
@@ -57,7 +57,7 @@ export default function Footer() {
             </div>
 
             <div>
-              <h3 className="font-semibold mb-4">VỀ CHỢ TỐT</h3>
+              <h3 className="font-semibold mb-4">VỀ TRỌ TỐT</h3>
               <ul className="space-y-2 text-sm">
                 <li>
                   <Link
@@ -117,8 +117,6 @@ export default function Footer() {
             </div>
           </div>
         </div>
-      </div>
-      <div className="container mb-4  ">
         <p className="text-center text-gray-600 ">
           © 2025 NhaTot. All rights reserved.
         </p>

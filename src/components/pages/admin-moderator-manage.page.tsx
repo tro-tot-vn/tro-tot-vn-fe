@@ -1,197 +1,392 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Eye, Lock, Unlock, UserPlus } from "lucide-react";
-import { Link } from "react-router";
+import { Card, Table, Button, Tag, Modal, Input, Form, Select, DatePicker, message, Descriptions } from "antd";
+import { EyeOutlined, LockOutlined, SettingFilled, UnlockOutlined, UserAddOutlined } from "@ant-design/icons";
+import adminService from "@/services/admin.service";
+import { getMorderatorListResponse } from "@/services/types/morderator-response";
+import { useEffect, useState } from "react";
+import { User } from "lucide-react";
+import { PostMoratorHistoryResponse } from "@/services/types/postModerateHistory-response";
 
-// Mock data for moderators
-const moderators = [
-  {
-    id: 1,
-    name: "Nguyen Van Moderator",
-    email: "moderator1@example.com",
-    phone: "0901234567",
-    status: "active",
-    lastActive: "2025-03-13T08:30:00Z",
-    createdAt: "2024-10-15T09:00:00Z",
-  },
-  {
-    id: 2,
-    name: "Tran Thi Reviewer",
-    email: "moderator2@example.com",
-    phone: "0912345678",
-    status: "active",
-    lastActive: "2025-03-13T09:15:00Z",
-    createdAt: "2024-11-20T10:30:00Z",
-  },
-  {
-    id: 3,
-    name: "Le Van Admin",
-    email: "moderator3@example.com",
-    phone: "0923456789",
-    status: "inactive",
-    lastActive: "2025-03-10T14:45:00Z",
-    createdAt: "2025-01-05T08:15:00Z",
-  },
-  {
-    id: 4,
-    name: "Pham Thi Moderator",
-    email: "moderator4@example.com",
-    phone: "0934567890",
-    status: "active",
-    lastActive: "2025-03-13T07:20:00Z",
-    createdAt: "2025-02-10T11:45:00Z",
-  },
-];
+const { Option } = Select;
 
 export default function ModeratorsPage() {
-  return (
-    <div className="flex flex-1 overflow-hidden">
-      <main className="flex-1 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">Moderators</h1>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button>
-                <UserPlus className="mr-2 h-4 w-4" />
-                Add Moderator
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add New Moderator</DialogTitle>
-                <DialogDescription>
-                  Create a new moderator account. They will receive an email
-                  with login instructions.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="name" className="text-right">
-                    Full Name
-                  </Label>
-                  <Input id="name" className="col-span-3" />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="email" className="text-right">
-                    Email
-                  </Label>
-                  <Input id="email" type="email" className="col-span-3" />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="phone" className="text-right">
-                    Phone
-                  </Label>
-                  <Input id="phone" type="tel" className="col-span-3" />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="submit">Create Account</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
+  const [moderatorList, setModeratorList] = useState<getMorderatorListResponse[]>([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
+  const [moderatorHistory, setModeratorHistory] = useState<PostMoratorHistoryResponse[]>([]);
+  const [isHistoryModalVisible, setIsHistoryModalVisible] = useState(false);
+  const [profileModerator, setProfileModerator] = useState<any>(null);
+  const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
+  const [selectedModeratorId, setSelectedModeratorId] = useState<number | null>(null);
+  const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
+  const [keySearch, setKeySearch] = useState("");
+  const [form] = Form.useForm();
+  const [passwordForm] = Form.useForm();
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Moderator Accounts</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Last Active</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {moderators.map((moderator) => (
-                  <TableRow
-                    key={moderator.id}
-                    className="cursor-pointer hover:bg-gray-200 border border-gray-100"
-                  >
-                    <TableCell className="font-bold whitespace-normal break-words p-4">
-                      {moderator.name}
-                    </TableCell>
-                    <TableCell className="font-medium whitespace-normal break-words p-4">
-                      {moderator.email}
-                    </TableCell>
-                    <TableCell className="font-medium whitespace-normal break-words p-4">
-                      {moderator.phone}
-                    </TableCell>
-                    <TableCell className="font-medium whitespace-normal break-words p-4">
-                      <Badge
-                        variant={
-                          moderator.status === "active"
-                            ? "default"
-                            : "secondary"
-                        }
-                      >
-                        {moderator.status.charAt(0).toUpperCase() +
-                          moderator.status.slice(1)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="font-medium whitespace-normal break-words p-4">
-                      {new Date(moderator.lastActive).toLocaleString()}
-                    </TableCell>
-                    <TableCell className="font-medium whitespace-normal break-words p-4">
-                      {new Date(moderator.createdAt).toLocaleString()}
-                    </TableCell>
-                    <TableCell className="font-medium whitespace-normal break-words p-4 text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="outline" size="icon" asChild>
-                          <Link to={`/users/moderators/${moderator.id}`}>
-                            <Eye className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className={
-                            moderator.status === "active"
-                              ? "text-red-500"
-                              : "text-green-500"
-                          }
-                        >
-                          {moderator.status === "active" ? (
-                            <Lock className="h-4 w-4" />
-                          ) : (
-                            <Unlock className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </main>
-    </div>
+  const fetchApi = async () => {
+    const result = await adminService.getMorderator(keySearch);
+    if (result?.status === 200 && Array.isArray(result.data)) {
+      setModeratorList(result.data);
+    }
+  };
+
+  
+  useEffect(() => {
+    fetchApi();
+  }, []);
+
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleOk = async () => {
+    try {
+      const values = await form.validateFields();
+      const result = await adminService.createModerator(values);
+      if (result) {
+        if (result.status === 200) {
+          messageApi.success("Thêm người kiểm duyệt thành công");
+          fetchApi();
+        } else if (result.status === 400) {
+          messageApi.error("Email đã tồn tại");
+        } else if (result.status === 404) {
+          messageApi.error("Không tìm thấy người dùng");
+        } else if (result.status === 500) {
+          messageApi.error("Lỗi hệ thống, vui lòng thử lại sau");
+        } else {
+          messageApi.error("Không thể thêm mới người dùng");
+        }
+      }
+      setIsModalVisible(false);
+      form.resetFields();
+    } catch (errorInfo) {
+      console.log('Lỗi khi nhận giá trị từ form: ', errorInfo);
+      messageApi.error("Không thể kết nối đến máy chủ");
+    }
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+    form.resetFields();
+  };
+
+  const handleChangStatus = async (status: string, adminId: number) => {
+    try {
+      const result = await adminService.changStatusModerator(status, adminId);
+      if (result) {
+        if (result.status === 200) {
+          messageApi.success("Thay đổi trạng thái thành công");
+          fetchApi();
+        } else if (result.status === 404) {
+          messageApi.error("Không tìm thấy người dùng");
+        } else if (result.status === 500) {
+          messageApi.error("Lỗi hệ thống, vui lòng thử lại sau");
+        } else {
+          messageApi.error("Không thể thay đổi trạng thái người dùng");
+        }
+      }
+    } catch (error) {
+      console.error("Lỗi khi thay đổi trạng thái:", error);
+      messageApi.error("Lỗi khi thay đổi trạng thái");
+    }
+  };
+
+  const fetchApiHistoryModerator = async (adminId: number) => {
+    try {
+      const result = await adminService.getPostModeratorHistorybyId(adminId);
+      if (result?.status === 200 && result.data) {
+        setModeratorHistory(Array.isArray(result.data) ? result.data : []);
+        setIsHistoryModalVisible(true);
+      } else {
+        messageApi.error("Không thể lấy lịch sử người dùng");
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy lịch sử:", error);
+    }
+  };
+
+  const fetchApiProileModerator = async (moderatorId: number) => {
+    try {
+      const result = await adminService.getProfileModerator(moderatorId);
+
+      if (result) {
+        if (result.status === 200) {
+          if (result.data) {
+            setProfileModerator(result.data);
+            setIsProfileModalVisible(true);
+          }
+        } else if (result.status === 404) {
+          messageApi.error("Không tìm thấy người dùng");
+        } else if (result.status === 500) {
+          messageApi.error("Lỗi hệ thống, vui lòng thử lại sau");
+        } else {
+          messageApi.error("Không thể lấy thông tin người dùng");
+        }
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy lịch sử:", error);
+    }
+  }
+  console.log(profileModerator)
+
+  // Hàm mở modal đổi mật khẩu và lưu moderatorId
+  const showPasswordModal = (moderatorId: number) => {
+    setSelectedModeratorId(moderatorId);
+    setIsPasswordModalVisible(true);
+  };
+
+  // Hàm xử lý đổi mật khẩu
+  const handlePasswordChange = async () => {
+    try {
+      const values = await passwordForm.validateFields();
+      const newPassword = values.newPassword; 
+      console.log(newPassword)
+      if (selectedModeratorId === null) {
+        messageApi.error("Không xác định được người dùng để đổi mật khẩu");
+        return;
+        
+      }
+      console.log(selectedModeratorId)
+      const result = await adminService.resetPasswordAdmin(newPassword, selectedModeratorId);
+      console.log(result)
+      if (result?.status === 200) {
+        messageApi.success("Đổi mật khẩu thành công!");
+      } else if (result?.status === 404) {
+        messageApi.error("Không tìm thấy người dùng");
+      } else if (result?.status === 500) {
+        messageApi.error("Lỗi hệ thống, vui lòng thử lại sau");
+      } else {
+        messageApi.error("Không thể đổi mật khẩu");
+      }
+      setIsPasswordModalVisible(false);
+      passwordForm.resetFields();
+    } catch (error) {
+      console.error("Lỗi khi thay đổi mật khẩu:", error);
+      messageApi.error("Lỗi khi thay đổi mật khẩu");
+    }
+  };
+
+
+  const columns = [
+    {
+      title: "Tên",
+      dataIndex: "name",
+      key: "name",
+      render: (_text: any, record: any) => `${record.firstName} ${record.lastName}`,
+    },
+    {
+      title: "Email",
+      dataIndex: ["account", "email"],
+      key: "email",
+    },
+    {
+      title: "Số điện thoại",
+      dataIndex: ["account", "phone"],
+      key: "phone",
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: ["account", "status"],
+      key: "status",
+      render: (status: string) => (
+        <Tag color={status === "Active" ? "green" : "red"}>
+          {status === "Active" ? "Hoạt động" : "Không hoạt động"}
+        </Tag>
+      ),
+    },
+    {
+      title: "Hành động",
+      key: "actions",
+      render: (_text: any, record: any) => (
+        <div className="flex justify-start gap-2">
+          <Button type="link" icon={<EyeOutlined />} onClick={() => fetchApiHistoryModerator(record.adminId)} />
+          <Button
+            type="link"
+            icon={record.account.status === "Active" ? <LockOutlined /> : <UnlockOutlined />}
+            className={record.account.status === "Active" ? "text-red-500" : "text-green-500"}
+            onClick={() => handleChangStatus(record.account.status === "Active" ? "InActive" : "Active", record.adminId)}
+          />
+          <Button type="link" icon={<User />} onClick={() => fetchApiProileModerator(record.adminId)} />
+          <Button type="link" icon={<SettingFilled />} onClick={() => showPasswordModal(record.adminId)} />
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <>
+      {contextHolder}
+      <div className="flex flex-1 overflow-hidden">
+        <main className="flex-1 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-3xl font-bold">Quản lý Người kiểm duyệt</h1>
+            <Button type="primary" icon={<UserAddOutlined />} onClick={showModal}>
+              Thêm Người kiểm duyệt
+            </Button>
+          </div>
+
+          <Card title="Danh sách người kiểm duyệt">
+            <div className="flex flex-row flex-1 justify-between mb-4">
+              <Input
+                placeholder="Tìm kiếm theo số điện thoại hoặc email"
+                defaultValue={keySearch ?? ""}
+                onChange={(e) => {
+                  setKeySearch(e.target.value);
+                }}
+                style={{}}
+              />
+              <Button type="primary" onClick={fetchApi} style={{ marginLeft: 16 }}>
+                Tìm kiếm
+              </Button>
+            </div>
+            <Table columns={columns} dataSource={moderatorList} rowKey="adminId" />
+          </Card>
+
+          <Modal
+            title="Thêm Người kiểm duyệt"
+            open={isModalVisible}
+            onOk={handleOk}
+            onCancel={handleCancel}
+          >
+            <Form form={form} layout="vertical">
+              <Form.Item
+                label="Họ"
+                name="firstName"
+                rules={[{ required: true, message: 'Vui lòng nhập họ!' }]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="Tên"
+                name="lastName"
+                rules={[{ required: true, message: 'Vui lòng nhập tên!' }]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="Email"
+                name="email"
+                rules={[{ required: true, message: 'Vui lòng nhập email!' }]}
+              >
+                <Input type="email" />
+              </Form.Item>
+              <Form.Item
+                label="Số điện thoại"
+                name="phone"
+                rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]}
+              >
+                <Input type="tel" />
+              </Form.Item>
+              <Form.Item
+                label="Giới tính"
+                name="gender"
+                rules={[{ required: true, message: 'Vui lòng chọn giới tính!' }]}
+              >
+                <Select>
+                  <Option value="Male">Nam</Option>
+                  <Option value="Female">Nữ</Option>
+                </Select>
+              </Form.Item>
+              <Form.Item
+                label="Ngày sinh"
+                name="birthday"
+                rules={[{ required: true, message: 'Vui lòng chọn ngày sinh!' }]}
+              >
+                <DatePicker style={{ width: '100%' }} />
+              </Form.Item>
+              <Form.Item
+                label="Mật khẩu"
+                name="password"
+                rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+              >
+                <Input.Password />
+              </Form.Item>
+            </Form>
+          </Modal>
+
+          <Modal
+            title="Lịch sử kiểm duyệt"
+            open={isHistoryModalVisible}
+            onCancel={() => setIsHistoryModalVisible(false)}
+            footer={null}
+            width={800}
+          >
+            <Table
+              columns={[
+                {
+                  title: 'Tiêu đề tin',
+                  key: 'title',
+                  render: (record: PostMoratorHistoryResponse) => record.post?.title || "Không có",
+                },
+                {
+                  title: 'Hành động',
+                  dataIndex: 'actionType',
+                  key: 'actionType',
+                },
+                {
+                  title: 'Lý do',
+                  dataIndex: 'reason',
+                  key: 'reason',
+                },
+                {
+                  title: 'Thời gian',
+                  dataIndex: 'execAt',
+                  key: 'execAt',
+                  render: (execAt: string) => new Date(execAt).toLocaleString(),
+                },
+              ]}
+              dataSource={moderatorHistory}
+              rowKey="postId"
+              pagination={false}
+            />
+          </Modal>
+
+          <Modal
+            title="Thông tin người kiểm duyệt"
+            open={isProfileModalVisible}
+            onCancel={() => setIsProfileModalVisible(false)}
+            footer={null}
+            width={800}
+          >
+            {profileModerator && profileModerator.account && (
+              <Descriptions bordered column={1} size="middle">
+                <Descriptions.Item label="Họ và tên">
+                  {profileModerator.lastName} {profileModerator.firstName}
+                </Descriptions.Item>
+                <Descriptions.Item label="Giới tính">
+                  {profileModerator.gender === "Male" ? "Nam" : "Nữ"}
+                </Descriptions.Item>
+                <Descriptions.Item label="Ngày sinh">
+                  {new Date(profileModerator.birthday).toLocaleDateString()}
+                </Descriptions.Item>
+                <Descriptions.Item label="Ngày gia nhập">
+                  {new Date(profileModerator.joinedAt).toLocaleDateString()}
+                </Descriptions.Item>
+                <Descriptions.Item label="Số điện thoại">{profileModerator.account.phone}</Descriptions.Item>
+                <Descriptions.Item label="Email">{profileModerator.account.email}</Descriptions.Item>
+              </Descriptions>
+            )}
+          </Modal>
+          <Modal
+            title="Đổi Mật khẩu"
+            open={isPasswordModalVisible}
+            onOk={handlePasswordChange}
+            onCancel={() => {
+              setIsPasswordModalVisible(false);
+              passwordForm.resetFields();
+            }}
+          >
+            <Form form={passwordForm} layout="vertical">
+              <Form.Item
+                label="Mật khẩu mới"
+                name="newPassword"
+                rules={[{ required: true, message: "Vui lòng nhập mật khẩu mới!" }]}
+              >
+                <Input.Password />
+              </Form.Item>
+            </Form>
+          </Modal>
+        </main>
+      </div>
+    </>
   );
 }

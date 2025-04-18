@@ -1,171 +1,153 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import {
-  SearchIcon,
-  MapPin,
-  Heart,
-  Building2,
-  HomeIcon,
-  Building,
-  ChevronRight,
-  Bed,
-} from "lucide-react";
-import { Link } from "react-router";
+import { SearchIcon, MapPin, Heart, DollarSignIcon } from "lucide-react";
+import { Link, useNavigate } from "react-router";
+import useAuth from "@/hooks/use-auth";
+import { toast } from "sonner";
+import { PostService } from "@/services/post.service";
+import { useEffect, useState } from "react";
+import type { ListPostRes } from "@/services/types/get-list-post-by-status-reponse";
+import { AreaRangeFilter } from "../elements/area-range-filter";
+import { InteriorConditionFilter } from "../elements/interior-condition-filter";
+import { LocationFilter } from "../elements/location-filter";
+import { PriceRangeFilter } from "../elements/price-range-filter";
 
-// Sample categories
-const categories = [
-  { id: 1, name: "Phòng trọ", icon: <Bed className="h-5 w-5" />, count: 3250 },
-  {
-    id: 2,
-    name: "Nhà nguyên căn",
-    icon: <HomeIcon className="h-5 w-5" />,
-    count: 854,
-  },
-  {
-    id: 3,
-    name: "Chung cư mini",
-    icon: <Building className="h-5 w-5" />,
-    count: 1089,
-  },
-  {
-    id: 4,
-    name: "Ở ghép",
-    icon: <Building2 className="h-5 w-5" />,
-    count: 567,
-  },
-  {
-    id: 5,
-    name: "Homestay",
-    icon: <Building2 className="h-5 w-5" />,
-    count: 396,
-  },
-];
-
-// Sample locations
 const popularLocations = [
-  { id: 1, name: "TP. Hồ Chí Minh", count: 5230 },
-  { id: 2, name: "Hà Nội", count: 4580 },
-  { id: 3, name: "Đà Nẵng", count: 1240 },
-  { id: 4, name: "Cần Thơ", count: 780 },
-  { id: 5, name: "Bình Dương", count: 1150 },
-  { id: 6, name: "Đồng Nai", count: 860 },
+  { id: 1, name: "TP. Hồ Chí Minh", count: 100 },
+  { id: 2, name: "Hà Nội", count: 112 },
+  { id: 3, name: "Đà Nẵng", count: 50 },
+  { id: 4, name: "Cần Thơ", count: 40 },
+  { id: 5, name: "Bình Dương", count: 80 },
 ];
 
-// Sample featured listings
-const featuredListings = [
-  {
-    id: 1,
-    title: "Phòng trọ cao cấp đầy đủ nội thất gần ĐH Bách Khoa",
-    price: "3.5 triệu/tháng",
-    location: "Quận Bình Thạnh, TP.HCM",
-    area: "25 m²",
-    amenities: ["Máy lạnh", "WC riêng", "Wifi"],
-    image: "/placeholder.svg?height=400&width=600",
-    avatarUrl: "/placeholder.svg?height=40&width=40",
-    author: "Nguyễn Văn A",
-    postedTime: "2 giờ trước",
-    isFeatured: true,
-    isVerified: true,
-  },
-  {
-    id: 2,
-    title: "Phòng trọ mới xây, sạch sẽ, an ninh gần chợ Bến Thành",
-    price: "2.8 triệu/tháng",
-    location: "Quận 1, TP.HCM",
-    area: "20 m²",
-    amenities: ["WC riêng", "Wifi", "Tự do"],
-    image: "/placeholder.svg?height=400&width=600",
-    avatarUrl: "/placeholder.svg?height=40&width=40",
-    author: "Trần Thị B",
-    postedTime: "1 ngày trước",
-    isFeatured: true,
-  },
-  {
-    id: 3,
-    title: "Nhà nguyên căn cho thuê khu vực Thảo Điền, 2 phòng ngủ",
-    price: "8 triệu/tháng",
-    location: "Quận 2, TP.HCM",
-    area: "60 m²",
-    amenities: ["2 phòng ngủ", "Máy lạnh", "Nội thất"],
-    image: "/placeholder.svg?height=400&width=600",
-    avatarUrl: "/placeholder.svg?height=40&width=40",
-    author: "Lê Văn C",
-    postedTime: "3 ngày trước",
-    isFeatured: true,
-  },
-  {
-    id: 4,
-    title: "Phòng trọ sinh viên giá rẻ gần ĐH Kinh Tế",
-    price: "1.8 triệu/tháng",
-    location: "Quận 10, TP.HCM",
-    area: "16 m²",
-    amenities: ["WC chung", "Wifi", "Giờ giấc tự do"],
-    image: "/placeholder.svg?height=400&width=600",
-    avatarUrl: "/placeholder.svg?height=40&width=40",
-    author: "Phạm Thị D",
-    postedTime: "5 ngày trước",
-    isFeatured: true,
-    isVerified: true,
-  },
-];
-
-// Sample new listings
-const newListings = [
-  {
-    id: 5,
-    title: "Phòng trọ cao cấp full nội thất gần Đại học Văn Lang",
-    price: "3.2 triệu/tháng",
-    location: "Quận Bình Thạnh, TP.HCM",
-    area: "22 m²",
-    amenities: ["Máy lạnh", "WC riêng", "Wifi"],
-    image: "/placeholder.svg?height=400&width=600",
-    avatarUrl: "/placeholder.svg?height=40&width=40",
-    author: "Hoàng Văn E",
-    postedTime: "5 giờ trước",
-  },
-  {
-    id: 6,
-    title: "Phòng trọ mới xây có gác lửng gần chợ Tân Định",
-    price: "2.5 triệu/tháng",
-    location: "Quận 1, TP.HCM",
-    area: "18 m²",
-    amenities: ["Gác lửng", "WC riêng", "Wifi"],
-    image: "/placeholder.svg?height=400&width=600",
-    avatarUrl: "/placeholder.svg?height=40&width=40",
-    author: "Võ Thị F",
-    postedTime: "8 giờ trước",
-    isVerified: true,
-  },
-  {
-    id: 7,
-    title: "Chung cư mini 1PN đầy đủ nội thất cao cấp",
-    price: "5 triệu/tháng",
-    location: "Quận 7, TP.HCM",
-    area: "35 m²",
-    amenities: ["1 phòng ngủ", "Máy lạnh", "Nội thất"],
-    image: "/placeholder.svg?height=400&width=600",
-    avatarUrl: "/placeholder.svg?height=40&width=40",
-    author: "Ngô Văn G",
-    postedTime: "1 ngày trước",
-  },
-  {
-    id: 8,
-    title: "Phòng trọ sinh viên giá rẻ gần ĐH Hoa Sen",
-    price: "1.6 triệu/tháng",
-    location: "Quận 1, TP.HCM",
-    area: "15 m²",
-    amenities: ["WC chung", "Wifi", "Giờ giấc tự do"],
-    image: "/placeholder.svg?height=400&width=600",
-    avatarUrl: "/placeholder.svg?height=40&width=40",
-    author: "Dương Thị H",
-    postedTime: "1 ngày trước",
-    isVerified: true,
-  },
-];
-
+const postService = new PostService();
 export default function HomePage() {
+  const [latestPost, setLatestPost] = useState<ListPostRes[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState({
+    minPrice: null as number | null,
+    maxPrice: null as number | null,
+    minArea: null as number | null,
+    maxArea: null as number | null,
+    city: null as string | null,
+    district: null as string | null,
+    ward: null as string | null,
+    interiorCondition: null as string | null,
+  });
+
+  useEffect(() => {
+    postService.getLatestPost(4).then((res) => {
+      console.log(res.data);
+      if (res.data.status === 200) {
+        setLatestPost(res.data.data || []);
+      }
+    });
+  }, []);
+
+  const handleSearch = () => {
+    // In a real application, you would use the search query and filters to fetch filtered results
+    console.log("Search with:", {
+      query: searchQuery,
+      filters,
+    });
+
+    // For demonstration purposes, show a toast with the filter values
+    const filterText = [];
+    if (filters.minPrice !== null || filters.maxPrice !== null) {
+      filterText.push(
+        `Giá: ${filters.minPrice || 0} - ${
+          filters.maxPrice || "không giới hạn"
+        }`
+      );
+    }
+    if (filters.minArea !== null || filters.maxArea !== null) {
+      filterText.push(
+        `Diện tích: ${filters.minArea || 0} - ${
+          filters.maxArea || "không giới hạn"
+        } m²`
+      );
+    }
+    if (filters.city) {
+      let locationText = `Vị trí: ${filters.city}`;
+      if (filters.district) {
+        locationText += `, ${filters.district}`;
+        if (filters.ward) {
+          locationText += `, ${filters.ward}`;
+        }
+      }
+      filterText.push(locationText);
+    }
+    if (filters.interiorCondition) {
+      filterText.push(
+        `Nội thất: ${
+          filters.interiorCondition === "Full" ? "Đầy đủ nội thất" : "Trống"
+        }`
+      );
+    }
+
+    nav(
+      `/search?` +
+        new URLSearchParams({
+          q: searchQuery,
+          minPrice: filters.minPrice?.toString() || "",
+          maxPrice: filters.maxPrice?.toString() || "",
+          minArea: filters.minArea?.toString() || "",
+          maxArea: filters.maxArea?.toString() || "",
+          city: filters.city || "",
+          district: filters.district || "",
+          ward: filters.ward || "",
+          interiorCondition: filters.interiorCondition || "",
+        }).toString()
+    );
+  };
+
+  const handlePriceFilterChange = (
+    minPrice: number | null,
+    maxPrice: number | null
+  ) => {
+    setFilters((prev) => ({
+      ...prev,
+      minPrice,
+      maxPrice,
+    }));
+  };
+
+  const handleAreaFilterChange = (
+    minArea: number | null,
+    maxArea: number | null
+  ) => {
+    setFilters((prev) => ({
+      ...prev,
+      minArea,
+      maxArea,
+    }));
+  };
+
+  const handleLocationFilterChange = (
+    city: string | null,
+    district: string | null,
+    ward: string | null
+  ) => {
+    setFilters((prev) => ({
+      ...prev,
+      city,
+      district,
+      ward,
+    }));
+  };
+
+  const handleInteriorConditionFilterChange = (condition: string | null) => {
+    setFilters((prev) => ({
+      ...prev,
+      interiorCondition: condition,
+    }));
+  };
+
+  const nav = useNavigate();
+  const auth = useAuth();
   return (
     <div className="min-h-screen bg-gray-50">
       <main>
@@ -189,37 +171,16 @@ export default function HomePage() {
                       <Input
                         placeholder="Tìm phòng trọ ..."
                         className="pl-10 py-6 border-gray-300"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                       />
                     </div>
-                    <Button className="bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white py-6">
+                    <Button
+                      className="bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white py-6"
+                      onClick={handleSearch}
+                    >
                       Tìm Kiếm
                     </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Link
-                      to="/listings/rent/ho-chi-minh"
-                      className="text-xs rounded-full px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700"
-                    >
-                      TP. Hồ Chí Minh
-                    </Link>
-                    <Link
-                      to="/listings/rent/ha-noi"
-                      className="text-xs rounded-full px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700"
-                    >
-                      Hà Nội
-                    </Link>
-                    <Link
-                      to="/listings/rent/da-nang"
-                      className="text-xs rounded-full px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700"
-                    >
-                      Đà Nẵng
-                    </Link>
-                    <Link
-                      to="/listings/rent/can-tho"
-                      className="text-xs rounded-full px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700"
-                    >
-                      Cần Thơ
-                    </Link>
                   </div>
                 </div>
               </div>
@@ -229,277 +190,22 @@ export default function HomePage() {
                   <div className="flex flex-wrap items-center gap-3">
                     <span className="text-sm font-medium">Lọc theo:</span>
                     <div className="flex flex-wrap gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="rounded-full text-xs"
-                      >
-                        Giá <ChevronRight className="h-3 w-3 ml-1" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="rounded-full text-xs"
-                      >
-                        Diện tích <ChevronRight className="h-3 w-3 ml-1" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="rounded-full text-xs"
-                      >
-                        Vị trí <ChevronRight className="h-3 w-3 ml-1" />
-                      </Button>
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="rounded-full text-xs"
-                      >
-                        Thêm bộ lọc <ChevronRight className="h-3 w-3 ml-1" />
-                      </Button>
+                      <LocationFilter
+                        onFilterChange={handleLocationFilterChange}
+                      />
+                      <PriceRangeFilter
+                        onFilterChange={handlePriceFilterChange}
+                      />
+                      <AreaRangeFilter
+                        onFilterChange={handleAreaFilterChange}
+                      />
+                      <InteriorConditionFilter
+                        onFilterChange={handleInteriorConditionFilterChange}
+                      />
                     </div>
                   </div>
                 </div>
               </section>
-            </div>
-          </div>
-        </section>
-
-        {/* Categories Section */}
-        <section className="py-8">
-          <div className="container mx-auto px-4">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold">Danh mục phòng trọ</h2>
-              <Link
-                to="/categories"
-                className="text-[#ff6d0b] hover:underline text-sm flex items-center"
-              >
-                Xem tất cả <ChevronRight className="h-4 w-4" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              {categories.map((category) => (
-                <Link key={category.id} to={`/category/${category.id}`}>
-                  <Card className="hover:border-[#ff6d0b]/50 transition-colors">
-                    <CardContent className="p-4 flex flex-col items-center text-center">
-                      <div className="h-12 w-12 rounded-full bg-[#ff6d0b]/10 flex items-center justify-center text-[#ff6d0b] mb-3">
-                        {category.icon}
-                      </div>
-                      <h3 className="font-medium mb-1">{category.name}</h3>
-                      <p className="text-sm text-gray-500">
-                        {category.count.toLocaleString()} tin đăng
-                      </p>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Featured Listings */}
-        <section className="py-8 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold">Phòng trọ nổi bật</h2>
-              <Link
-                to="/featured"
-                className="text-[#ff6d0b] hover:underline text-sm flex items-center"
-              >
-                Xem tất cả <ChevronRight className="h-4 w-4" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredListings.map((listing) => (
-                <Card
-                  key={listing.id}
-                  className="overflow-hidden hover:shadow-md transition-shadow"
-                >
-                  <div className="relative">
-                    <img
-                      src={listing.image || "/placeholder.svg"}
-                      alt={listing.title}
-                      width={600}
-                      height={400}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="absolute top-2 right-2 flex gap-1">
-                      {listing.isFeatured && (
-                        <Badge className="bg-[#ff6d0b] hover:bg-[#ff6d0b]">
-                          Nổi bật
-                        </Badge>
-                      )}
-                      {listing.isVerified && (
-                        <Badge className="bg-blue-500 hover:bg-blue-500">
-                          Đã xác thực
-                        </Badge>
-                      )}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute top-2 left-2 h-8 w-8 rounded-full bg-white/80 hover:bg-white"
-                    >
-                      <Heart className="h-4 w-4" />
-                      <span className="sr-only">Lưu tin</span>
-                    </Button>
-                  </div>
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-bold text-[#ff6d0b]">
-                        {listing.price}
-                      </h3>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        <span className="truncate max-w-[150px]">
-                          {listing.location}
-                        </span>
-                      </div>
-                    </div>
-                    <Link to={`/listing/${listing.id}`}>
-                      <h3 className="font-medium line-clamp-2 mb-2 hover:text-[#ff6d0b]">
-                        {listing.title}
-                      </h3>
-                    </Link>
-                    <div className="flex items-center gap-3 text-sm text-gray-500 mb-3">
-                      <span>{listing.area}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {listing.amenities?.map((amenity, index) => (
-                        <span
-                          key={index}
-                          className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
-                        >
-                          {amenity}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="flex justify-between items-center pt-2 border-t">
-                      <div className="flex items-center gap-2">
-                        <img
-                          src={listing.avatarUrl || "/placeholder.svg"}
-                          alt={listing.author}
-                          width={24}
-                          height={24}
-                          className="rounded-full"
-                        />
-                        <span className="text-xs">{listing.author}</span>
-                      </div>
-                      <span className="text-xs text-gray-500">
-                        {listing.postedTime}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Banner Section */}
-        <section className="py-8 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <img
-              src="/placeholder.svg?height=200&width=1200"
-              alt="Banner Quảng Cáo"
-              width={1200}
-              height={200}
-              className="w-full rounded-lg h-auto object-cover"
-            />
-          </div>
-        </section>
-
-        {/* New Listings */}
-        <section className="py-8 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold">Phòng trọ mới đăng</h2>
-              <Link
-                to="/newest"
-                className="text-[#ff6d0b] hover:underline text-sm flex items-center"
-              >
-                Xem tất cả <ChevronRight className="h-4 w-4" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {newListings.map((listing) => (
-                <Card
-                  key={listing.id}
-                  className="overflow-hidden hover:shadow-md transition-shadow"
-                >
-                  <div className="relative">
-                    <img
-                      src={listing.image || "/placeholder.svg"}
-                      alt={listing.title}
-                      width={600}
-                      height={400}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="absolute top-2 right-2 flex gap-1">
-                      {listing.isVerified && (
-                        <Badge className="bg-blue-500 hover:bg-blue-500">
-                          Đã xác thực
-                        </Badge>
-                      )}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute top-2 left-2 h-8 w-8 rounded-full bg-white/80 hover:bg-white"
-                    >
-                      <Heart className="h-4 w-4" />
-                      <span className="sr-only">Lưu tin</span>
-                    </Button>
-                  </div>
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-bold text-[#ff6d0b]">
-                        {listing.price}
-                      </h3>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        <span className="truncate max-w-[150px]">
-                          {listing.location}
-                        </span>
-                      </div>
-                    </div>
-                    <Link to={`/listing/${listing.id}`}>
-                      <h3 className="font-medium line-clamp-2 mb-2 hover:text-[#ff6d0b]">
-                        {listing.title}
-                      </h3>
-                    </Link>
-                    <div className="flex items-center gap-3 text-sm text-gray-500 mb-3">
-                      <span>{listing.area}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {listing.amenities?.map((amenity, index) => (
-                        <span
-                          key={index}
-                          className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
-                        >
-                          {amenity}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="flex justify-between items-center pt-2 border-t">
-                      <div className="flex items-center gap-2">
-                        <img
-                          src={listing.avatarUrl || "/placeholder.svg"}
-                          alt={listing.author}
-                          width={24}
-                          height={24}
-                          className="rounded-full"
-                        />
-                        <span className="text-xs">{listing.author}</span>
-                      </div>
-                      <span className="text-xs text-gray-500">
-                        {listing.postedTime}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
             </div>
           </div>
         </section>
@@ -513,21 +219,106 @@ export default function HomePage() {
                 to="/locations"
                 className="text-[#ff6d0b] hover:underline text-sm flex items-center"
               >
-                Xem tất cả <ChevronRight className="h-4 w-4" />
+                {/* Xem tất cả <ChevronRight className="h-4 w-4" /> */}
               </Link>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {popularLocations.map((location) => (
-                <Link key={location.id} to={`/location/${location.id}`}>
-                  <Card className="hover:border-[#ff6d0b]/50 transition-colors h-full">
-                    <CardContent className="p-4 flex flex-col items-center text-center">
-                      <h3 className="font-medium mb-1">{location.name}</h3>
-                      <p className="text-sm text-gray-500">
-                        {location.count.toLocaleString()} phòng trọ
-                      </p>
-                    </CardContent>
-                  </Card>
-                </Link>
+                <Card
+                  key={location.id}
+                  className="hover:border-[#ff6d0b]/50 transition-colors h-full"
+                >
+                  <CardContent className="p-4 flex flex-col items-center text-center">
+                    <h3 className="font-medium mb-1">{location.name}</h3>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* New Listings */}
+        <section className="py-8 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold">Phòng trọ mới đăng</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {latestPost.map((post) => (
+                <Card
+                  key={post.postId}
+                  className="overflow-hidden hover:shadow-md transition-shadow"
+                >
+                  <div className="relative">
+                    <img
+                      src={
+                        post.multimediaFiles[0]?.fileId
+                          ? `http://localhost:3333/api/files/${post.multimediaFiles[0].fileId}`
+                          : "/placeholder.svg"
+                      }
+                      alt={post.title}
+                      width={600}
+                      height={400}
+                      className="w-full h-48 object-cover"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-2 left-2 h-8 w-8 rounded-full bg-white/80 hover:bg-white"
+                    >
+                      <Heart className="h-4 w-4" />
+                      <span className="sr-only">Lưu tin</span>
+                    </Button>
+                  </div>
+                  <CardContent className="p-4">
+                    <Link to={`/posts/${post.postId}/detail`}>
+                      <h3 className="font-medium line-clamp-2 mb-2 hover:text-[#ff6d0b]">
+                        {post.title}
+                      </h3>
+                    </Link>
+                    <div className="flex flex-col justify-between items-start mb-1">
+                      <div className="flex flex-row items-center gap-2">
+                        <DollarSignIcon className="h-3 w-3 mr-1" />
+                        <p className="font-bold text-[#ff6d0b]">
+                          {Number(post.price).toLocaleString("it-IT", {
+                            style: "currency",
+                            currency: "VND",
+                          })}{" "}
+                          VND
+                        </p>
+                      </div>
+                      <div className="flex items-center text-sm text-gray-500">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        <span className="truncate max-w-[150px]">
+                          {post.city}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm text-gray-500 mb-3">
+                      <span>{post.acreage} m2</span>
+                    </div>
+                    <span className="text-xs text-gray-500">
+                      {(() => {
+                        const postDate = new Date(post.createdAt);
+                        const today = new Date();
+                        const diffTime = Math.abs(
+                          today.getTime() - postDate.getTime()
+                        );
+                        const diffDays = Math.ceil(
+                          diffTime / (1000 * 60 * 60 * 24)
+                        );
+
+                        if (diffDays === 0) {
+                          return "Hôm nay";
+                        } else if (diffDays <= 7) {
+                          return `${diffDays} ngày trước`;
+                        } else {
+                          return "7+ ngày trước";
+                        }
+                      })()}
+                    </span>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </div>
@@ -638,6 +429,13 @@ export default function HomePage() {
             <Button
               size="lg"
               className="bg-white text-[#ff6d0b] hover:bg-gray-100"
+              onClick={() => {
+                if (auth.user?.role.roleName === "Customer") {
+                  nav("/my-posts/create-post");
+                } else {
+                  toast("Chức năng này không khả dụng với bạn");
+                }
+              }}
             >
               Đăng tin ngay
             </Button>

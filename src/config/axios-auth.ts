@@ -1,4 +1,12 @@
-import axios from "axios";
+import { RefreshTokenResponse } from "@/services/types/refresh-token.response";
+import ResponseData from "@/types/response.type";
+import axios, { InternalAxiosRequestConfig } from "axios";
+import { toast } from "sonner";
+
+// Extend the InternalAxiosRequestConfig interface to include _retry property
+interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
 
 const axios_auth = axios.create({
   baseURL: "http://localhost:3333",
@@ -86,41 +94,86 @@ axios_auth.interceptors.request.use((config) => {
   return config;
 });
 
-// axios_auth.interceptors.response.use(
-//   (response) => {
-//     return response;
-//   },
-//   async (error) => {
-//     const originalRequest = error.config; // get the original request
-//     if (
-//       error.response.status === 401 && // if the error is 401 Unauthorized
-//       !originalRequest._retry // and the original request has not been retried yet
-//     ) {
-//       originalRequest._retry = true; // mark the original request as retried
-//       try {
-//         const res = await axios_auth.post<ResponseData<AccessToken>>(
-//           "/refresh-token",
-//           {
-//             refreshToken: localStorage.getItem("refreshToken"),
-//           }
-//         );
-//         if (res.data.success) {
-//           // if the refresh token is valid
-//           axios_auth.defaults.headers.common[
-//             "Authorization"
-//           ] = `Bearer ${res.data.data.accessToken}`;
-//           return axios_auth(originalRequest); // retry the original request
-//         }
-//       } catch (error) {
-//         console.log("Intercepter Axios", error);
-//         // if the refresh token is invalid
-//         localStorage.removeItem("refreshToken");
-//         localStorage.removeItem("accessToken");
-//         localStorage.removeItem("account");
-//         window.location.href = "/";
-//       }
-//     }
-//     return Promise.reject(error);
-//   }
-// );
+axios_auth.interceptors.response.use(
+  async (response) => {
+    if (response.status === 401) {
+      // Get the original request config
+      const originalConfig = response.config as CustomAxiosRequestConfig;
+
+      // If this request has already been retried or no refresh token, don't retry
+      if (originalConfig._retry || !localStorage.getItem("refreshToken")) {
+        // Clear auth data and redirect to login
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("account");
+        window.location.replace("/login");
+        return response;
+      }
+
+      // Mark as retried
+      originalConfig._retry = true;
+
+      try {
+        // Use axios_base to avoid sending the expired token
+        const res = await axios_base.post<ResponseData<RefreshTokenResponse>>(
+          "api/auth/refresh-token",
+          {
+            refreshToken: localStorage.getItem("refreshToken"),
+          }
+        );
+
+        if (res.data.status === 200) {
+          // If the refresh token is valid
+          const newToken = res.data.data?.accessToken;
+          if (newToken) {
+            localStorage.setItem("accessToken", newToken);
+
+            // Update the auth header for future requests
+            axios_auth.defaults.headers.common[
+              "Authorization"
+            ] = `Bearer ${newToken}`;
+
+            // Update the auth header for this specific request
+            originalConfig.headers.Authorization = `Bearer ${newToken}`;
+
+            // Retry the original request with the new token
+            return axios_auth(originalConfig);
+          }
+        }
+
+        // If refresh token failed or newToken is undefined
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("account");
+        window.location.replace("/login");
+        return response;
+      } catch (error) {
+        console.log("Interceptor Axios", error);
+        // If the refresh token is invalid
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("account");
+        window.location.replace("/login");
+        return response;
+      }
+    }
+    return response;
+  },
+  async (error) => {
+    console.log("Interceptor Axios", error);
+    return Promise.reject(error);
+  }
+);
+axios_auth.interceptors.response.use(async (response) => {
+  if (response.data.message === "Invalid Request" && response.status === 400) {
+    try {
+      toast("Yêu cầu không hợp lệ, vui lòng thử lại");
+    } catch (error) {
+      console.log("Interceptor Axios", error);
+      // If the refresh token is invalid
+    }
+    return response;
+  }
+  return response;
+});
 export { axios_auth, axios_base };

@@ -121,6 +121,7 @@ export function PostListings({
     if (posts.length === 0) {
       loadMorePosts();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -142,6 +143,7 @@ export function PostListings({
         observer.unobserve(observerTarget.current);
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasMore, isLoading]);
 
   const handlePostClick = (id: number) => {

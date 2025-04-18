@@ -163,7 +163,11 @@ export default function RegisterPage() {
               id="birthday"
               name="birthday"
               type="date"
-              value={birthday ? birthday.toISOString().split("T")[0] : " "}
+              value={
+                birthday instanceof Date && !isNaN(birthday.getTime())
+                  ? birthday.toISOString().split("T")[0]
+                  : ""
+              }
               onChange={(e) => setBirthday(new Date(e.target.value))}
               className="pr-8"
             />

@@ -48,7 +48,7 @@ export function ProfileInfoForm() {
             email: data.account.email || "",
             gender: data.gender || "",
             birthDate: data.birthday
-              ? new Date(data.birthday).toISOString().split("T")[0]
+              ? moment(data.birthday).format("DD-MM-YYYY")
               : "",
           });
         } else {
@@ -167,18 +167,6 @@ export function ProfileInfoForm() {
           />
           <div className="text-right text-xs text-gray-500">Tối đa 60 từ</div>
         </div>
-
-        {/* <div className="space-y-2">
-          <Label htmlFor="nickname">Tên gợi nhớ</Label>
-          <Input
-            id="nickname"
-            name="nickname"
-            value={formData.nickname}
-            onChange={handleChange}
-            placeholder="Tên gợi nhớ"
-          />
-          <div className="text-xs text-gray-500"></div>
-        </div> */}
 
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>

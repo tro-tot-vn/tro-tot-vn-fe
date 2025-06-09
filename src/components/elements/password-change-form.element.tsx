@@ -5,13 +5,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import authService from "@/services/auth.service";
 import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
 
 export function PasswordChangeForm() {
   const [formData, setFormData] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
-    showPhone: true,
+  });
+
+  const [showPasswords, setShowPasswords] = useState({
+    currentPassword: false,
+    newPassword: false,
+    confirmPassword: false,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -19,13 +25,12 @@ export function PasswordChangeForm() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // const handleSwitchChange = (checked: boolean) => {
-  //   setFormData((prev) => ({ ...prev, showPhone: checked }));
-  // };
+  const togglePasswordVisibility = (field: keyof typeof showPasswords) => {
+    setShowPasswords((prev) => ({ ...prev, [field]: !prev[field] }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Implement password change logic here
     if (formData.newPassword !== formData.confirmPassword) {
       toast("Mật khẩu mới và xác nhận mật khẩu không khớp.");
       return;
@@ -34,6 +39,11 @@ export function PasswordChangeForm() {
       .changePassword(formData.currentPassword, formData.newPassword)
       .then((response) => {
         if (response.status === 200) {
+          setFormData({
+            currentPassword: "",
+            newPassword: "",
+            confirmPassword: "",
+          });
           toast("Mật khẩu đã được thay đổi thành công.");
         } else if (response.status === 400 && response.data.message === "PASSWORD_NOT_MATCH") {
           toast("Mật khẩu hiện tại không đúng.");
@@ -45,7 +55,6 @@ export function PasswordChangeForm() {
         console.error("Error changing password:", error);
         toast("Đã xảy ra lỗi khi thay đổi mật khẩu.");
       });
-    // You can also send the formData to your backend API
     console.log("Password change submitted:", formData);
   };
 
@@ -58,45 +67,84 @@ export function PasswordChangeForm() {
             <Label htmlFor="currentPassword">
               Mật khẩu hiện tại <span className="text-red-500">*</span>
             </Label>
-            <Input
-              id="currentPassword"
-              name="currentPassword"
-              type="password"
-              value={formData.currentPassword}
-              onChange={handleChange}
-              required
-              className="w-full"
-            />
+            <div className="relative">
+              <Input
+                id="currentPassword"
+                name="currentPassword"
+                type={showPasswords.currentPassword ? "text" : "password"}
+                value={formData.currentPassword}
+                onChange={handleChange}
+                required
+                className="w-full pr-10"
+              />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                onClick={() => togglePasswordVisibility("currentPassword")}
+              >
+                {showPasswords.currentPassword ? (
+                  <EyeOff className="h-4 w-4 text-gray-400" />
+                ) : (
+                  <Eye className="h-4 w-4 text-gray-400" />
+                )}
+              </button>
+            </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="newPassword">
               Mật khẩu mới <span className="text-red-500">*</span>
             </Label>
-            <Input
-              id="newPassword"
-              name="newPassword"
-              type="password"
-              value={formData.newPassword}
-              onChange={handleChange}
-              required
-              className="w-full"
-            />
+            <div className="relative">
+              <Input
+                id="newPassword"
+                name="newPassword"
+                type={showPasswords.newPassword ? "text" : "password"}
+                value={formData.newPassword}
+                onChange={handleChange}
+                required
+                className="w-full pr-10"
+              />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                onClick={() => togglePasswordVisibility("newPassword")}
+              >
+                {showPasswords.newPassword ? (
+                  <EyeOff className="h-4 w-4 text-gray-400" />
+                ) : (
+                  <Eye className="h-4 w-4 text-gray-400" />
+                )}
+              </button>
+            </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">
               Xác nhận mật khẩu mới <span className="text-red-500">*</span>
             </Label>
-            <Input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-              className="w-full"
-            />
+            <div className="relative">
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type={showPasswords.confirmPassword ? "text" : "password"}
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+                className="w-full pr-10"
+              />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                onClick={() => togglePasswordVisibility("confirmPassword")}
+              >
+                {showPasswords.confirmPassword ? (
+                  <EyeOff className="h-4 w-4 text-gray-400" />
+                ) : (
+                  <Eye className="h-4 w-4 text-gray-400" />
+                )}
+              </button>
+            </div>
           </div>
 
           <Button
@@ -107,31 +155,6 @@ export function PasswordChangeForm() {
           </Button>
         </form>
       </div>
-
-      {/* <div className="pt-6 border-t">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="font-medium">
-              Cho phép người mua liên lạc qua điện thoại
-            </h3>
-            <p className="text-sm text-gray-500 mt-1">
-              Khi bật tính năng này, số điện thoại sẽ hiển thị trên tất cả tin
-              đăng của bạn.
-            </p>
-          </div>
-          <Switch
-            checked={formData.showPhone}
-            onCheckedChange={handleSwitchChange}
-            className="data-[state=checked]:bg-[#ff6d0b]"
-          />
-        </div>
-      </div> */}
-
-      {/* <div className="pt-6 border-t">
-        <Button variant="link" className="text-blue-600 p-0 h-auto">
-          Yêu cầu chấm dứt tài khoản
-        </Button>
-      </div> */}
     </div>
   );
 }

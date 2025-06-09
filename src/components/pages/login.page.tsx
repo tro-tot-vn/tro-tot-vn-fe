@@ -14,6 +14,7 @@ export default function LoginPage() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [isLoginFailure, setLoginFailure] = useState(false);
+  const [loginMessage, setLoginMessage] = useState("");
   const auth = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,10 +33,10 @@ export default function LoginPage() {
           }
         } else if (res.status === 401) {
           setLoginFailure(true);
-          toast.error("Số điện thoại hoặc mật khẩu chưa đúng");
+          setLoginMessage("Số điện thoại hoặc mật khẩu chưa đúng");
         } else if (res.status === 423) {
           setLoginFailure(true);
-          toast.error("Tài khoản của bạn đã bị khóa");
+          setLoginMessage("Tài khoản của bạn đã bị khóa");
         } else {
           setLoginFailure(true);
         }
@@ -43,7 +44,7 @@ export default function LoginPage() {
       .catch((err) => {
         setLoginFailure(true);
         console.error("Login error", err);
-        toast.error("Đăng nhập thất bại");
+        setLoginMessage("Đăng nhập thất bại");
       });
   };
 
@@ -82,7 +83,7 @@ export default function LoginPage() {
                 size={20}
               ></TriangleAlert>
               <p className="flex flex-1 text-[14px] text-muted-foreground justify-center items-center">
-                Số điện thoại hoặc mật khẩu chưa đúng, vui lòng kiểm tra lại
+                {loginMessage}
               </p>
             </div>
           )}

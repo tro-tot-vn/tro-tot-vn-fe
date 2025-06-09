@@ -32,9 +32,8 @@ class AuthService {
         data
       );
       return res.data;
-    } catch (error) {
-      const axiosError = error as AxiosError<ResponseData<any>>;
-      return axiosError.response ?? null; // Trả về response hoặc null nếu không có
+    } catch (e) {
+      return null;
     }
   }
   async getPost() {
@@ -166,9 +165,9 @@ class AuthService {
     }
   }
   async getStatisticsForDashBoard() {
-    return await axios_auth.get<
-      ResponseData<GetStaticsResponse>
-    >(`api/admin/statistics`);
+    return await axios_auth.get<ResponseData<GetStaticsResponse>>(
+      `api/admin/statistics`
+    );
   }
 }
 export default new AuthService();

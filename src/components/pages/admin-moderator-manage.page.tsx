@@ -1,5 +1,23 @@
-import { Card, Table, Button, Tag, Modal, Input, Form, Select, DatePicker, message, Descriptions } from "antd";
-import { EyeOutlined, LockOutlined, SettingFilled, UnlockOutlined, UserAddOutlined } from "@ant-design/icons";
+import {
+  Card,
+  Table,
+  Button,
+  Tag,
+  Modal,
+  Input,
+  Form,
+  Select,
+  DatePicker,
+  message,
+  Descriptions,
+} from "antd";
+import {
+  EyeOutlined,
+  LockOutlined,
+  SettingFilled,
+  UnlockOutlined,
+  UserAddOutlined,
+} from "@ant-design/icons";
 import adminService from "@/services/admin.service";
 import { getMorderatorListResponse } from "@/services/types/morderator-response";
 import { useEffect, useState } from "react";
@@ -9,14 +27,20 @@ import { PostMoratorHistoryResponse } from "@/services/types/postModerateHistory
 const { Option } = Select;
 
 export default function ModeratorsPage() {
-  const [moderatorList, setModeratorList] = useState<getMorderatorListResponse[]>([]);
+  const [moderatorList, setModeratorList] = useState<
+    getMorderatorListResponse[]
+  >([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
-  const [moderatorHistory, setModeratorHistory] = useState<PostMoratorHistoryResponse[]>([]);
+  const [moderatorHistory, setModeratorHistory] = useState<
+    PostMoratorHistoryResponse[]
+  >([]);
   const [isHistoryModalVisible, setIsHistoryModalVisible] = useState(false);
   const [profileModerator, setProfileModerator] = useState<any>(null);
   const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
-  const [selectedModeratorId, setSelectedModeratorId] = useState<number | null>(null);
+  const [selectedModeratorId, setSelectedModeratorId] = useState<number | null>(
+    null
+  );
   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
   const [keySearch, setKeySearch] = useState("");
   const [form] = Form.useForm();
@@ -29,7 +53,6 @@ export default function ModeratorsPage() {
     }
   };
 
-  
   useEffect(() => {
     fetchApi();
   }, []);
@@ -44,10 +67,18 @@ export default function ModeratorsPage() {
       const result = await adminService.createModerator(values);
       if (result) {
         if (result.status === 200) {
+          form.resetFields();
+          setIsModalVisible(false);
           messageApi.success("Thêm người kiểm duyệt thành công");
           fetchApi();
         } else if (result.status === 400) {
-          messageApi.error("Email đã tồn tại");
+          if (result.message === "PHONE_ALREADY_EXISTS") {
+            messageApi.error("Số điện thoại đã tồn tại");
+          } else if (result.message === "EMAIL_ALREADY_EXISTS") {
+            messageApi.error("Email đã tồn tại");
+          } else {
+            messageApi.error("Thông tin không hợp lệ, vui lòng kiểm tra lại");
+          }
         } else if (result.status === 404) {
           messageApi.error("Không tìm thấy người dùng");
         } else if (result.status === 500) {
@@ -56,17 +87,15 @@ export default function ModeratorsPage() {
           messageApi.error("Không thể thêm mới người dùng");
         }
       }
-      setIsModalVisible(false);
-      form.resetFields();
     } catch (errorInfo) {
-      console.log('Lỗi khi nhận giá trị từ form: ', errorInfo);
+      console.log("Lỗi khi nhận giá trị từ form: ", errorInfo);
       messageApi.error("Không thể kết nối đến máy chủ");
     }
   };
 
   const handleCancel = () => {
     setIsModalVisible(false);
-    form.resetFields();
+    // form.resetFields();
   };
 
   const handleChangStatus = async (status: string, adminId: number) => {
@@ -125,8 +154,8 @@ export default function ModeratorsPage() {
     } catch (error) {
       console.error("Lỗi khi lấy lịch sử:", error);
     }
-  }
-  console.log(profileModerator)
+  };
+  console.log(profileModerator);
 
   // Hàm mở modal đổi mật khẩu và lưu moderatorId
   const showPasswordModal = (moderatorId: number) => {
@@ -138,16 +167,18 @@ export default function ModeratorsPage() {
   const handlePasswordChange = async () => {
     try {
       const values = await passwordForm.validateFields();
-      const newPassword = values.newPassword; 
-      console.log(newPassword)
+      const newPassword = values.newPassword;
+      console.log(newPassword);
       if (selectedModeratorId === null) {
         messageApi.error("Không xác định được người dùng để đổi mật khẩu");
         return;
-        
       }
-      console.log(selectedModeratorId)
-      const result = await adminService.resetPasswordAdmin(newPassword, selectedModeratorId);
-      console.log(result)
+      console.log(selectedModeratorId);
+      const result = await adminService.resetPasswordAdmin(
+        newPassword,
+        selectedModeratorId
+      );
+      console.log(result);
       if (result?.status === 200) {
         messageApi.success("Đổi mật khẩu thành công!");
       } else if (result?.status === 404) {
@@ -165,13 +196,13 @@ export default function ModeratorsPage() {
     }
   };
 
-
   const columns = [
     {
       title: "Tên",
       dataIndex: "name",
       key: "name",
-      render: (_text: any, record: any) => `${record.firstName} ${record.lastName}`,
+      render: (_text: any, record: any) =>
+        `${record.firstName} ${record.lastName}`,
     },
     {
       title: "Email",
@@ -198,15 +229,42 @@ export default function ModeratorsPage() {
       key: "actions",
       render: (_text: any, record: any) => (
         <div className="flex justify-start gap-2">
-          <Button type="link" icon={<EyeOutlined />} onClick={() => fetchApiHistoryModerator(record.adminId)} />
           <Button
             type="link"
-            icon={record.account.status === "Active" ? <LockOutlined /> : <UnlockOutlined />}
-            className={record.account.status === "Active" ? "text-red-500" : "text-green-500"}
-            onClick={() => handleChangStatus(record.account.status === "Active" ? "InActive" : "Active", record.adminId)}
+            icon={<EyeOutlined />}
+            onClick={() => fetchApiHistoryModerator(record.adminId)}
           />
-          <Button type="link" icon={<User />} onClick={() => fetchApiProileModerator(record.adminId)} />
-          <Button type="link" icon={<SettingFilled />} onClick={() => showPasswordModal(record.adminId)} />
+          <Button
+            type="link"
+            icon={
+              record.account.status === "Active" ? (
+                <LockOutlined />
+              ) : (
+                <UnlockOutlined />
+              )
+            }
+            className={
+              record.account.status === "Active"
+                ? "text-red-500"
+                : "text-green-500"
+            }
+            onClick={() =>
+              handleChangStatus(
+                record.account.status === "Active" ? "InActive" : "Active",
+                record.adminId
+              )
+            }
+          />
+          <Button
+            type="link"
+            icon={<User />}
+            onClick={() => fetchApiProileModerator(record.adminId)}
+          />
+          <Button
+            type="link"
+            icon={<SettingFilled />}
+            onClick={() => showPasswordModal(record.adminId)}
+          />
         </div>
       ),
     },
@@ -219,7 +277,11 @@ export default function ModeratorsPage() {
         <main className="flex-1 p-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-3xl font-bold">Quản lý Người kiểm duyệt</h1>
-            <Button type="primary" icon={<UserAddOutlined />} onClick={showModal}>
+            <Button
+              type="primary"
+              icon={<UserAddOutlined />}
+              onClick={showModal}
+            >
               Thêm Người kiểm duyệt
             </Button>
           </div>
@@ -234,11 +296,19 @@ export default function ModeratorsPage() {
                 }}
                 style={{}}
               />
-              <Button type="primary" onClick={fetchApi} style={{ marginLeft: 16 }}>
+              <Button
+                type="primary"
+                onClick={fetchApi}
+                style={{ marginLeft: 16 }}
+              >
                 Tìm kiếm
               </Button>
             </div>
-            <Table columns={columns} dataSource={moderatorList} rowKey="adminId" />
+            <Table
+              columns={columns}
+              dataSource={moderatorList}
+              rowKey="adminId"
+            />
           </Card>
 
           <Modal
@@ -246,40 +316,45 @@ export default function ModeratorsPage() {
             open={isModalVisible}
             onOk={handleOk}
             onCancel={handleCancel}
+            maskClosable={false}
           >
             <Form form={form} layout="vertical">
               <Form.Item
                 label="Họ"
                 name="firstName"
-                rules={[{ required: true, message: 'Vui lòng nhập họ!' }]}
+                rules={[{ required: true, message: "Vui lòng nhập họ!" }]}
               >
                 <Input />
               </Form.Item>
               <Form.Item
                 label="Tên"
                 name="lastName"
-                rules={[{ required: true, message: 'Vui lòng nhập tên!' }]}
+                rules={[{ required: true, message: "Vui lòng nhập tên!" }]}
               >
                 <Input />
               </Form.Item>
               <Form.Item
                 label="Email"
                 name="email"
-                rules={[{ required: true, message: 'Vui lòng nhập email!' }]}
+                rules={[{ required: true, message: "Vui lòng nhập email!" }]}
               >
                 <Input type="email" />
               </Form.Item>
               <Form.Item
                 label="Số điện thoại"
                 name="phone"
-                rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]}
+                rules={[
+                  { required: true, message: "Vui lòng nhập số điện thoại!" },
+                ]}
               >
                 <Input type="tel" />
               </Form.Item>
               <Form.Item
                 label="Giới tính"
                 name="gender"
-                rules={[{ required: true, message: 'Vui lòng chọn giới tính!' }]}
+                rules={[
+                  { required: true, message: "Vui lòng chọn giới tính!" },
+                ]}
               >
                 <Select>
                   <Option value="Male">Nam</Option>
@@ -289,14 +364,16 @@ export default function ModeratorsPage() {
               <Form.Item
                 label="Ngày sinh"
                 name="birthday"
-                rules={[{ required: true, message: 'Vui lòng chọn ngày sinh!' }]}
+                rules={[
+                  { required: true, message: "Vui lòng chọn ngày sinh!" },
+                ]}
               >
-                <DatePicker style={{ width: '100%' }} />
+                <DatePicker style={{ width: "100%" }} />
               </Form.Item>
               <Form.Item
                 label="Mật khẩu"
                 name="password"
-                rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+                rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
               >
                 <Input.Password />
               </Form.Item>
@@ -313,24 +390,25 @@ export default function ModeratorsPage() {
             <Table
               columns={[
                 {
-                  title: 'Tiêu đề tin',
-                  key: 'title',
-                  render: (record: PostMoratorHistoryResponse) => record.post?.title || "Không có",
+                  title: "Tiêu đề tin",
+                  key: "title",
+                  render: (record: PostMoratorHistoryResponse) =>
+                    record.post?.title || "Không có",
                 },
                 {
-                  title: 'Hành động',
-                  dataIndex: 'actionType',
-                  key: 'actionType',
+                  title: "Hành động",
+                  dataIndex: "actionType",
+                  key: "actionType",
                 },
                 {
-                  title: 'Lý do',
-                  dataIndex: 'reason',
-                  key: 'reason',
+                  title: "Lý do",
+                  dataIndex: "reason",
+                  key: "reason",
                 },
                 {
-                  title: 'Thời gian',
-                  dataIndex: 'execAt',
-                  key: 'execAt',
+                  title: "Thời gian",
+                  dataIndex: "execAt",
+                  key: "execAt",
                   render: (execAt: string) => new Date(execAt).toLocaleString(),
                 },
               ]}
@@ -361,8 +439,12 @@ export default function ModeratorsPage() {
                 <Descriptions.Item label="Ngày gia nhập">
                   {new Date(profileModerator.joinedAt).toLocaleDateString()}
                 </Descriptions.Item>
-                <Descriptions.Item label="Số điện thoại">{profileModerator.account.phone}</Descriptions.Item>
-                <Descriptions.Item label="Email">{profileModerator.account.email}</Descriptions.Item>
+                <Descriptions.Item label="Số điện thoại">
+                  {profileModerator.account.phone}
+                </Descriptions.Item>
+                <Descriptions.Item label="Email">
+                  {profileModerator.account.email}
+                </Descriptions.Item>
               </Descriptions>
             )}
           </Modal>
@@ -379,7 +461,9 @@ export default function ModeratorsPage() {
               <Form.Item
                 label="Mật khẩu mới"
                 name="newPassword"
-                rules={[{ required: true, message: "Vui lòng nhập mật khẩu mới!" }]}
+                rules={[
+                  { required: true, message: "Vui lòng nhập mật khẩu mới!" },
+                ]}
               >
                 <Input.Password />
               </Form.Item>

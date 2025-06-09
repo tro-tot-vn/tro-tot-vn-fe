@@ -201,6 +201,7 @@ export function SiteHeader() {
               title="Hồ sơ cá nhân"
               open={isProfileModalOpen}
               onCancel={handleCancel}
+              maskClosable={false}
               footer={[
                 !isEditing ? (
                   <AntdButton key="edit" type="primary" onClick={handleEdit}>

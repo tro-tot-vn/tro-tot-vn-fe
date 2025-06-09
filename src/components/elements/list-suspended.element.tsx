@@ -1,5 +1,6 @@
 import NoPostElement from "./no-post.element";
 import { Clock, MapPin } from "lucide-react";
+import { vi } from "date-fns/locale";
 import { Link } from "react-router";
 import {
   Card,
@@ -9,7 +10,7 @@ import {
   CardTitle,
 } from "../ui/card";
 import { ListPostRes } from "@/services/types/get-list-post-by-status-reponse";
-import { formatDistance, subDays } from "date-fns";
+import { formatDistance } from "date-fns";
 
 export function ListSuspendedPost({
   listPostRes,
@@ -70,9 +71,9 @@ export function ListSuspendedPost({
                               <Clock className="h-3 w-3 mr-1" />
                               <span>
                                 {formatDistance(
-                                  subDays(post.createdAt, 3),
+                                  new Date(post.createdAt),
                                   new Date(),
-                                  { addSuffix: true }
+                                  { addSuffix: true, locale: vi }
                                 )}
                               </span>
                             </div>

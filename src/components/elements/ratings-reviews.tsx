@@ -26,11 +26,12 @@ import { GetMyRateFromPostRes } from "@/services/types/get-my-rate-from-post.res
 import { StatsPostResponse } from "@/services/types/get-stats-post.response";
 interface RatingsReviewsProps {
   postId: number;
+  ownerId: number;
 }
 
 const customerService = new CustomerService();
 
-export function RatingsReviews({ postId }: RatingsReviewsProps) {
+export function RatingsReviews({ postId, ownerId }: RatingsReviewsProps) {
   const [rateStats, setRateStats] = useState<StatsPostResponse | null>(null);
   const [rates, setRates] = useState<RateResponse[]>([]);
   const [nextCursor, setNextCursor] = useState<Date | null>(null);
@@ -173,29 +174,36 @@ export function RatingsReviews({ postId }: RatingsReviewsProps) {
       <div className="flex flex-1 flex-col mt-12">
         <div className=" flex min-w-full items-center justify-center">
           {/* check owner */}
-          <Button
-            onClick={() => {
-              if (auth.isAuthenticated) {
-                setOpenDialog(true);
-              } else {
-                toast("Vui lòng đăng nhập để đánh giá bài đăng này", {
-                  description:
-                    "Đăng nhập ngay để trải nghiệm nhiều tính năng hơn",
-                  action: {
-                    label: "Đăng nhập",
-                    onClick: () => {
-                      nav("/login");
+
+          {auth.user?.customer.customerId === ownerId ? (
+            <></>
+          ) : (
+            <Button
+              onClick={() => {
+                if (auth.isAuthenticated) {
+                  setOpenDialog(true);
+                } else {
+                  toast("Vui lòng đăng nhập để đánh giá bài đăng này", {
+                    description:
+                      "Đăng nhập ngay để trải nghiệm nhiều tính năng hơn",
+                    action: {
+                      label: "Đăng nhập",
+                      onClick: () => {
+                        nav("/login");
+                      },
                     },
-                  },
-                });
-              }
-            }}
-            variant="outline"
-            className="mb-4"
-          >
-            <PencilIcon></PencilIcon>{" "}
-            {myRate ? "Cập nhật đánh giá" : "Đánh giá bài đăng"}
-          </Button>
+                  });
+                }
+              }}
+              variant="outline"
+              className="mb-4"
+            >
+              <>
+                <PencilIcon></PencilIcon>{" "}
+                {myRate ? "Cập nhật đánh giá" : "Đánh giá bài đăng"}
+              </>
+            </Button>
+          )}
         </div>
 
         {myRate ? (

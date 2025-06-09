@@ -177,7 +177,7 @@ export default function PostDetailPage() {
                 </div>
 
                 {/* Phần đánh giá */}
-                <RatingsReviews postId={postId} />
+                <RatingsReviews postId={postId} ownerId={postData.owner.customerId} />
               </div>
             </div>
           </div>

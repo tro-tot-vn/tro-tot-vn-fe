@@ -1,6 +1,7 @@
 import NoPostElement from "./no-post.element";
 import { Clock, MapPin } from "lucide-react";
 import { Link } from "react-router";
+import { vi } from "date-fns/locale";
 import {
   Card,
   CardContent,
@@ -8,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { formatDistance, subDays } from "date-fns";
+import { formatDistance } from "date-fns";
 import { useEffect, useState } from "react";
 import { CustomerService } from "@/services/customer.service";
 import { PostResponse } from "@/services/types/post-response";
@@ -32,9 +33,7 @@ export function HistoryPostElement() {
         } else if (response.status === 404) {
           console.log("Không tìm thấy dữ liệu lịch sử xem tin");
         } else {
-          console.log(
-            "Lỗi không xác định khi lấy dữ liệu lịch sử xem tin"
-          );
+          console.log("Lỗi không xác định khi lấy dữ liệu lịch sử xem tin");
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -94,9 +93,9 @@ export function HistoryPostElement() {
                               <Clock className="h-3 w-3 mr-1" />
                               <span>
                                 {formatDistance(
-                                  subDays(post.createdAt, 3),
+                                  new Date(post.createdAt),
                                   new Date(),
-                                  { addSuffix: true }
+                                  { addSuffix: true, locale: vi }
                                 )}
                               </span>
                             </div>

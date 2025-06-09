@@ -1,5 +1,3 @@
-import { Button } from "../ui/button";
-
 export default function NoPostElement() {
   return (
     <div className="text-center py-16">
@@ -14,9 +12,6 @@ export default function NoPostElement() {
       <p className="text-muted-foreground mb-6">
         Bạn hiện tại không có tin đăng nào cho trạng thái này
       </p>
-      <Button className="bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white">
-        Đăng tin
-      </Button>
     </div>
   );
 }

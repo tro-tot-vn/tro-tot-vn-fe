@@ -50,7 +50,7 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
   const [nextCursor, setNextCursor] = useState<Date | null>(null);
-  const [totalResults, setTotalResults] = useState(0);
+  const [, setTotalResults] = useState(0);
 
   // Mock API call to fetch search results
   const fetchSearchResults = async (cursor: Date | null = null) => {
@@ -308,8 +308,7 @@ export default function SearchPage() {
               "Đang tìm kiếm..."
             ) : (
               <>
-                Tìm thấy {totalResults} kết quả
-                {searchQuery ? ` cho "${searchQuery}"` : ""}
+                Search
               </>
             )}
           </h1>

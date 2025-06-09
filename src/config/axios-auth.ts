@@ -96,6 +96,7 @@ axios_auth.interceptors.request.use((config) => {
 
 axios_auth.interceptors.response.use(
   async (response) => {
+    console.log("Interceptor Axios", response.status);
     if (response.status === 401) {
       // Get the original request config
       const originalConfig = response.config as CustomAxiosRequestConfig;
@@ -156,6 +157,15 @@ axios_auth.interceptors.response.use(
         window.location.replace("/login");
         return response;
       }
+    } else if (response.status === 423) {
+      // If the account is locked
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("account");
+      toast.error("Tài khoản của bạn đã bị khóa");
+      setTimeout(() => {
+        window.location.replace("/login");
+      }, 1000);
     }
     return response;
   },

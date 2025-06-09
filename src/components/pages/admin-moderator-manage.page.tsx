@@ -189,7 +189,7 @@ export default function ModeratorsPage() {
       key: "status",
       render: (status: string) => (
         <Tag color={status === "Active" ? "green" : "red"}>
-          {status === "Active" ? "Hoạt động" : "Không hoạt động"}
+          {status === "Active" ? "Hoạt động" : "Ngừng hoạt động"}
         </Tag>
       ),
     },

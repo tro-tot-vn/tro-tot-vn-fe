@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import { TriangleAlert, X } from "lucide-react";
 import authService from "@/services/auth.service";
 import useAuth from "@/hooks/use-auth";
@@ -15,7 +15,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isLoginFailure, setLoginFailure] = useState(false);
   const auth = useAuth();
-  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +29,6 @@ export default function LoginPage() {
               res.data.data.token.refreshToken
             );
             toast("Đăng nhập thành công");
-            navigate("/home");
           }
         } else if (res.status === 401) {
           setLoginFailure(true);

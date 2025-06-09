@@ -175,7 +175,9 @@ export function RatingsReviews({ postId, ownerId }: RatingsReviewsProps) {
         <div className=" flex min-w-full items-center justify-center">
           {/* check owner */}
 
-          {auth.user?.customer.customerId === ownerId ? (
+          {(auth.user?.customer?.customerId ||
+          -1) === ownerId ||
+          (auth.user?.role.roleName !== "Customer") ? (
             <></>
           ) : (
             <Button

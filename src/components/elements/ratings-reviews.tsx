@@ -136,11 +136,12 @@ export function RatingsReviews({ postId, ownerId }: RatingsReviewsProps) {
     customerService.addRate(rating, comment, postId).then((res) => {
       if (res.status === 200) {
         toast.success("Đánh giá thành công");
+        setRates([]);
         loadMyRate();
-        // setNextCursor(null);
-        // setRates([]);
-        // setHasMore(true);
-        // loadMoreRates();
+        loadStatsPost();
+        setNextCursor(null);
+        setHasMore(true);
+        loadMoreRates();
       } else {
         toast.error("Đánh giá thất bại");
       }
@@ -152,6 +153,8 @@ export function RatingsReviews({ postId, ownerId }: RatingsReviewsProps) {
       if (res.status === 200) {
         toast.success("Xóa đánh giá thành công");
         loadMyRate();
+        loadStatsPost();
+        setRates(rates.filter((rate) => rate.rateId !== myRate?.rateId));
       } else {
         toast.error("Xóa đánh giá thất bại");
       }
@@ -175,9 +178,8 @@ export function RatingsReviews({ postId, ownerId }: RatingsReviewsProps) {
         <div className=" flex min-w-full items-center justify-center">
           {/* check owner */}
 
-          {(auth.user?.customer?.customerId ||
-          -1) === ownerId ||
-          (auth.user?.role.roleName !== "Customer") ? (
+          {(auth.user?.customer?.customerId || -1) === ownerId ||
+          auth.user?.role.roleName !== "Customer" ? (
             <></>
           ) : (
             <Button

@@ -1,17 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Phone,
-  MessageCircle,
-  Flag,
-  MapPin,
-  User,
-} from "lucide-react";
+import { Phone, MessageCircle, Flag, MapPin, User } from "lucide-react";
 import { Owner } from "@/services/types/get-detail-post.response";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
 import useAuth from "@/hooks/use-auth";
+import getCurrentFileUrl from "@/utils/get-file-url";
+import { Gender } from "@/services/types/value-object.enum";
 
 export function SellerInfo({
   customerInformation,
@@ -26,13 +21,21 @@ export function SellerInfo({
         {/* Thông tin người bán */}
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-4">
-            <Avatar className="h-16 w-16">
-              <AvatarImage
-                src="/placeholder.svg?height=64&width=64"
-                alt="Người bán"
+            <div className="h-22 w-22 rounded-full border-4  border-white bg-white overflow-hidden">
+              <img
+                src={
+                  customerInformation.avatar
+                    ? getCurrentFileUrl(customerInformation.avatar)
+                    : customerInformation.gender == Gender.MALE
+                    ? "/male-avatar.png"
+                    : "/female-avatar.jpg"
+                }
+                alt="Avatar"
+                width={96}
+                height={96}
+                className="w-full h-full object-cover"
               />
-              <AvatarFallback>NT</AvatarFallback>
-            </Avatar>
+            </div>
             <div>
               <h3 className="text-lg font-medium">
                 {customerInformation.lastName +

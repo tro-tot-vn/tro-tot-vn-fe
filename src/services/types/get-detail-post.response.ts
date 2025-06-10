@@ -30,6 +30,7 @@ export interface File {
 
 export interface Owner {
   customerId: number;
+  gender: string;
   firstName: string;
   lastName: string;
   avatar: null;

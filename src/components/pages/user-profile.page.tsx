@@ -1,11 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  Clock,
-  MapPin,
-  MessageCircle,
-  LoaderCircle,
-} from "lucide-react";
+import { Clock, MapPin, MessageCircle, LoaderCircle } from "lucide-react";
 import { PostRecent } from "../elements/post-listing.element";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import { CustomerService } from "@/services/customer.service";
@@ -14,6 +9,7 @@ import { useEffect, useState } from "react";
 import { GetCustomerInformationRes } from "@/services/types/get-customer-information";
 import { toast } from "sonner";
 import { Gender } from "@/services/types/value-object.enum";
+import getCurrentFileUrl from "@/utils/get-file-url";
 
 const customerService = new CustomerService();
 
@@ -87,10 +83,11 @@ export default function CustomerProfilePage() {
                 <div className="h-22 w-22 rounded-full border-4  border-white bg-white overflow-hidden">
                   <img
                     src={
-                      customerInformation.avatar ||
-                      ((customerInformation.gender == Gender.FEMALE) ? "/male-avatar.png" : 
-                        "/female-avatar.jpg"
-                      )
+                      customerInformation.avatar
+                        ? getCurrentFileUrl(customerInformation.avatar)
+                        : customerInformation.gender == Gender.MALE
+                        ? "/male-avatar.png"
+                        : "/female-avatar.jpg"
                     }
                     alt="Avatar"
                     width={96}

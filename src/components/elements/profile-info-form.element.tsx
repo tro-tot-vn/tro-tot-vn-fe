@@ -1,5 +1,5 @@
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -15,19 +16,42 @@ import { DatePicker } from "antd";
 import { CustomerService } from "@/services/customer.service";
 import { toast } from "sonner";
 import moment from "moment";
+import locationService, {
+  ResultProvinceResponse,
+} from "@/services/location.service";
+import getCurrentFileUrl from "@/utils/get-file-url";
+import { Gender } from "@/services/types/value-object.enum";
 
 const customerService = new CustomerService();
 
 export function ProfileInfoForm() {
+  const [listOfProvinces, setListProvince] = useState<ResultProvinceResponse[]>(
+    []
+  );
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     phone: "",
     bio: "",
+    address: undefined as string | undefined,
     lastName: "",
     firstName: "",
     email: "",
     gender: "",
     birthDate: "",
+    avatar: undefined as number | undefined,
+    avatarFile: undefined as File | undefined,
   });
+
+  useEffect(() => {
+    locationService.getAllProvinces().then((res) => {
+      if (res) {
+        if (res.status === 200) {
+          console.log(res.data.results);
+          setListProvince(res.data.results);
+        }
+      }
+    });
+  }, []);
 
   useEffect(() => {
     customerService
@@ -42,6 +66,7 @@ export function ProfileInfoForm() {
           console.log("Profile data:", data);
           setFormData({
             phone: data.account.phone || "",
+            address: data.address || "",
             bio: data.bio || "",
             lastName: data.lastName || "",
             firstName: data.firstName || "",
@@ -50,6 +75,8 @@ export function ProfileInfoForm() {
             birthDate: data.birthday
               ? moment(data.birthday).format("DD-MM-YYYY")
               : "",
+            avatar: data.avatar || undefined,
+            avatarFile: undefined,
           });
         } else {
           toast("Đã xảy ra lỗi khi tải thông tin cá nhân");
@@ -74,6 +101,7 @@ export function ProfileInfoForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    toast("Đang cập nhật thông tin cá nhân...");
     console.log("Profile update submitted:", formData);
     customerService
       .updateMyProfile({
@@ -97,9 +125,78 @@ export function ProfileInfoForm() {
       });
   };
 
+  function handleAvatarClick(): void {
+    fileInputRef.current?.click();
+  }
+  function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>): void {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData((prev) => ({
+        ...prev,
+        avatarFile: file,
+      }));
+    }
+  }
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">Hồ sơ cá nhân</h2>
+
+      <div className="flex justify-center mb-8">
+        <div className="relative group">
+          <div
+            className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-200 cursor-pointer group-hover:border-blue-400 transition-all duration-200"
+            // onClick={handleAvatarClick}
+          >
+            {formData.avatarFile ? (
+              <img
+                src={
+                  formData.avatarFile
+                    ? URL.createObjectURL(formData.avatarFile)
+                    : ""
+                }
+                alt="Avatar"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <img
+                src={
+                  formData.avatar
+                    ? getCurrentFileUrl(formData.avatar)
+                    : formData.gender == Gender.MALE
+                    ? "/male-avatar.png"
+                    : "/female-avatar.jpg"
+                }
+                alt="Avatar"
+                width={96}
+                height={96}
+                className="w-full h-full object-cover"
+              />
+            )}
+          </div>
+
+          {/* Hover Overlay */}
+          <div
+            className="absolute inset-0  bg-opacity-0 group-hover:bg-opacity-30 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer"
+            onClick={handleAvatarClick}
+          >
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <div className="bg-white bg-opacity-90 rounded-lg px-3 py-1 text-sm font-medium text-gray-800">
+                Thay đổi ảnh
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Hidden File Input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleAvatarChange}
+          className="hidden"
+        />
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
@@ -141,19 +238,56 @@ export function ProfileInfoForm() {
             className="bg-gray-100"
           />
         </div>
-        {/* <div className="space-y-2">
-          <Label htmlFor="address">Địa chỉ</Label>
-          <div className="relative">
+        <div className="space-y-2">
+          <Label htmlFor="city">Chọn thành phố *</Label>
+          {listOfProvinces.length > 0 && formData.address ? (
+            <Select
+              defaultValue={
+                listOfProvinces.find(
+                  (province) => province.province_name === formData.address
+                )?.province_id ?? undefined
+              }
+              onValueChange={(value) => {
+                console.log(
+                  "Selected province ID:",
+                  value,
+                  " ",
+                  formData.address
+                );
+                setFormData((prev) => ({
+                  ...prev,
+                  address:
+                    listOfProvinces.find(
+                      (province) => province.province_id === value
+                    )?.province_name ?? "",
+                }));
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Chọn thành phố" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {listOfProvinces.map((province) => (
+                    <SelectItem
+                      key={province.province_id}
+                      value={province.province_id}
+                    >
+                      {province.province_name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          ) : (
             <Input
-              id="address"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              placeholder="Địa chỉ"
+              value={formData.address || ""}
+              placeholder="Loading thành phố..."
+              disabled
+              className="bg-gray-100"
             />
-            <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-          </div>
-        </div> */}
+          )}
+        </div>
 
         <div className="space-y-2">
           <Label htmlFor="bio">Giới thiệu</Label>

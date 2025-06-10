@@ -47,10 +47,24 @@ export class CustomerService {
     email: string;
     gender: string;
     birthDate: string;
+    avatarFile?: File | null;
+    address?: string | null;
   }) {
+    const updateData = new FormData();
+    updateData.append("phone", newProfile.phone);
+    updateData.append("bio", newProfile.bio);
+    if (newProfile.address) updateData.append("address", newProfile.address);
+    updateData.append("lastName", newProfile.lastName);
+    updateData.append("firstName", newProfile.firstName);
+    updateData.append("email", newProfile.email);
+    updateData.append("gender", newProfile.gender);
+    updateData.append("birthDate", newProfile.birthDate);
+    if (newProfile.avatarFile) {
+      updateData.append("avatarFile", newProfile.avatarFile);
+    }
     return axios_auth.put<ResponseData<GetMyProfileResponse>>(
       `api/customer/my-profile`,
-      newProfile
+      updateData
     );
   }
   async getListSavedPost() {
@@ -127,5 +141,4 @@ export class CustomerService {
       `api/customer/history-view-post`
     );
   }
-
 }

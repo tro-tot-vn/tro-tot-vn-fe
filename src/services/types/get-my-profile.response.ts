@@ -3,9 +3,11 @@ export interface GetMyProfileResponse {
   bio: string;
   firstName: string;
   lastName: string;
-  birthday: Date;
+  birthday?: Date;
   gender: string;
+  avatar?: number;
   account: AccountMyProfile;
+  address?: string;
 }
 
 export interface AccountMyProfile {

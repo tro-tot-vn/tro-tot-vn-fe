@@ -44,7 +44,6 @@ export default function ModeratorsPage() {
   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
   const [keySearch, setKeySearch] = useState("");
   const [form] = Form.useForm();
-  const [passwordForm] = Form.useForm();
 
   const fetchApi = async () => {
     const result = await adminService.getMorderator(keySearch);
@@ -63,6 +62,14 @@ export default function ModeratorsPage() {
 
   const handleOk = async () => {
     try {
+      const isValid = await form
+        .validateFields()
+        .then(() => true)
+        .catch(() => false);
+      if (!isValid) {
+        messageApi.error("Vui lòng điền đầy đủ thông tin");
+        return;
+      }
       const values = await form.validateFields();
       const result = await adminService.createModerator(values);
       if (result) {
@@ -166,16 +173,12 @@ export default function ModeratorsPage() {
   // Hàm xử lý đổi mật khẩu
   const handlePasswordChange = async () => {
     try {
-      const values = await passwordForm.validateFields();
-      const newPassword = values.newPassword;
-      console.log(newPassword);
       if (selectedModeratorId === null) {
         messageApi.error("Không xác định được người dùng để đổi mật khẩu");
         return;
       }
       console.log(selectedModeratorId);
-      const result = await adminService.resetPasswordAdmin(
-        newPassword,
+      const result = await adminService.resetPasswordModerator(
         selectedModeratorId
       );
       console.log(result);
@@ -189,7 +192,6 @@ export default function ModeratorsPage() {
         messageApi.error("Không thể đổi mật khẩu");
       }
       setIsPasswordModalVisible(false);
-      passwordForm.resetFields();
     } catch (error) {
       console.error("Lỗi khi thay đổi mật khẩu:", error);
       messageApi.error("Lỗi khi thay đổi mật khẩu");
@@ -197,6 +199,11 @@ export default function ModeratorsPage() {
   };
 
   const columns = [
+    {
+      title: "ID",
+      dataIndex: ["adminId"],
+      key: "adminId",
+    },
     {
       title: "Tên",
       dataIndex: "name",
@@ -368,14 +375,7 @@ export default function ModeratorsPage() {
                   { required: true, message: "Vui lòng chọn ngày sinh!" },
                 ]}
               >
-                <DatePicker style={{ width: "100%" }} />
-              </Form.Item>
-              <Form.Item
-                label="Mật khẩu"
-                name="password"
-                rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
-              >
-                <Input.Password />
+                <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
               </Form.Item>
             </Form>
           </Modal>
@@ -434,10 +434,14 @@ export default function ModeratorsPage() {
                   {profileModerator.gender === "Male" ? "Nam" : "Nữ"}
                 </Descriptions.Item>
                 <Descriptions.Item label="Ngày sinh">
-                  {new Date(profileModerator.birthday).toLocaleDateString()}
+                  {new Date(profileModerator.birthday).toLocaleDateString(
+                    "vi-VN"
+                  )}
                 </Descriptions.Item>
                 <Descriptions.Item label="Ngày gia nhập">
-                  {new Date(profileModerator.joinedAt).toLocaleDateString()}
+                  {new Date(profileModerator.joinedAt).toLocaleDateString(
+                    "vi-VN"
+                  )}
                 </Descriptions.Item>
                 <Descriptions.Item label="Số điện thoại">
                   {profileModerator.account.phone}
@@ -449,26 +453,13 @@ export default function ModeratorsPage() {
             )}
           </Modal>
           <Modal
-            title="Đổi Mật khẩu"
+            title="Bạn có muốn khôi phục mật khẩu mặc định quản trị viên"
             open={isPasswordModalVisible}
             onOk={handlePasswordChange}
             onCancel={() => {
               setIsPasswordModalVisible(false);
-              passwordForm.resetFields();
             }}
-          >
-            <Form form={passwordForm} layout="vertical">
-              <Form.Item
-                label="Mật khẩu mới"
-                name="newPassword"
-                rules={[
-                  { required: true, message: "Vui lòng nhập mật khẩu mới!" },
-                ]}
-              >
-                <Input.Password />
-              </Form.Item>
-            </Form>
-          </Modal>
+          ></Modal>
         </main>
       </div>
     </>

@@ -150,13 +150,10 @@ class AuthService {
     );
     return res.data;
   }
-  async resetPasswordAdmin(newPassword: string, moderatorId: number) {
+  async resetPasswordModerator(moderatorId: number) {
     try {
       const res = await axios_auth.put<ResponseData<Profile>>(
-        `api/admin/manager/${moderatorId}/reset-password`,
-        {
-          newPassword,
-        }
+        `api/admin/manager/${moderatorId}/reset-password`
       );
       return res.data;
     } catch (error) {

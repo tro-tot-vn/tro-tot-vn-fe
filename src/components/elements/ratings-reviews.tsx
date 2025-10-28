@@ -140,9 +140,18 @@ export function RatingsReviews({ postId }: RatingsReviewsProps) {
         // setRates([]);
         // setHasMore(true);
         // loadMoreRates();
+      } else if (res.status === 400 && res.data.message === "CONTENT_VIOLATION") {
+        toast.error("Nội dung đánh giá vi phạm quy định", {
+          description: "Nhận xét của bạn có thể chứa nội dung không phù hợp. Vui lòng chỉnh sửa và thử lại."
+        });
       } else {
         toast.error("Đánh giá thất bại");
       }
+    }).catch((error) => {
+      console.error("Error adding rate:", error);
+      toast.error("Đánh giá thất bại", {
+        description: "Đã xảy ra lỗi. Vui lòng thử lại sau."
+      });
     });
   };
 

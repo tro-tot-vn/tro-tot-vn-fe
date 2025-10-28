@@ -319,10 +319,18 @@ export default function EditPostPage() {
           if (res.status === 200) {
             toast("Sửa tin thành công");
           } else if (res.status === 400) {
-            toast("Sửa tin thất bại", {
-              description:
-                "Thông tin nhập không hợp lí. Vui lòng kiểm tra lại.",
-            });
+            // Check for AI moderation rejection
+            if (res.data.message === "CONTENT_VIOLATION") {
+              toast("Nội dung vi phạm quy định", {
+                description:
+                  "Tiêu đề hoặc mô tả của bạn có thể chứa nội dung không phù hợp. Vui lòng chỉnh sửa và thử lại.",
+              });
+            } else {
+              toast("Sửa tin thất bại", {
+                description:
+                  "Thông tin nhập không hợp lí. Vui lòng kiểm tra lại.",
+              });
+            }
           } else {
             toast("Sửa tin thất bại", {
               description: "Đã xảy ra lỗi khi Sửa tin. Vui lòng thử lại sau.",

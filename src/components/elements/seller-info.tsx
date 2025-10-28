@@ -12,6 +12,7 @@ import { Owner } from "@/services/types/get-detail-post.response";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
 import useAuth from "@/hooks/use-auth";
+import { useState } from "react";
 
 export function SellerInfo({
   customerInformation,
@@ -20,6 +21,7 @@ export function SellerInfo({
 }) {
   const auth = useAuth();
   const navigate = useNavigate();
+  const [showPhone, setShowPhone] = useState(false);
   return (
     <Card className="p-6">
       <div className="flex flex-col md:flex-row md:items-start gap-6">
@@ -59,7 +61,9 @@ export function SellerInfo({
               <div>
                 <p className="text-sm text-gray-500">Địa chỉ</p>
                 <p className="font-medium">
-                  {customerInformation.address ?? "Chưa có thông tin"}
+                  {customerInformation.currentCity || customerInformation.currentDistrict
+                    ? `${customerInformation.currentDistrict || ""}${customerInformation.currentDistrict && customerInformation.currentCity ? ", " : ""}${customerInformation.currentCity || ""}`
+                    : "Chưa có thông tin"}
                 </p>
               </div>
             </div>
@@ -82,13 +86,11 @@ export function SellerInfo({
 
         {/* Nút liên hệ */}
         <div className="flex flex-col gap-3 min-w-[200px]">
-          <Button
-            className="w-full bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white"
-            onClick={() => {
-              if (auth.isAuthenticated) {
-                // toast("test 123")
-              } else {
-                toast.error("Vui lòng đăng nhập để sử dụng tính năng này", {
+          {!auth.isAuthenticated ? (
+            <Button
+              className="w-full bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white"
+              onClick={() => {
+                toast.error("Vui lòng đăng nhập để xem số điện thoại", {
                   action: {
                     label: "Đăng nhập",
                     onClick: () => {
@@ -96,14 +98,24 @@ export function SellerInfo({
                     },
                   },
                 });
-              }
-            }}
-          >
-            <Phone className="h-4 w-4 mr-2" />
-            {auth.isAuthenticated
-              ? customerInformation.account.phone
-              : customerInformation.account.phone.slice(0, -3) + "***"}
-          </Button>
+              }}
+            >
+              <Phone className="h-4 w-4 mr-2" />
+              {customerInformation.account.phone.slice(0, -3) + "***"}
+            </Button>
+          ) : (
+            <Button
+              className="w-full bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white"
+              onClick={() => {
+                setShowPhone(true);
+              }}
+            >
+              <Phone className="h-4 w-4 mr-2" />
+              {showPhone
+                ? customerInformation.account.phone
+                : "Xem số điện thoại"}
+            </Button>
+          )}
           <Button variant="outline" className="w-full">
             <MessageCircle className="h-4 w-4 mr-2" />
             Chat với người bán

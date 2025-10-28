@@ -10,7 +10,9 @@ export interface GetCustomerInformationRes {
   avatar: null;
   joinedAt: Date;
   posts: Post[];
-  address: string;
+  currentCity?: string;
+  currentDistrict?: string;
+  currentJob?: string;
 }
 
 export interface Post {

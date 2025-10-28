@@ -15,6 +15,10 @@ import { DatePicker } from "antd";
 import { CustomerService } from "@/services/customer.service";
 import { toast } from "sonner";
 import moment from "moment";
+import LocationVNService, {
+  ResultProvinceResponse,
+  ResultDistrictResponse,
+} from "@/services/location.service";
 
 const customerService = new CustomerService();
 
@@ -27,8 +31,27 @@ export function ProfileInfoForm() {
     email: "",
     gender: "",
     birthDate: "",
+    currentCity: "",
+    currentDistrict: "",
+    currentJob: "",
   });
 
+  const [provinces, setProvinces] = useState<ResultProvinceResponse[]>([]);
+  const [districts, setDistricts] = useState<ResultDistrictResponse[]>([]);
+  const [selectedProvinceId, setSelectedProvinceId] = useState<string>("");
+
+  // Load provinces on mount
+  useEffect(() => {
+    LocationVNService.getAllProvinces()
+      .then((res) => {
+        setProvinces(res.data.results);
+      })
+      .catch((err) => {
+        console.log("Error fetching provinces:", err);
+      });
+  }, []);
+
+  // Load profile data
   useEffect(() => {
     customerService
       .getMyProfile()
@@ -50,7 +73,27 @@ export function ProfileInfoForm() {
             birthDate: data.birthday
               ? new Date(data.birthday).toISOString().split("T")[0]
               : "",
+            currentCity: data.currentCity || "",
+            currentDistrict: data.currentDistrict || "",
+            currentJob: data.currentJob || "",
           });
+
+          // If city is set, find and load districts
+          if (data.currentCity) {
+            const province = provinces.find(
+              (p) => p.province_name === data.currentCity
+            );
+            if (province) {
+              setSelectedProvinceId(province.province_id);
+              LocationVNService.getDistrictsByProvinceId(province.province_id)
+                .then((distRes) => {
+                  setDistricts(distRes.data.results);
+                })
+                .catch((err) => {
+                  console.log("Error fetching districts:", err);
+                });
+            }
+          }
         } else {
           toast("Đã xảy ra lỗi khi tải thông tin cá nhân");
         }
@@ -59,7 +102,7 @@ export function ProfileInfoForm() {
         console.log("Error fetching profile:", err);
         toast("Đã xảy ra lỗi khi tải thông tin cá nhân");
       });
-  }, []);
+  }, [provinces]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -70,6 +113,37 @@ export function ProfileInfoForm() {
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleProvinceChange = (provinceId: string) => {
+    const province = provinces.find((p) => p.province_id === provinceId);
+    if (province) {
+      setSelectedProvinceId(provinceId);
+      setFormData((prev) => ({
+        ...prev,
+        currentCity: province.province_name,
+        currentDistrict: "", // Reset district when city changes
+      }));
+
+      // Load districts for selected province
+      LocationVNService.getDistrictsByProvinceId(provinceId)
+        .then((res) => {
+          setDistricts(res.data.results);
+        })
+        .catch((err) => {
+          console.log("Error fetching districts:", err);
+        });
+    }
+  };
+
+  const handleDistrictChange = (districtId: string) => {
+    const district = districts.find((d) => d.district_id === districtId);
+    if (district) {
+      setFormData((prev) => ({
+        ...prev,
+        currentDistrict: district.district_name,
+      }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -141,19 +215,72 @@ export function ProfileInfoForm() {
             className="bg-gray-100"
           />
         </div>
-        {/* <div className="space-y-2">
-          <Label htmlFor="address">Địa chỉ</Label>
-          <div className="relative">
-            <Input
-              id="address"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              placeholder="Địa chỉ"
-            />
-            <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <Label htmlFor="currentCity">Thành phố</Label>
+            <Select
+              value={selectedProvinceId}
+              onValueChange={handleProvinceChange}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Chọn thành phố" />
+              </SelectTrigger>
+              <SelectContent>
+                {provinces.map((province) => (
+                  <SelectItem
+                    key={province.province_id}
+                    value={province.province_id}
+                  >
+                    {province.province_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-        </div> */}
+
+          <div className="space-y-2">
+            <Label htmlFor="currentDistrict">Quận/Huyện</Label>
+            <Select
+              value={
+                districts.find((d) => d.district_name === formData.currentDistrict)
+                  ?.district_id || ""
+              }
+              onValueChange={handleDistrictChange}
+              disabled={!selectedProvinceId}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Chọn quận/huyện" />
+              </SelectTrigger>
+              <SelectContent>
+                {districts.map((district) => (
+                  <SelectItem
+                    key={district.district_id}
+                    value={district.district_id}
+                  >
+                    {district.district_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="currentJob">Công việc</Label>
+          <Select
+            value={formData.currentJob || undefined}
+            onValueChange={(value) => handleSelectChange("currentJob", value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Chọn trạng thái công việc (Tùy chọn)" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Student">Sinh viên</SelectItem>
+              <SelectItem value="Employed">Đã đi làm</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         <div className="space-y-2">
           <Label htmlFor="bio">Giới thiệu</Label>

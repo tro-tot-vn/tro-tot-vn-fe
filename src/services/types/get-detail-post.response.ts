@@ -33,7 +33,9 @@ export interface Owner {
   firstName: string;
   lastName: string;
   avatar: null;
-  address: null;
+  currentCity?: string;
+  currentDistrict?: string;
+  currentJob?: string;
   account: Account;
   joinedAt: Date;
 }

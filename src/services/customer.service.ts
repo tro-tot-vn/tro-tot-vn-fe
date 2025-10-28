@@ -47,6 +47,9 @@ export class CustomerService {
     email: string;
     gender: string;
     birthDate: string;
+    currentCity?: string;
+    currentDistrict?: string;
+    currentJob?: string;
   }) {
     return axios_auth.put<ResponseData<GetMyProfileResponse>>(
       `api/customer/my-profile`,

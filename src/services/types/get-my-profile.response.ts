@@ -5,6 +5,9 @@ export interface GetMyProfileResponse {
   lastName: string;
   birthday: Date;
   gender: string;
+  currentCity?: string;
+  currentDistrict?: string;
+  currentJob?: string;
   account: AccountMyProfile;
 }
 

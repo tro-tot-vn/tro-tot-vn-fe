@@ -139,8 +139,9 @@ export default function CustomerProfilePage() {
                   <span className="text-sm text-gray-600">
                     Địa chỉ:{" "}
                     <strong>
-                      {customerInformation.address ||
-                        "Chưa có thông tin địa chỉ"}
+                      {customerInformation.currentCity || customerInformation.currentDistrict
+                        ? `${customerInformation.currentDistrict || ""}${customerInformation.currentDistrict && customerInformation.currentCity ? ", " : ""}${customerInformation.currentCity || ""}`
+                        : "Chưa có thông tin địa chỉ"}
                     </strong>
                   </span>
                 </div>
@@ -151,6 +152,20 @@ export default function CustomerProfilePage() {
                 <p className="text-sm text-gray-600">
                   {customerInformation.bio || "Chưa có thông tin giới thiệu"}
                 </p>
+                {customerInformation.currentJob && (
+                  <div className="mt-2">
+                    <span className="text-sm text-gray-600">
+                      Công việc:{" "}
+                      <strong>
+                        {customerInformation.currentJob === "Student"
+                          ? "Sinh viên"
+                          : customerInformation.currentJob === "Employed"
+                          ? "Đã đi làm"
+                          : customerInformation.currentJob}
+                      </strong>
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>

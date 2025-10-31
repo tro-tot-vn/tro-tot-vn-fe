@@ -1,39 +1,99 @@
 import axios from "axios";
+import provincesData from "@/data/provinces.json";
+import {
+  Province,
+  District,
+  ChoTotProvinceData,
+  ChoTotWardsResponse,
+} from "./types/location.types";
 
 class LocationVNService {
-  async getAllProvinces() {
-    return await axios.get<ProvinceResponse>(
-      "https://vapi.vnappmob.com/api/v2/province/",
-      {
-        headers: {
-          Accept: "*/*",
-        },
-      }
-    );
+  private provinces: Province[] = [];
+
+  constructor() {
+    this.initializeProvinces();
   }
-  async getDistrictsByProvinceId(provinceId: string) {
-    return await axios.get<DistrictResponse>(
-      `https://vapi.vnappmob.com/api/v2/province/district/${provinceId}`,
-      {
-        headers: {
-          Accept: "*/*",
-        },
-      }
-    );
+
+  private initializeProvinces() {
+    const data = provincesData as any as ChoTotProvinceData;
+    const provincesMap: Province[] = [];
+
+    data.regions.forEach((regionObj) => {
+      Object.entries(regionObj).forEach(([provinceId, provinceData]) => {
+        const districts: District[] = [];
+
+        provinceData.area.forEach((districtObj) => {
+          Object.entries(districtObj).forEach(([districtId, districtName]) => {
+            districts.push({
+              id: districtId,
+              name: districtName,
+              provinceId: provinceId,
+            });
+          });
+        });
+
+        provincesMap.push({
+          id: provinceId,
+          name: provinceData.name,
+          districts: districts,
+        });
+      });
+    });
+
+    this.provinces = provincesMap;
   }
+
+  // Get all provinces
+  getAllProvinces(): Province[] {
+    return this.provinces;
+  }
+
+  // Get province by ID
+  getProvinceById(provinceId: string): Province | undefined {
+    return this.provinces.find((p) => p.id === provinceId);
+  }
+
+  // Get province by name
+  getProvinceByName(name: string): Province | undefined {
+    return this.provinces.find((p) => p.name === name);
+  }
+
+  // Get districts by province ID
+  getDistrictsByProvinceId(provinceId: string): District[] {
+    const province = this.getProvinceById(provinceId);
+    return province ? province.districts : [];
+  }
+
+  // Get district by ID
+  getDistrictById(districtId: string): District | undefined {
+    for (const province of this.provinces) {
+      const district = province.districts.find((d) => d.id === districtId);
+      if (district) return district;
+    }
+    return undefined;
+  }
+
+  // Get district by name (within a province)
+  getDistrictByName(
+    provinceName: string,
+    districtName: string
+  ): District | undefined {
+    const province = this.getProvinceByName(provinceName);
+    if (!province) return undefined;
+    return province.districts.find((d) => d.name === districtName);
+  }
+
+  // Get wards by district ID from backend proxy (to avoid CORS)
   async getWardsByDistrictId(districtId: string) {
-    return await axios.get<WardResponse>(
-      `https://vapi.vnappmob.com/api/v2/province/ward/${districtId}`,
-      {
-        headers: {
-          Accept: "*/*",
-        },
-      }
+    return await axios.get<ChoTotWardsResponse>(
+      `http://localhost:3333/api/location/wards/${districtId}`
     );
   }
 }
+
 export default new LocationVNService();
 
+// Legacy types for backward compatibility (if needed)
 export interface ProvinceResponse {
   results: ResultProvinceResponse[];
 }

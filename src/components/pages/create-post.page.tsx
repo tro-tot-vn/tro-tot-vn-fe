@@ -26,11 +26,8 @@ import {
 } from "../ui/select";
 import { toast } from "sonner";
 import { PostService } from "@/services/post.service";
-import locationService, {
-  ResultDistrictResponse,
-  ResultProvinceResponse,
-  ResultWardResponse,
-} from "@/services/location.service";
+import locationService from "@/services/location.service";
+import { Province, District, Ward } from "@/services/types/location.types";
 const postService = new PostService();
 
 export default function CreatePostPage() {
@@ -41,14 +38,14 @@ export default function CreatePostPage() {
   const locationRef = useRef<HTMLInputElement>(null);
   const ipSelectImage = useRef<HTMLInputElement>(null);
   const ipSelectVideo = useRef<HTMLInputElement>(null);
-  const [selectedProvince, setProvince] = useState<ResultProvinceResponse>();
-  const [selectedDistrict, setDistrict] = useState<ResultDistrictResponse>();
-  const [listOfDistrict, setListDistrict] = useState<ResultDistrictResponse[]>(
+  const [selectedProvince, setProvince] = useState<Province>();
+  const [selectedDistrict, setDistrict] = useState<District>();
+  const [listOfDistrict, setListDistrict] = useState<District[]>(
     []
   );
-  const [listOfWard, setListWard] = useState<ResultWardResponse[]>([]);
-  const [selectedWard, setWard] = useState<ResultWardResponse>();
-  const [listOfProvinces, setListProvince] = useState<ResultProvinceResponse[]>(
+  const [listOfWard, setListWard] = useState<Ward[]>([]);
+  const [selectedWard, setWard] = useState<Ward>();
+  const [listOfProvinces, setListProvince] = useState<Province[]>(
     []
   );
   const [isLoading, setLoading] = useState(false);
@@ -72,38 +69,27 @@ export default function CreatePostPage() {
   });
 
   useEffect(() => {
-    locationService.getAllProvinces().then((res) => {
-      if (res) {
-        if (res.status === 200) {
-          console.log(res.data.results);
-          setListProvince(res.data.results);
-        }
-      }
-    });
+    const provinces = locationService.getAllProvinces();
+    setListProvince(provinces);
   }, []);
 
   useEffect(() => {
     console.log(selectedProvince);
     if (selectedProvince) {
-      locationService
-        .getDistrictsByProvinceId(selectedProvince.province_id)
-        .then((res) => {
-          console.log(res.data.results);
-          setListDistrict(res.data.results);
-        })
-        .catch((e) => {
-          console.log(e);
-          setListDistrict([]);
-        });
+      const districts = locationService.getDistrictsByProvinceId(selectedProvince.id);
+      console.log(districts);
+      setListDistrict(districts);
     }
   }, [selectedProvince]);
 
   useEffect(() => {
     if (selectedDistrict) {
       locationService
-        .getWardsByDistrictId(selectedDistrict.district_id)
+        .getWardsByDistrictId(selectedDistrict.id)
         .then((res) => {
-          setListWard(res.data.results);
+          if (res.data.code === "SUCCESS") {
+            setListWard(res.data.wards);
+          }
         })
         .catch((e) => {
           console.log(e);
@@ -198,9 +184,9 @@ export default function CreatePostPage() {
     formData.append("price", price);
     formData.append("acreage", acreage);
     formData.append("interiorStatus", interiorStatus);
-    formData.append("city", selectedProvince?.province_name ?? "");
-    formData.append("ward", selectedWard?.ward_name ?? "");
-    formData.append("district", selectedDistrict?.district_name ?? "");
+    formData.append("city", selectedProvince?.name ?? "");
+    formData.append("ward", selectedWard?.name ?? "");
+    formData.append("district", selectedDistrict?.name ?? "");
     formData.append("streetNumber", houseNumber);
     formData.append("street", streetName);
     formData.append("description", description);
@@ -489,11 +475,11 @@ export default function CreatePostPage() {
                 <div className="items-center gap-4">
                   <Label htmlFor="city">Chọn thành phố *</Label>
                   <Select
-                    defaultValue={selectedProvince?.province_id ?? undefined}
+                    defaultValue={selectedProvince?.id ?? undefined}
                     onValueChange={(value) => {
                       setProvince(
                         listOfProvinces.find(
-                          (province) => province.province_id === value
+                          (province) => province.id === value
                         )
                       );
                       setDistrict(undefined);
@@ -508,10 +494,10 @@ export default function CreatePostPage() {
                       <SelectGroup>
                         {listOfProvinces.map((province) => (
                           <SelectItem
-                            key={province.province_id}
-                            value={province.province_id}
+                            key={province.id}
+                            value={province.id}
                           >
-                            {province.province_name}
+                            {province.name}
                           </SelectItem>
                         ))}
                       </SelectGroup>
@@ -521,11 +507,11 @@ export default function CreatePostPage() {
                 <div className="items-center gap-4">
                   <Label htmlFor="ward">Chọn quận, huyện *</Label>
                   <Select
-                    defaultValue={selectedDistrict?.district_id ?? undefined}
+                    defaultValue={selectedDistrict?.id ?? undefined}
                     onValueChange={(value) => {
                       setDistrict(
                         listOfDistrict.find(
-                          (district) => district.district_id === value
+                          (district) => district.id === value
                         )
                       );
                     }}
@@ -537,14 +523,14 @@ export default function CreatePostPage() {
                       <SelectGroup>
                         {listOfDistrict.map((district) => (
                           <SelectItem
-                            key={district.district_id}
+                            key={district.id}
                             onClick={() => {
                               console.log(district);
                               setDistrict(district);
                             }}
-                            value={district.district_id}
+                            value={district.id}
                           >
-                            {district.district_name}
+                            {district.name}
                           </SelectItem>
                         ))}
                       </SelectGroup>
@@ -554,9 +540,9 @@ export default function CreatePostPage() {
                 <div className="items-center gap-4">
                   <Label htmlFor="ward">Chọn phường, xã, thị trấn *</Label>
                   <Select
-                    defaultValue={selectedWard?.ward_id ?? undefined}
+                    defaultValue={selectedWard?.id.toString() ?? undefined}
                     onValueChange={(value) =>
-                      setWard(listOfWard.find((ward) => ward.ward_id === value))
+                      setWard(listOfWard.find((ward) => ward.id.toString() === value))
                     }
                   >
                     <SelectTrigger className="w-full">
@@ -565,8 +551,8 @@ export default function CreatePostPage() {
                     <SelectContent>
                       <SelectGroup>
                         {listOfWard.map((ward) => (
-                          <SelectItem key={ward.ward_id} value={ward.ward_id}>
-                            {ward.ward_name}
+                          <SelectItem key={ward.id} value={ward.id.toString()}>
+                            {ward.name}
                           </SelectItem>
                         ))}
                       </SelectGroup>
@@ -611,7 +597,7 @@ export default function CreatePostPage() {
                     }
                     setOpen(false);
                     if (locationRef.current) {
-                      locationRef.current.value = `${houseNumber} ${streetName}, ${selectedWard.ward_name}, ${selectedDistrict?.district_name}, ${selectedProvince?.province_name}`;
+                      locationRef.current.value = `${houseNumber} ${streetName}, ${selectedWard.name}, ${selectedDistrict?.name}, ${selectedProvince?.name}`;
                       // Xóa lỗi khi người dùng đã nhập địa chỉ
                       if (errors.address) {
                         setErrors((prev) => ({ ...prev, address: "" }));

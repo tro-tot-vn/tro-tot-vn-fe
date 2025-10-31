@@ -18,10 +18,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import locationService, {
-  ResultDistrictResponse,
-  ResultProvinceResponse,
-} from "@/services/location.service";
+import locationService from "@/services/location.service";
+import { Province, District } from "@/services/types/location.types";
 import { toast } from "sonner";
 
 interface SubscriptionDialogProps {
@@ -35,12 +33,12 @@ export function CreateSubscriptionDialog({
   setOpen,
   onSubmit,
 }: SubscriptionDialogProps) {
-  const [selectedProvince, setProvince] = useState<ResultProvinceResponse>();
-  const [selectedDistrict, setDistrict] = useState<ResultDistrictResponse>();
-  const [listOfDistrict, setListDistrict] = useState<ResultDistrictResponse[]>(
+  const [selectedProvince, setProvince] = useState<Province>();
+  const [selectedDistrict, setDistrict] = useState<District>();
+  const [listOfDistrict, setListDistrict] = useState<District[]>(
     []
   );
-  const [listOfProvinces, setListProvince] = useState<ResultProvinceResponse[]>(
+  const [listOfProvinces, setListProvince] = useState<Province[]>(
     []
   );
 
@@ -50,32 +48,20 @@ export function CreateSubscriptionDialog({
       return;
     }
     onSubmit({
-      city: selectedProvince.province_name,
-      district: selectedDistrict.district_name,
+      city: selectedProvince.name,
+      district: selectedDistrict.name,
     });
     setOpen(false);
   };
   useEffect(() => {
-    locationService.getAllProvinces().then((res) => {
-      if (res) {
-        if (res.status === 200) {
-          setListProvince(res.data.results);
-        }
-      }
-    });
+    const provinces = locationService.getAllProvinces();
+    setListProvince(provinces);
   }, []);
 
   useEffect(() => {
     if (selectedProvince) {
-      locationService
-        .getDistrictsByProvinceId(selectedProvince.province_id)
-        .then((res) => {
-          setListDistrict(res.data.results);
-        })
-        .catch((e) => {
-          console.log(e);
-          setListDistrict([]);
-        });
+      const districts = locationService.getDistrictsByProvinceId(selectedProvince.id);
+      setListDistrict(districts);
     }
   }, [selectedProvince]);
 
@@ -92,11 +78,11 @@ export function CreateSubscriptionDialog({
           <div className="items-center gap-4">
             <Label htmlFor="city">Chọn thành phố *</Label>
             <Select
-              defaultValue={selectedProvince?.province_id ?? undefined}
+              defaultValue={selectedProvince?.id ?? undefined}
               onValueChange={(value) => {
                 setProvince(
                   listOfProvinces.find(
-                    (province) => province.province_id === value
+                    (province) => province.id === value
                   )
                 );
                 setDistrict(undefined);
@@ -110,10 +96,10 @@ export function CreateSubscriptionDialog({
                 <SelectGroup>
                   {listOfProvinces.map((province) => (
                     <SelectItem
-                      key={province.province_id}
-                      value={province.province_id}
+                      key={province.id}
+                      value={province.id}
                     >
-                      {province.province_name}
+                      {province.name}
                     </SelectItem>
                   ))}
                 </SelectGroup>
@@ -123,11 +109,11 @@ export function CreateSubscriptionDialog({
           <div className="items-center gap-4">
             <Label htmlFor="ward">Chọn quận, huyện *</Label>
             <Select
-              defaultValue={selectedDistrict?.district_id ?? undefined}
+              defaultValue={selectedDistrict?.id ?? undefined}
               onValueChange={(value) => {
                 setDistrict(
                   listOfDistrict.find(
-                    (district) => district.district_id === value
+                    (district) => district.id === value
                   )
                 );
               }}
@@ -139,14 +125,14 @@ export function CreateSubscriptionDialog({
                 <SelectGroup>
                   {listOfDistrict.map((district) => (
                     <SelectItem
-                      key={district.district_id}
+                      key={district.id}
                       onClick={() => {
                         console.log(district);
                         setDistrict(district);
                       }}
-                      value={district.district_id}
+                      value={district.id}
                     >
-                      {district.district_name}
+                      {district.name}
                     </SelectItem>
                   ))}
                 </SelectGroup>

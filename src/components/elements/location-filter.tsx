@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { toast } from "sonner"
 import locationService from "@/services/location.service"
-import type { ResultProvinceResponse, ResultDistrictResponse, ResultWardResponse } from "@/services/location.service"
+import type { Province, District, Ward } from "@/services/types/location.types"
 
 interface LocationFilterProps {
   onFilterChange: (city: string | null, district: string | null, ward: string | null) => void
@@ -22,52 +22,42 @@ export function LocationFilter({
   initialWard = null,
 }: LocationFilterProps) {
   const [open, setOpen] = useState(false)
-  const [selectedProvince, setProvince] = useState<ResultProvinceResponse>()
-  const [selectedDistrict, setDistrict] = useState<ResultDistrictResponse>()
-  const [selectedWard, setWard] = useState<ResultWardResponse>()
-  const [listOfDistrict, setListDistrict] = useState<ResultDistrictResponse[]>([])
-  const [listOfWard, setListWard] = useState<ResultWardResponse[]>([])
-  const [listOfProvinces, setListProvince] = useState<ResultProvinceResponse[]>([])
+  const [selectedProvince, setProvince] = useState<Province>()
+  const [selectedDistrict, setDistrict] = useState<District>()
+  const [selectedWard, setWard] = useState<Ward>()
+  const [listOfDistrict, setListDistrict] = useState<District[]>([])
+  const [listOfWard, setListWard] = useState<Ward[]>([])
+  const [listOfProvinces, setListProvince] = useState<Province[]>([])
   const [isFiltered, setIsFiltered] = useState(!!initialCity)
 
   // Load provinces on component mount
   useEffect(() => {
-    locationService.getAllProvinces().then((res) => {
-      if (res && res.status === 200) {
-        setListProvince(res.data.results)
+    const provinces = locationService.getAllProvinces()
+    setListProvince(provinces)
 
         // If we have initial values, try to find the matching province
         if (initialCity) {
-          const province = res.data.results.find((p: ResultProvinceResponse) => p.province_name === initialCity)
+      const province = provinces.find((p: Province) => p.name === initialCity)
           if (province) {
             setProvince(province)
             setIsFiltered(true)
           }
         }
-      }
-    })
   }, [initialCity])
 
   // Load districts when province changes
   useEffect(() => {
     if (selectedProvince) {
-      locationService
-        .getDistrictsByProvinceId(selectedProvince.province_id)
-        .then((res) => {
-          setListDistrict(res.data.results)
+      const districts = locationService.getDistrictsByProvinceId(selectedProvince.id)
+      setListDistrict(districts)
 
           // If we have initial district, try to find the matching district
           if (initialDistrict) {
-            const district = res.data.results.find((d: ResultDistrictResponse) => d.district_name === initialDistrict)
+        const district = districts.find((d: District) => d.name === initialDistrict)
             if (district) {
               setDistrict(district)
             }
           }
-        })
-        .catch((e) => {
-          console.log(e)
-          setListDistrict([])
-        })
     }
   }, [selectedProvince, initialDistrict])
 
@@ -75,15 +65,17 @@ export function LocationFilter({
   useEffect(() => {
     if (selectedDistrict) {
       locationService
-        .getWardsByDistrictId(selectedDistrict.district_id)
+        .getWardsByDistrictId(selectedDistrict.id)
         .then((res) => {
-          setListWard(res.data.results)
+          if (res.data.code === "SUCCESS") {
+            setListWard(res.data.wards)
 
           // If we have initial ward, try to find the matching ward
           if (initialWard) {
-            const ward = res.data.results.find((w: ResultWardResponse) => w.ward_name === initialWard)
+              const ward = res.data.wards.find((w: Ward) => w.name === initialWard)
             if (ward) {
               setWard(ward)
+              }
             }
           }
         })
@@ -104,9 +96,9 @@ export function LocationFilter({
     }
 
     onFilterChange(
-      selectedProvince ? selectedProvince.province_name : null,
-      selectedDistrict ? selectedDistrict.district_name : null,
-      selectedWard ? selectedWard.ward_name : null,
+      selectedProvince ? selectedProvince.name : null,
+      selectedDistrict ? selectedDistrict.name : null,
+      selectedWard ? selectedWard.name : null,
     )
 
     setIsFiltered(true)
@@ -131,11 +123,11 @@ export function LocationFilter({
         >
           {isFiltered ? (
             <>
-              Vị trí: {selectedProvince?.province_name || initialCity}
-              {selectedDistrict?.district_name || initialDistrict
-                ? `, ${selectedDistrict?.district_name || initialDistrict}`
+              Vị trí: {selectedProvince?.name || initialCity}
+              {selectedDistrict?.name || initialDistrict
+                ? `, ${selectedDistrict?.name || initialDistrict}`
                 : ""}
-              {selectedWard?.ward_name || initialWard ? `, ${selectedWard?.ward_name || initialWard}` : ""}
+              {selectedWard?.name || initialWard ? `, ${selectedWard?.name || initialWard}` : ""}
               <X
                 className="h-3 w-3 ml-1"
                 onClick={(e) => {
@@ -161,9 +153,9 @@ export function LocationFilter({
                 Chọn thành phố
               </Label>
               <Select
-                value={selectedProvince?.province_id}
+                value={selectedProvince?.id}
                 onValueChange={(value) => {
-                  setProvince(listOfProvinces.find((province) => province.province_id === value))
+                  setProvince(listOfProvinces.find((province) => province.id === value))
                   setDistrict(undefined)
                   setWard(undefined)
                   setListDistrict([])
@@ -176,8 +168,8 @@ export function LocationFilter({
                 <SelectContent>
                   <SelectGroup>
                     {listOfProvinces.map((province) => (
-                      <SelectItem key={province.province_id} value={province.province_id}>
-                        {province.province_name}
+                      <SelectItem key={province.id} value={province.id}>
+                        {province.name}
                       </SelectItem>
                     ))}
                   </SelectGroup>
@@ -190,9 +182,9 @@ export function LocationFilter({
                 Chọn quận, huyện
               </Label>
               <Select
-                value={selectedDistrict?.district_id}
+                value={selectedDistrict?.id}
                 onValueChange={(value) => {
-                  setDistrict(listOfDistrict.find((district) => district.district_id === value))
+                  setDistrict(listOfDistrict.find((district) => district.id === value))
                   setWard(undefined)
                 }}
                 disabled={!selectedProvince}
@@ -203,8 +195,8 @@ export function LocationFilter({
                 <SelectContent>
                   <SelectGroup>
                     {listOfDistrict.map((district) => (
-                      <SelectItem key={district.district_id} value={district.district_id}>
-                        {district.district_name}
+                      <SelectItem key={district.id} value={district.id}>
+                        {district.name}
                       </SelectItem>
                     ))}
                   </SelectGroup>
@@ -217,9 +209,9 @@ export function LocationFilter({
                 Chọn phường, xã
               </Label>
               <Select
-                value={selectedWard?.ward_id}
+                value={selectedWard?.id.toString()}
                 onValueChange={(value) => {
-                  setWard(listOfWard.find((ward) => ward.ward_id === value))
+                  setWard(listOfWard.find((ward) => ward.id.toString() === value))
                 }}
                 disabled={!selectedDistrict}
               >
@@ -229,8 +221,8 @@ export function LocationFilter({
                 <SelectContent>
                   <SelectGroup>
                     {listOfWard.map((ward) => (
-                      <SelectItem key={ward.ward_id} value={ward.ward_id}>
-                        {ward.ward_name}
+                      <SelectItem key={ward.id} value={ward.id.toString()}>
+                        {ward.name}
                       </SelectItem>
                     ))}
                   </SelectGroup>

@@ -15,10 +15,8 @@ import { DatePicker } from "antd";
 import { CustomerService } from "@/services/customer.service";
 import { toast } from "sonner";
 import moment from "moment";
-import LocationVNService, {
-  ResultProvinceResponse,
-  ResultDistrictResponse,
-} from "@/services/location.service";
+import LocationVNService from "@/services/location.service";
+import { Province, District } from "@/services/types/location.types";
 
 const customerService = new CustomerService();
 
@@ -36,19 +34,14 @@ export function ProfileInfoForm() {
     currentJob: "",
   });
 
-  const [provinces, setProvinces] = useState<ResultProvinceResponse[]>([]);
-  const [districts, setDistricts] = useState<ResultDistrictResponse[]>([]);
+  const [provinces, setProvinces] = useState<Province[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
   const [selectedProvinceId, setSelectedProvinceId] = useState<string>("");
 
   // Load provinces on mount
   useEffect(() => {
-    LocationVNService.getAllProvinces()
-      .then((res) => {
-        setProvinces(res.data.results);
-      })
-      .catch((err) => {
-        console.log("Error fetching provinces:", err);
-      });
+    const allProvinces = LocationVNService.getAllProvinces();
+    setProvinces(allProvinces);
   }, []);
 
   // Load profile data
@@ -81,17 +74,12 @@ export function ProfileInfoForm() {
           // If city is set, find and load districts
           if (data.currentCity) {
             const province = provinces.find(
-              (p) => p.province_name === data.currentCity
+              (p) => p.name === data.currentCity
             );
             if (province) {
-              setSelectedProvinceId(province.province_id);
-              LocationVNService.getDistrictsByProvinceId(province.province_id)
-                .then((distRes) => {
-                  setDistricts(distRes.data.results);
-                })
-                .catch((err) => {
-                  console.log("Error fetching districts:", err);
-                });
+              setSelectedProvinceId(province.id);
+              const provinceDistricts = LocationVNService.getDistrictsByProvinceId(province.id);
+              setDistricts(provinceDistricts);
             }
           }
         } else {
@@ -116,32 +104,27 @@ export function ProfileInfoForm() {
   };
 
   const handleProvinceChange = (provinceId: string) => {
-    const province = provinces.find((p) => p.province_id === provinceId);
+    const province = provinces.find((p) => p.id === provinceId);
     if (province) {
       setSelectedProvinceId(provinceId);
       setFormData((prev) => ({
         ...prev,
-        currentCity: province.province_name,
+        currentCity: province.name,
         currentDistrict: "", // Reset district when city changes
       }));
 
       // Load districts for selected province
-      LocationVNService.getDistrictsByProvinceId(provinceId)
-        .then((res) => {
-          setDistricts(res.data.results);
-        })
-        .catch((err) => {
-          console.log("Error fetching districts:", err);
-        });
+      const provinceDistricts = LocationVNService.getDistrictsByProvinceId(provinceId);
+      setDistricts(provinceDistricts);
     }
   };
 
   const handleDistrictChange = (districtId: string) => {
-    const district = districts.find((d) => d.district_id === districtId);
+    const district = districts.find((d) => d.id === districtId);
     if (district) {
       setFormData((prev) => ({
         ...prev,
-        currentDistrict: district.district_name,
+        currentDistrict: district.name,
       }));
     }
   };
@@ -229,10 +212,10 @@ export function ProfileInfoForm() {
               <SelectContent>
                 {provinces.map((province) => (
                   <SelectItem
-                    key={province.province_id}
-                    value={province.province_id}
+                    key={province.id}
+                    value={province.id}
                   >
-                    {province.province_name}
+                    {province.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -243,8 +226,8 @@ export function ProfileInfoForm() {
             <Label htmlFor="currentDistrict">Quận/Huyện</Label>
             <Select
               value={
-                districts.find((d) => d.district_name === formData.currentDistrict)
-                  ?.district_id || ""
+                districts.find((d) => d.name === formData.currentDistrict)
+                  ?.id || ""
               }
               onValueChange={handleDistrictChange}
               disabled={!selectedProvinceId}
@@ -255,10 +238,10 @@ export function ProfileInfoForm() {
               <SelectContent>
                 {districts.map((district) => (
                   <SelectItem
-                    key={district.district_id}
-                    value={district.district_id}
+                    key={district.id}
+                    value={district.id}
                   >
-                    {district.district_name}
+                    {district.name}
                   </SelectItem>
                 ))}
               </SelectContent>

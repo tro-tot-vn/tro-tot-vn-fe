@@ -87,9 +87,9 @@ export function SellerInfo({
         {/* Nút liên hệ */}
         <div className="flex flex-col gap-3 min-w-[200px]">
           {!auth.isAuthenticated ? (
-            <Button
-              className="w-full bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white"
-              onClick={() => {
+          <Button
+            className="w-full bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white"
+            onClick={() => {
                 toast.error("Vui lòng đăng nhập để xem số điện thoại", {
                   action: {
                     label: "Đăng nhập",
@@ -108,13 +108,13 @@ export function SellerInfo({
               className="w-full bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white"
               onClick={() => {
                 setShowPhone(true);
-              }}
-            >
-              <Phone className="h-4 w-4 mr-2" />
+            }}
+          >
+            <Phone className="h-4 w-4 mr-2" />
               {showPhone
-                ? customerInformation.account.phone
+              ? customerInformation.account.phone
                 : "Xem số điện thoại"}
-            </Button>
+          </Button>
           )}
           <Button variant="outline" className="w-full">
             <MessageCircle className="h-4 w-4 mr-2" />

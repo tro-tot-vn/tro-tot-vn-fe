@@ -16,9 +16,9 @@ import { AreaRangeFilter } from "../elements/area-range-filter";
 import { InteriorConditionFilter } from "../elements/interior-condition-filter";
 import { LocationFilter } from "../elements/location-filter";
 import { PriceRangeFilter } from "../elements/price-range-filter";
-import { PostService } from "@/services/post.service";
+import { SearchService } from "@/services/search.service";
 
-const postService = new PostService();
+const searchService = new SearchService();
 
 export default function SearchPage() {
   const [searchParams] = useSearchParams();
@@ -48,50 +48,49 @@ export default function SearchPage() {
   // Results state
   const [results, setResults] = useState<ListPostRes[]>([]);
   const [loading, setLoading] = useState(true);
-  const [hasMore, setHasMore] = useState(false);
-  const [nextCursor, setNextCursor] = useState<Date | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
   const [totalResults, setTotalResults] = useState(0);
 
-  // Mock API call to fetch search results
-  const fetchSearchResults = async (cursor: Date | null = null) => {
-    // Reset state for new search
-    postService
-      .searchPost(
-        searchQuery,
-        filters.minPrice !== null ? filters.minPrice.toString() : undefined,
-        filters.maxPrice !== null ? filters.maxPrice.toString() : undefined,
-        filters.minArea !== null ? filters.minArea.toString() : undefined,
-        filters.maxArea !== null ? filters.maxArea.toString() : undefined,
-        filters.city || undefined,
-        filters.district || undefined,
-        filters.ward || undefined,
-        filters.interiorCondition || undefined,
-        cursor
-      )
-      .then((res) => {
-        if (res.status === 200 || res.status === 304) {
-          console.log("Search results:", res.data.data);
-          setResults((prev) => [...prev, ...(res.data.data?.dataPag || [])]);
-          setNextCursor(res.data.data?.nextCursor || null);
-          setHasMore(res.data.data?.hasMore || false);
-          setTotalResults(res.data.data?.dataPag.length || 0);
-        } else {
-          setResults([]);
-          setNextCursor(null);
-          setHasMore(false);
-          setTotalResults(0);
-        }
-      })
-      .catch((err) => {
-        console.error("Error fetching search results:", err);
-        setResults([]);
-        setNextCursor(null);
-        setHasMore(false);
-        setTotalResults(0);
-      })
-      .finally(() => {
-        setLoading(false);
+  // Fetch search results using new vector search API
+  const fetchSearchResults = async (page: number = 1, append: boolean = false) => {
+    try {
+      const response = await searchService.search({
+        query: searchQuery,
+        city: filters.city || undefined,
+        district: filters.district || undefined,
+        ward: filters.ward || undefined,
+        minPrice: filters.minPrice || undefined,
+        maxPrice: filters.maxPrice || undefined,
+        minArea: filters.minArea || undefined,
+        maxArea: filters.maxArea || undefined,
+        interiorCondition: filters.interiorCondition || undefined,
+        page: page,
+        pageSize: 20,
       });
+
+      console.log("Search results:", response);
+
+      // Append or replace results based on flag
+      if (append) {
+        setResults((prev) => [...prev, ...(response.data || [])]);
+      } else {
+        setResults(response.data || []);
+      }
+
+      // Update pagination state
+      setCurrentPage(response.pagination.page);
+      setTotalPages(response.pagination.totalPages);
+      setTotalResults(response.pagination.total);
+    } catch (err) {
+      console.error("Error fetching search results:", err);
+      setResults([]);
+      setCurrentPage(1);
+      setTotalPages(0);
+      setTotalResults(0);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Update URL with search params
@@ -120,11 +119,11 @@ export default function SearchPage() {
   const handleSearch = () => {
     setLoading(true);
     setResults([]);
-    setNextCursor(null);
-    setHasMore(false);
+    setCurrentPage(1);
+    setTotalPages(0);
     setTotalResults(0);
     updateSearchParams();
-    fetchSearchResults();
+    fetchSearchResults(1, false); // Start from page 1, don't append
   };
 
   // Handle filter changes
@@ -172,8 +171,9 @@ export default function SearchPage() {
 
   // Load more results
   const loadMore = () => {
-    if (hasMore && !loading) {
-      fetchSearchResults(nextCursor);
+    if (currentPage < totalPages && !loading) {
+      setLoading(true);
+      fetchSearchResults(currentPage + 1, true); // Fetch next page and append
     }
   };
 
@@ -226,7 +226,7 @@ export default function SearchPage() {
     setFilters(initialFilters);
     setSearchQuery(searchParams.get("q") || "");
 
-    fetchSearchResults(nextCursor);
+    fetchSearchResults(1, false); // Start from page 1
   }, []);
 
   return (
@@ -304,7 +304,7 @@ export default function SearchPage() {
         {/* Results Summary */}
         <div className="mb-4">
           <h1 className="text-xl font-semibold">
-            {loading && nextCursor === null ? (
+            {loading && currentPage === 1 ? (
               "Đang tìm kiếm..."
             ) : (
               <>
@@ -316,7 +316,7 @@ export default function SearchPage() {
         </div>
 
         {/* Results Grid */}
-        {loading && nextCursor === null ? (
+        {loading && currentPage === 1 ? (
           <div className="flex justify-center items-center py-20">
             <Loader2 className="h-10 w-10 animate-spin text-[#ff6d0b]" />
           </div>
@@ -346,7 +346,7 @@ export default function SearchPage() {
                 });
                 setSearchQuery("");
                 navigate("/search");
-                fetchSearchResults(nextCursor);
+                fetchSearchResults(1, false);
               }}
             >
               Xóa bộ lọc
@@ -417,7 +417,7 @@ export default function SearchPage() {
             </div>
 
             {/* Load More */}
-            {hasMore && (
+            {currentPage < totalPages && (
               <div className="flex justify-center mb-8">
                 <Button
                   variant="outline"

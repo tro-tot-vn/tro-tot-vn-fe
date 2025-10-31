@@ -88,6 +88,11 @@ export class PostService {
     );
     return res;
   };
+  /**
+   * @deprecated Use SearchService.search() instead
+   * This method uses the old cursor-based search API which no longer exists in the backend.
+   * The new SearchService provides vector hybrid search with better results.
+   */
   searchPost = async (
     keyword: string,
     minPrice?: string,

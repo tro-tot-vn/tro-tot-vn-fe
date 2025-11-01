@@ -13,11 +13,14 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router";
 import useAuth from "@/hooks/use-auth";
 import { useState } from "react";
+import { interactionService } from "@/services/interaction.service";
 
 export function SellerInfo({
   customerInformation,
+  postId,
 }: {
   customerInformation: Owner;
+  postId: number;
 }) {
   const auth = useAuth();
   const navigate = useNavigate();
@@ -106,8 +109,15 @@ export function SellerInfo({
           ) : (
             <Button
               className="w-full bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white"
-              onClick={() => {
+              onClick={async () => {
                 setShowPhone(true);
+                // Log contact interaction (typeAction = 3)
+                try {
+                  await interactionService.logContact(postId);
+                } catch (error) {
+                  // Silent fail - don't break UX
+                  console.error('Failed to log contact:', error);
+                }
             }}
           >
             <Phone className="h-4 w-4 mr-2" />

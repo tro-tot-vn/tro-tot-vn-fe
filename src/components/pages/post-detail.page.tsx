@@ -161,7 +161,10 @@ export default function PostDetailPage() {
                 {/* Thông tin người đăng - đã di chuyển xuống dưới phần bản đồ */}
                 <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="md:col-span-2">
-                    <SellerInfo customerInformation={postData.owner} />
+                    <SellerInfo 
+                      customerInformation={postData.owner} 
+                      postId={postData.postId} 
+                    />
                   </div>
                   <Card className="p-4">
                     <h2 className="font-bold mb-2">Nhắn tin nhanh:</h2>

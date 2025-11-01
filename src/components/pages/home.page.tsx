@@ -8,6 +8,7 @@ import { Link, useNavigate } from "react-router";
 import useAuth from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { PostService } from "@/services/post.service";
+import { recommendService } from "@/services/recommend.service";
 import { useEffect, useState } from "react";
 import type { ListPostRes } from "@/services/types/get-list-post-by-status-reponse";
 import { AreaRangeFilter } from "../elements/area-range-filter";
@@ -26,6 +27,9 @@ const popularLocations = [
 
 const postService = new PostService();
 export default function HomePage() {
+  const nav = useNavigate();
+  const auth = useAuth();
+  
   const [latestPost, setLatestPost] = useState<ListPostRes[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
@@ -39,6 +43,10 @@ export default function HomePage() {
     interiorCondition: null as string | null,
   });
 
+  // Recommendation state
+  const [allRecommendations, setAllRecommendations] = useState<ListPostRes[]>([]);
+  const [displayedCount, setDisplayedCount] = useState(10);
+
   useEffect(() => {
     postService.getLatestPost(4).then((res) => {
       console.log(res.data);
@@ -47,6 +55,20 @@ export default function HomePage() {
       }
     });
   }, []);
+
+  // Fetch recommendations once on mount if user is logged in
+  useEffect(() => {
+    if (auth.user) {
+      recommendService.getRecommendations(100)
+        .then((result) => {
+          setAllRecommendations(result.posts);
+          console.log(`[HomePage] Loaded ${result.posts.length} recommendations`);
+        })
+        .catch((error) => {
+          console.error('[HomePage] Failed to load recommendations:', error);
+        });
+    }
+  }, [auth.user]);
 
   const handleSearch = () => {
     // In a real application, you would use the search query and filters to fetch filtered results
@@ -147,8 +169,10 @@ export default function HomePage() {
     }));
   };
 
-  const nav = useNavigate();
-  const auth = useAuth();
+  const handleLoadMoreRecommendations = () => {
+    setDisplayedCount((prev) => prev + 10);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <main>
@@ -324,6 +348,105 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* Recommendations Section */}
+        {auth.user && allRecommendations.length > 0 && (
+          <section className="py-8 bg-gray-50">
+            <div className="container mx-auto px-4">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold">Gợi ý cho bạn</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {allRecommendations.slice(0, displayedCount).map((post) => (
+                  <Card
+                    key={post.postId}
+                    className="overflow-hidden hover:shadow-md transition-shadow"
+                  >
+                    <div className="relative">
+                      <img
+                        src={
+                          post.multimediaFiles[0]?.fileId
+                            ? getFileUrl(post.multimediaFiles[0].fileId)
+                            : "/placeholder.svg"
+                        }
+                        alt={post.title}
+                        width={600}
+                        height={400}
+                        className="w-full h-48 object-cover"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-2 left-2 h-8 w-8 rounded-full bg-white/80 hover:bg-white"
+                      >
+                        <Heart className="h-4 w-4" />
+                        <span className="sr-only">Lưu tin</span>
+                      </Button>
+                    </div>
+                    <CardContent className="p-4">
+                      <Link to={`/posts/${post.postId}/detail`}>
+                        <h3 className="font-medium line-clamp-2 mb-2 hover:text-[#ff6d0b]">
+                          {post.title}
+                        </h3>
+                      </Link>
+                      <div className="flex flex-col justify-between items-start mb-1">
+                        <div className="flex flex-row items-center gap-2">
+                          <DollarSignIcon className="h-3 w-3 mr-1" />
+                          <p className="font-bold text-[#ff6d0b]">
+                            {Number(post.price).toLocaleString("it-IT", {
+                              style: "currency",
+                              currency: "VND",
+                            })}{" "}
+                            VND
+                          </p>
+                        </div>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <MapPin className="h-3 w-3 mr-1" />
+                          <span className="truncate max-w-[150px]">
+                            {post.city}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm text-gray-500 mb-3">
+                        <span>{post.acreage} m2</span>
+                      </div>
+                      <span className="text-xs text-gray-500">
+                        {(() => {
+                          const postDate = new Date(post.createdAt);
+                          const today = new Date();
+                          const diffTime = Math.abs(
+                            today.getTime() - postDate.getTime()
+                          );
+                          const diffDays = Math.ceil(
+                            diffTime / (1000 * 60 * 60 * 24)
+                          );
+
+                          if (diffDays === 0) {
+                            return "Hôm nay";
+                          } else if (diffDays <= 7) {
+                            return `${diffDays} ngày trước`;
+                          } else {
+                            return "7+ ngày trước";
+                          }
+                        })()}
+                      </span>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              {displayedCount < allRecommendations.length && (
+                <div className="flex justify-center mt-6">
+                  <Button
+                    onClick={handleLoadMoreRecommendations}
+                    className="bg-[#ff6d0b] hover:bg-[#ff6d0b]/90 text-white"
+                  >
+                    Xem thêm
+                  </Button>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* Why Choose Us */}
         <section className="py-8 bg-white">

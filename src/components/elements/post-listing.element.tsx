@@ -1,6 +1,7 @@
 import { MapPin, Clock } from "lucide-react";
 import { Link } from "react-router";
 import { Post } from "@/services/types/get-customer-information";
+import { getFileUrl } from "@/config/env";
 
 interface PostRecent {
   post: Post;
@@ -14,7 +15,7 @@ export function PostRecent({ post }: PostRecent) {
           <img
             src={
               post.multimediaFiles.length > 0
-                ? `http://localhost:3333/api/files/${post.multimediaFiles[0].fileId}`
+                ? getFileUrl(post.multimediaFiles[0].fileId)
                 : "/default-image.png"
             }
             alt={String(post.multimediaFiles[0].fileId)}

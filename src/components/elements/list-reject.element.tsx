@@ -10,6 +10,7 @@ import {
 } from "../ui/card";
 import { ListPostRes } from "@/services/types/get-list-post-by-status-reponse";
 import { formatDistance, subDays } from "date-fns";
+import { getFileUrl } from "@/config/env";
 import { Button } from "../ui/button";
 
 export function ListRejectPost({
@@ -37,7 +38,7 @@ export function ListRejectPost({
                   <CardContent>
                     <div className="relative">
                       <img
-                        src={`http://localhost:3333/api/files/${post.multimediaFiles[0].fileId}`}
+                        src={getFileUrl(post.multimediaFiles[0].fileId)}
                         alt={post.title}
                         className="w-full h-32 object-cover"
                       />

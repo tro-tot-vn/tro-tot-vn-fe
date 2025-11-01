@@ -2,6 +2,7 @@ import { RefreshTokenResponse } from "@/services/types/refresh-token.response";
 import ResponseData from "@/types/response.type";
 import axios, { InternalAxiosRequestConfig } from "axios";
 import { toast } from "sonner";
+import { env } from "./env";
 
 // Extend the InternalAxiosRequestConfig interface to include _retry property
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
@@ -9,7 +10,7 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
 }
 
 const axios_auth = axios.create({
-  baseURL: "http://localhost:3333",
+  baseURL: env.API_BASE_URL,
   transformResponse: [
     (data) => {
       // First, parse the JSON string into an object
@@ -48,7 +49,7 @@ const axios_auth = axios.create({
 });
 
 const axios_base = axios.create({
-  baseURL: "http://localhost:3333",
+  baseURL: env.API_BASE_URL,
   transformResponse: [
     (data) => {
       // First, parse the JSON string into an object

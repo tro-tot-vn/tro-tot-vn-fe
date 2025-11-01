@@ -12,6 +12,7 @@ import { PostResponse } from "@/services/types/post-response";
 import { Image } from "antd";
 import NotFoundPage from "./not-found.page";
 import { FileType } from "@/services/types/get-list-post-by-status-reponse";
+import { getFileUrl } from "@/config/env";
 
 export default function PendingPostDetailPage() {
   const location = useLocation();
@@ -172,7 +173,7 @@ export default function PendingPostDetailPage() {
                               <Image
                                 key={index}
                                 width={300}
-                                src={`http://localhost:3333/api/files/${file.file.fileId}`}
+                                src={getFileUrl(file.file.fileId)}
                                 alt={`Hình ảnh tài sản ${index + 1}`}
                                 style={{ borderRadius: 8 }}
                               />
@@ -184,7 +185,7 @@ export default function PendingPostDetailPage() {
                                 style={{ borderRadius: 8 }}
                               >
                                 <source
-                                  src={`http://localhost:3333/api/files/${file.file.fileId}`}
+                                  src={getFileUrl(file.file.fileId)}
                                   type="video/mp4"
                                 />
                                 Your browser does not support the video tag.

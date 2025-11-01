@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import { PostService } from "@/services/post.service";
 import locationService from "@/services/location.service";
 import { Province, District, Ward } from "@/services/types/location.types";
+import { getFileUrl } from "@/config/env";
 import {
   GetDetailPostResponse,
   MultimediaFileDetailPost,
@@ -590,7 +591,7 @@ export default function EditPostPage() {
                   <div key={`img-${file.fileId}`} className="relative group">
                     <div className="aspect-square rounded-md overflow-hidden border">
                       <img
-                        src={`http://localhost:3333/api/files/${file.fileId}`}
+                        src={getFileUrl(file.fileId)}
                         alt={`Preview ${index}`}
                         className="w-full h-full object-cover"
                       />
@@ -629,7 +630,7 @@ export default function EditPostPage() {
                   <div key={`video-${index}`} className="relative group">
                     <div className="aspect-video rounded-md overflow-hidden border bg-black">
                       <video
-                        src={`http://localhost:3333/api/files/${file.fileId}`}
+                        src={getFileUrl(file.fileId)}
                         controls
                         className="w-full h-full object-contain"
                       />

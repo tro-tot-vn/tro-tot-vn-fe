@@ -11,6 +11,7 @@ import {
 import { ListPostRes } from "@/services/types/get-list-post-by-status-reponse";
 import { formatDistance, subDays } from "date-fns";
 import { Button } from "../ui/button";
+import { getFileUrl } from "@/config/env";
 
 export function ListMyPendingPost({
   listPostRes,
@@ -37,7 +38,7 @@ export function ListMyPendingPost({
                   <CardContent>
                     <div className="relative">
                       <img
-                        src={`http://localhost:3333/api/files/${post.multimediaFiles[0].fileId}`}
+                        src={getFileUrl(post.multimediaFiles[0].fileId)}
                         alt={post.title}
                         className="w-full h-32 object-cover"
                       />

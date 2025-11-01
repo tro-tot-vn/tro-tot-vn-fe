@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import useAuth from "@/hooks/use-auth";
+import { getFileUrl as getCurrentFileUrl } from "@/config/env";
 
 export function ImageGallery({
   data,
@@ -71,11 +72,6 @@ export function ImageGallery({
   // Xác định xem item hiện tại là hình ảnh hay video
   const isCurrentItemVideo =
     data[currentIndex]?.file.fileType === FileType.VIDEO;
-
-  // Tạo URL cho file hiện tại (trong môi trường thực tế)
-  const getCurrentFileUrl = (fileId: number) => {
-    return `http://localhost:3333/api/files/${fileId}`;
-  };
 
   return (
     <div className="relative rounded-lg overflow-hidden">

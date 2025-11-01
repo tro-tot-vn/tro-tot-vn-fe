@@ -1,6 +1,7 @@
 import { MultimediaFileDetailPost } from "@/services/types/get-detail-post.response";
 import { FileType } from "@/services/types/get-list-post-by-status-reponse";
 import { useState, useRef, useEffect } from "react";
+import { getFileUrl } from "@/config/env";
 
 interface LightboxProps {
   isOpen: boolean;
@@ -44,10 +45,6 @@ export function Lightbox({ isOpen, onClose, file }: LightboxProps) {
   };
 
   const isVideo = file?.file.fileType === FileType.VIDEO // Kiểm tra nếu file là video
-
-  const getFileUrl = (fileId: number) => {
-    return `http://localhost:3333/api/files/${fileId}`;
-  };
 
   if (!isOpen || !file) return null;
 

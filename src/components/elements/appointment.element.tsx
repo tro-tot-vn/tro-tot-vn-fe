@@ -23,6 +23,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { env } from "@/config/env";
 
 // Define appointment types
 type AppointmentStatus = "Pending" | "Accepted" | "Rejected" | "Cancelled";
@@ -649,7 +650,7 @@ export default function AppointmentsPage() {
                         <div className="aspect-square rounded-md overflow-hidden relative">
                           {appointment.post.multimediaFiles.length > 0 ? (
                             <img
-                              src={`http://localhost:3333/file/${appointment.post.multimediaFiles[0].fileId}`}
+                              src={`${env.API_BASE_URL}/file/${appointment.post.multimediaFiles[0].fileId}`}
                               alt={appointment.post.title}
                               className="object-cover"
                             />
@@ -749,7 +750,7 @@ export default function AppointmentsPage() {
                         <div className="aspect-square rounded-md overflow-hidden relative">
                           {appointment.post.multimediaFiles.length > 0 ? (
                             <img
-                              src={`http://localhost:3333/file/${appointment.post.multimediaFiles[0].fileId}`}
+                              src={`${env.API_BASE_URL}/file/${appointment.post.multimediaFiles[0].fileId}`}
                               alt={appointment.post.title}
                               className="object-cover"
                             />

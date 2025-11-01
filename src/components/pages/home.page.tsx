@@ -14,6 +14,7 @@ import { AreaRangeFilter } from "../elements/area-range-filter";
 import { InteriorConditionFilter } from "../elements/interior-condition-filter";
 import { LocationFilter } from "../elements/location-filter";
 import { PriceRangeFilter } from "../elements/price-range-filter";
+import { getFileUrl } from "@/config/env";
 
 const popularLocations = [
   { id: 1, name: "TP. Hồ Chí Minh", count: 100 },
@@ -253,7 +254,7 @@ export default function HomePage() {
                     <img
                       src={
                         post.multimediaFiles[0]?.fileId
-                          ? `http://localhost:3333/api/files/${post.multimediaFiles[0].fileId}`
+                          ? getFileUrl(post.multimediaFiles[0].fileId)
                           : "/placeholder.svg"
                       }
                       alt={post.title}

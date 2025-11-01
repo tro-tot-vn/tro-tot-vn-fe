@@ -17,6 +17,7 @@ import { InteriorConditionFilter } from "../elements/interior-condition-filter";
 import { LocationFilter } from "../elements/location-filter";
 import { PriceRangeFilter } from "../elements/price-range-filter";
 import { SearchService } from "@/services/search.service";
+import { getFileUrl } from "@/config/env";
 
 const searchService = new SearchService();
 
@@ -364,7 +365,7 @@ export default function SearchPage() {
                     <img
                       src={
                         post.multimediaFiles?.[0]?.file?.fileId
-                          ? `http://localhost:3333/api/files/${post.multimediaFiles[0].file.fileId}`
+                          ? getFileUrl(post.multimediaFiles[0].file.fileId)
                           : "https://via.placeholder.com/400x300?text=No+Image"
                       }
                       alt={post.title}

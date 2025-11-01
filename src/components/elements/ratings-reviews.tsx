@@ -24,6 +24,7 @@ import { CustomerService } from "@/services/customer.service";
 import { RateResponse } from "@/services/types/get-list-rate.response";
 import { GetMyRateFromPostRes } from "@/services/types/get-my-rate-from-post.response";
 import { StatsPostResponse } from "@/services/types/get-stats-post.response";
+import { env } from "@/config/env";
 interface RatingsReviewsProps {
   postId: number;
 }
@@ -222,7 +223,7 @@ export function RatingsReviews({ postId }: RatingsReviewsProps) {
                     <AvatarImage
                       src={
                         myRate.rater.avatar
-                          ? `http://localhost:3333/files/${myRate.rater.avatar}`
+                          ? `${env.API_BASE_URL}/files/${myRate.rater.avatar}`
                           : ""
                       }
                       alt={"myRate"}

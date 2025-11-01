@@ -6,6 +6,7 @@ import {
   ChoTotProvinceData,
   ChoTotWardsResponse,
 } from "./types/location.types";
+import { env } from "@/config/env";
 
 class LocationVNService {
   private provinces: Province[] = [];
@@ -15,6 +16,7 @@ class LocationVNService {
   }
 
   private initializeProvinces() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data = provincesData as any as ChoTotProvinceData;
     const provincesMap: Province[] = [];
 
@@ -86,7 +88,7 @@ class LocationVNService {
   // Get wards by district ID from backend proxy (to avoid CORS)
   async getWardsByDistrictId(districtId: string) {
     return await axios.get<ChoTotWardsResponse>(
-      `http://localhost:3333/api/location/wards/${districtId}`
+      `${env.API_BASE_URL}/api/location/wards/${districtId}`
     );
   }
 }

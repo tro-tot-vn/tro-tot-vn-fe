@@ -21,6 +21,9 @@ export interface SearchPagination {
  * Response from hybrid vector search API
  */
 export interface SearchResponse {
+  /** Success flag */
+  success: boolean;
+  
   /** Array of search results (posts) */
   data: ListPostRes[];
   

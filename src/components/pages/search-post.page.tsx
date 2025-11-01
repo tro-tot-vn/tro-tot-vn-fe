@@ -363,9 +363,9 @@ export default function SearchPage() {
                   <div className="relative">
                     <img
                       src={
-                        post.multimediaFiles[0]
-                          ? `http://localhost:3333/api/files/${post.multimediaFiles[0].fileId}`
-                          : ""
+                        post.multimediaFiles?.[0]?.file?.fileId
+                          ? `http://localhost:3333/api/files/${post.multimediaFiles[0].file.fileId}`
+                          : "https://via.placeholder.com/400x300?text=No+Image"
                       }
                       alt={post.title}
                       className="w-full h-48 object-cover"

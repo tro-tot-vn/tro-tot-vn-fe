@@ -1,5 +1,4 @@
 import { axios_auth } from "@/config/axios-auth";
-import ResponseData from "@/types/response.type";
 import { SearchResponse } from "./types/search-response";
 
 export interface SearchParams {
@@ -48,16 +47,16 @@ export class SearchService {
       queryParams.interiorCondition = params.interiorCondition;
 
     // Call new search API endpoint
-    const response = await axios_auth.get<ResponseData<SearchResponse>>(
+    const response = await axios_auth.get<SearchResponse>(
       "api/search",
       { params: queryParams }
     );
 
-    if (!response.data.data) {
+    if (!response.data) {
       throw new Error("Search service returned no data");
     }
 
-    return response.data.data;
+    return response.data;
   }
 
   /**
@@ -66,10 +65,10 @@ export class SearchService {
    */
   async healthCheck(): Promise<boolean> {
     try {
-      const response = await axios_auth.get<ResponseData<{ status: string }>>(
+      const response = await axios_auth.get<{ success: boolean; status: string }>(
         "api/search/health"
       );
-      return response.status === 200 && response.data.data?.status === "healthy";
+      return response.status === 200 && response.data.status === "healthy";
     } catch (error) {
       console.error("[SearchService] Health check failed:", error);
       return false;

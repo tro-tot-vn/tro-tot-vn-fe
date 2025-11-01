@@ -33,10 +33,13 @@ export interface ModerationHistory {
 
 export interface MultimediaFile {
   fileId: number;
-  file: File;
+  postId?: number;
+  file: MultimediaFileDetail;
 }
 
-export interface File {
+export interface MultimediaFileDetail {
+  fileId: number;
+  fileCloudId?: string;
   fileType: FileType;
   createdAt: Date;
 }

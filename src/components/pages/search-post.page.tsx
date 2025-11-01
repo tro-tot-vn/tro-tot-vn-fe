@@ -7,8 +7,9 @@ import {
   MapPin,
   Heart,
   DollarSignIcon,
-  ArrowRight,
   Loader2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Link, useSearchParams, useNavigate } from "react-router";
 import { ListPostRes } from "@/services/types/get-list-post-by-status-reponse";
@@ -170,12 +171,16 @@ export default function SearchPage() {
     }));
   };
 
-  // Load more results
-  const loadMore = () => {
-    if (currentPage < totalPages && !loading) {
-      setLoading(true);
-      fetchSearchResults(currentPage + 1, true); // Fetch next page and append
-    }
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages || loading) return;
+    
+    setLoading(true);
+    setCurrentPage(page);
+    fetchSearchResults(page, false); // Fetch specific page, replace results
+    
+    // Scroll to top of results
+    window.scrollTo({ top: 300, behavior: 'smooth' });
   };
 
   // Format price to VND
@@ -417,26 +422,77 @@ export default function SearchPage() {
               ))}
             </div>
 
-            {/* Load More */}
-            {currentPage < totalPages && (
-              <div className="flex justify-center mb-8">
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mb-8">
+                {/* Previous Button */}
                 <Button
                   variant="outline"
-                  className="border-[#ff6d0b] text-[#ff6d0b] hover:bg-[#ff6d0b]/10"
-                  onClick={loadMore}
-                  disabled={loading}
+                  size="icon"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1 || loading}
+                  className="h-9 w-9"
                 >
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Đang tải...
-                    </>
-                  ) : (
-                    <>
-                      Xem thêm
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </>
-                  )}
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+
+                {/* Page Numbers */}
+                {(() => {
+                  const pages = [];
+                  const maxVisible = 5;
+                  
+                  if (totalPages <= maxVisible) {
+                    // Show all pages
+                    for (let i = 1; i <= totalPages; i++) {
+                      pages.push(i);
+                    }
+                  } else {
+                    // Smart pagination: 1 ... 4 5 6 ... 10
+                    if (currentPage <= 3) {
+                      pages.push(1, 2, 3, 4, -1, totalPages);
+                    } else if (currentPage >= totalPages - 2) {
+                      pages.push(1, -1, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+                    } else {
+                      pages.push(1, -1, currentPage - 1, currentPage, currentPage + 1, -1, totalPages);
+                    }
+                  }
+
+                  return pages.map((page, idx) => {
+                    if (page === -1) {
+                      return (
+                        <span key={`ellipsis-${idx}`} className="px-2 text-gray-400">
+                          ...
+                        </span>
+                      );
+                    }
+
+                    return (
+                      <Button
+                        key={page}
+                        variant={currentPage === page ? "default" : "outline"}
+                        onClick={() => handlePageChange(page)}
+                        disabled={loading}
+                        className={
+                          currentPage === page
+                            ? "h-9 w-9 bg-[#ff6d0b] hover:bg-[#ff6d0b]/90"
+                            : "h-9 w-9"
+                        }
+                      >
+                        {page}
+                      </Button>
+                    );
+                  });
+                })()}
+
+                {/* Next Button */}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages || loading}
+                  className="h-9 w-9"
+                >
+                  <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
             )}

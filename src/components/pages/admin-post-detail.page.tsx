@@ -24,6 +24,7 @@ export default function PendingPostDetailPage() {
   const [tabValue, setTabValue] = useState("Approved");
   const [approvalNotes, setApprovalNotes] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
+  const [isHateContent, setIsHateContent] = useState(false); // NEW: Hate content checkbox
 
   const fetchApi = async () => {
     try {
@@ -81,11 +82,16 @@ export default function PendingPostDetailPage() {
       const result = await adminService.changStatus(
         tabValue,
         rejectionReason,
-        postDetail.postId
+        postDetail.postId,
+        isHateContent  // NEW: Send hate content checkbox value
       );
       if (result) {
         if (result.status === 200) {
           messageApi.success("Từ chối bài đăng thành công");
+          
+          // Reset states
+          setRejectionReason("");
+          setIsHateContent(false);
 
           setTimeout(() => navigate("/admin/posts/review-post"), 1000);
         } else if (result.status == 400) {
@@ -245,7 +251,13 @@ export default function PendingPostDetailPage() {
                       <CardTitle>Hành động duyệt</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <Tabs defaultValue="Approved" onValueChange={setTabValue}>
+                      <Tabs defaultValue="Approved" onValueChange={(value) => {
+                        setTabValue(value);
+                        // Reset hate content checkbox when switching tabs
+                        if (value !== "Rejected") {
+                          setIsHateContent(false);
+                        }
+                      }}>
                         <TabsList className="grid grid-cols-2 mb-4">
                           <TabsTrigger value="Approved">Duyệt</TabsTrigger>
                           <TabsTrigger value="Rejected">Từ chối</TabsTrigger>
@@ -281,6 +293,30 @@ export default function PendingPostDetailPage() {
                               }
                               required
                             />
+                            
+                            {/* NEW: Hate Content Checkbox */}
+                            <div className="flex items-center space-x-2 p-3 bg-orange-50 border border-orange-200 rounded-md">
+                              <input
+                                type="checkbox"
+                                id="isHateContent"
+                                checked={isHateContent}
+                                onChange={(e) => setIsHateContent(e.target.checked)}
+                                className="w-4 h-4 text-orange-600 bg-gray-100 border-gray-300 rounded focus:ring-orange-500"
+                              />
+                              <label 
+                                htmlFor="isHateContent"
+                                className="text-sm font-medium text-orange-900 cursor-pointer"
+                              >
+                                ⚠️ Nội dung thô tục (hate content)
+                              </label>
+                            </div>
+                            
+                            {isHateContent && (
+                              <div className="text-xs text-orange-700 bg-orange-50 p-2 rounded border border-orange-200">
+                                💡 Bài đăng này sẽ được lưu vào hệ thống để cải thiện AI phát hiện nội dung thô tục.
+                              </div>
+                            )}
+                            
                             <Button
                               variant="destructive"
                               className="w-full"

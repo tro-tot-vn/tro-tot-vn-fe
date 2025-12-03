@@ -37,10 +37,22 @@ export default function RegisterPage() {
 
     // Kiểm tra mã trạng thái của response
     if (res) {
+      console.log(res.data)
       if (res.status === 201) {
         if (res.data.data) {
           toast("Đăng ký thành công");
           navigate("/login");
+        }
+      } else if (res.status === 400) {
+        // Xử lý validation error - hiển thị chi tiết
+        setRegisterFailure(true);
+        const errors = res.data.error as any[];
+        if (errors && errors.length > 0) {
+          // Hiển thị tất cả lỗi validation, cách nhau bởi dấu phẩy
+          const errorMessages = errors.map((err: any) => err.msg).join(". ");
+          setErrorMessage(errorMessages);
+        } else {
+          setErrorMessage("Dữ liệu không hợp lệ, vui lòng kiểm tra lại!");
         }
       } else if (res.status === 409) {
         setRegisterFailure(true);
@@ -115,6 +127,7 @@ export default function RegisterPage() {
               <button
                 type="button"
                 onClick={clearPhoneNumber}
+                aria-label="Xóa số điện thoại"
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
                 <X size={16} />
@@ -174,6 +187,9 @@ export default function RegisterPage() {
           </div>
 
           <div className="relative">
+            <label htmlFor="gender" className="sr-only">
+              Giới tính
+            </label>
             <select
               id="gender"
               name="gender"

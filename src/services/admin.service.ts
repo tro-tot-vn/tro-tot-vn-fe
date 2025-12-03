@@ -48,13 +48,14 @@ class AuthService {
       return axiosError.response ?? null; // Trả về response hoặc null nếu không có
     }
   }
-  async changStatus(actionType: string, reason: string, postId: number) {
+  async changStatus(actionType: string, reason: string, postId: number, isHateContent?: boolean) {
     try {
       const res = await axios_auth.post<ResponseData<PostResponse>>(
         `api/admin/posts/review-post/${postId}/moderate`,
         {
           actionType,
           reason,
+          isHateContent, // NEW: Send hate content flag
         }
       );
       return res.data;

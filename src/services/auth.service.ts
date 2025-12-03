@@ -44,18 +44,20 @@ class AuthService {
       return res;
     } catch (error) {
       console.log(error);
-      return null;
+      // Trả về error response thay vì null để frontend có thể xử lý
+      const axiosError = error as AxiosError<ResponseData<RegisterResponse>>;
+      return axiosError.response ?? null;
     }
   }
   async login(identifier: string, password: string) {
-      const res = await axios_base.post<ResponseData<LoginResponse>>(
-        "api/auth/login",
-        {
-          identifier,
-          password,
-        }
-      );
-      return res;
+    const res = await axios_base.post<ResponseData<LoginResponse>>(
+      "api/auth/login",
+      {
+        identifier,
+        password,
+      }
+    );
+    return res;
   }
 
   async sendEmail(email: string) {

@@ -1,12 +1,22 @@
 import type React from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { useState } from "react";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Separator } from "../ui/separator";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 import { TriangleAlert, X } from "lucide-react";
-import authService from "@/services/auth.service";
 import { toast } from "sonner";
+import authService from "@/services/auth.service";
+import locationService from "@/services/location.service";
+import { Province, District } from "@/services/types/location.types";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,8 +27,29 @@ export default function RegisterPage() {
   const [birthday, setBirthday] = useState<Date | null>(null);
   const [gender, setGender] = useState("Male"); // Default is male
   const [password, setPassword] = useState("");
+  const [selectedProvince, setProvince] = useState<Province>();
+  const [selectedDistrict, setDistrict] = useState<District>();
+  const [listOfProvinces, setListProvinces] = useState<Province[]>([]);
+  const [listOfDistricts, setListDistricts] = useState<District[]>([]);
+  const [currentJob, setCurrentJob] = useState("");
   const [isRegisterFailure, setRegisterFailure] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  // Load provinces on mount
+  useEffect(() => {
+    const provinces = locationService.getAllProvinces();
+    setListProvinces(provinces);
+  }, []);
+
+  // Load districts when province changes
+  useEffect(() => {
+    if (selectedProvince) {
+      const districts = locationService.getDistrictsByProvinceId(selectedProvince.id);
+      setListDistricts(districts);
+      // Reset district when province changes
+      setDistrict(undefined);
+    }
+  }, [selectedProvince]);
 
   const navigate = useNavigate();
 
@@ -32,7 +63,10 @@ export default function RegisterPage() {
       lastName,
       birthday,
       gender,
-      password
+      password,
+      selectedProvince?.name || "",
+      selectedDistrict?.name || "",
+      currentJob
     );
 
     // Kiểm tra mã trạng thái của response
@@ -200,6 +234,70 @@ export default function RegisterPage() {
               <option value="Male">Nam</option>
               <option value="Female">Nữ</option>
             </select>
+          </div>
+
+          <div className="relative">
+            <Select
+              value={selectedProvince?.id}
+              onValueChange={(value) => {
+                const province = listOfProvinces.find(p => p.id === value);
+                setProvince(province);
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Thành phố hiện tại" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {listOfProvinces.map((province) => (
+                    <SelectItem key={province.id} value={province.id}>
+                      {province.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="relative">
+            <Select
+              value={selectedDistrict?.id}
+              onValueChange={(value) => {
+                const district = listOfDistricts.find(d => d.id === value);
+                setDistrict(district);
+              }}
+              disabled={!selectedProvince}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Quận/Huyện hiện tại" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {listOfDistricts.map((district) => (
+                    <SelectItem key={district.id} value={district.id}>
+                      {district.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="relative">
+            <Select
+              value={currentJob || undefined}
+              onValueChange={(value) => setCurrentJob(value)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Nghề nghiệp (Tùy chọn)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="Student">Sinh viên</SelectItem>
+                  <SelectItem value="Employed">Đã đi làm</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="relative">

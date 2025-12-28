@@ -17,7 +17,10 @@ class AuthService {
     lastName: string,
     birthday: Date | null,
     gender: string,
-    password: string
+    password: string,
+    currentCity: string,
+    currentDistrict: string,
+    currentJob: string
   ) {
     console.log("registerAccount", {
       phone,
@@ -39,6 +42,9 @@ class AuthService {
           birthday,
           gender,
           password,
+          currentCity,
+          currentDistrict,
+          currentJob,
         }
       );
       return res;

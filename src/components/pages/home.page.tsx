@@ -29,7 +29,7 @@ const postService = new PostService();
 export default function HomePage() {
   const nav = useNavigate();
   const auth = useAuth();
-  
+
   const [latestPost, setLatestPost] = useState<ListPostRes[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
@@ -45,7 +45,10 @@ export default function HomePage() {
 
   // Recommendation state
   const [allRecommendations, setAllRecommendations] = useState<ListPostRes[]>([]);
-  const [displayedCount, setDisplayedCount] = useState(10);
+  const [recommendationLogId, setRecommendationLogId] = useState<number | undefined>();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMoreRecommendations, setHasMoreRecommendations] = useState(false);
+  const pageSize = 20;
 
   useEffect(() => {
     postService.getLatestPost(4).then((res) => {
@@ -56,13 +59,16 @@ export default function HomePage() {
     });
   }, []);
 
-  // Fetch recommendations once on mount if user is logged in
+  // Fetch first page of recommendations on mount if user is logged in
   useEffect(() => {
     if (auth.user) {
-      recommendService.getRecommendations(100)
+      recommendService.getRecommendations(1, pageSize)
         .then((result) => {
           setAllRecommendations(result.posts);
-          console.log(`[HomePage] Loaded ${result.posts.length} recommendations`);
+          setRecommendationLogId(result.recommendationLogId);
+          setCurrentPage(1);
+          setHasMoreRecommendations(result.pagination.hasMore);
+          console.log(`[HomePage] Loaded page 1: ${result.posts.length} recommendations, hasMore=${result.pagination.hasMore}`);
         })
         .catch((error) => {
           console.error('[HomePage] Failed to load recommendations:', error);
@@ -81,15 +87,13 @@ export default function HomePage() {
     const filterText = [];
     if (filters.minPrice !== null || filters.maxPrice !== null) {
       filterText.push(
-        `Giá: ${filters.minPrice || 0} - ${
-          filters.maxPrice || "không giới hạn"
+        `Giá: ${filters.minPrice || 0} - ${filters.maxPrice || "không giới hạn"
         }`
       );
     }
     if (filters.minArea !== null || filters.maxArea !== null) {
       filterText.push(
-        `Diện tích: ${filters.minArea || 0} - ${
-          filters.maxArea || "không giới hạn"
+        `Diện tích: ${filters.minArea || 0} - ${filters.maxArea || "không giới hạn"
         } m²`
       );
     }
@@ -105,25 +109,24 @@ export default function HomePage() {
     }
     if (filters.interiorCondition) {
       filterText.push(
-        `Nội thất: ${
-          filters.interiorCondition === "Full" ? "Đầy đủ nội thất" : "Trống"
+        `Nội thất: ${filters.interiorCondition === "Full" ? "Đầy đủ nội thất" : "Trống"
         }`
       );
     }
 
     nav(
       `/search?` +
-        new URLSearchParams({
-          q: searchQuery,
-          minPrice: filters.minPrice?.toString() || "",
-          maxPrice: filters.maxPrice?.toString() || "",
-          minArea: filters.minArea?.toString() || "",
-          maxArea: filters.maxArea?.toString() || "",
-          city: filters.city || "",
-          district: filters.district || "",
-          ward: filters.ward || "",
-          interiorCondition: filters.interiorCondition || "",
-        }).toString()
+      new URLSearchParams({
+        q: searchQuery,
+        minPrice: filters.minPrice?.toString() || "",
+        maxPrice: filters.maxPrice?.toString() || "",
+        minArea: filters.minArea?.toString() || "",
+        maxArea: filters.maxArea?.toString() || "",
+        city: filters.city || "",
+        district: filters.district || "",
+        ward: filters.ward || "",
+        interiorCondition: filters.interiorCondition || "",
+      }).toString()
     );
   };
 
@@ -169,8 +172,45 @@ export default function HomePage() {
     }));
   };
 
-  const handleLoadMoreRecommendations = () => {
-    setDisplayedCount((prev) => prev + 10);
+  const handleLoadMoreRecommendations = async () => {
+    if (!hasMoreRecommendations) return;
+
+    const nextPage = currentPage + 1;
+    console.log(`[HomePage] Loading page ${nextPage}...`);
+
+    try {
+      const result = await recommendService.getRecommendations(
+        nextPage,
+        pageSize,
+        recommendationLogId  // Pass logId for cache lookup
+      );
+
+      // Append new posts
+      setAllRecommendations((prev) => [...prev, ...result.posts]);
+      setCurrentPage(nextPage);
+      setHasMoreRecommendations(result.pagination.hasMore);
+
+      console.log(`[HomePage] Loaded page ${nextPage}: ${result.posts.length} posts, hasMore=${result.pagination.hasMore}`);
+    } catch (error) {
+      console.error('[HomePage] Failed to load more:', error);
+    }
+  };
+
+  const handleRecommendationClick = (post: ListPostRes) => {
+    // Log click if we have tracking IDs
+    if (recommendationLogId && (post as any).recommendationLogItemId) {
+      console.log('[HomePage] Logging recommendation click:', {
+        recommendationLogId,
+        recommendationLogItemId: (post as any).recommendationLogItemId,
+        postId: post.postId
+      });
+      recommendService.logClick(
+        recommendationLogId,
+        (post as any).recommendationLogItemId
+      ).catch(err => console.error('Click logging failed:', err));
+    }
+    // Navigate to detail
+    nav(`/posts/${post.postId}/detail`);
   };
 
   return (
@@ -357,7 +397,7 @@ export default function HomePage() {
                 <h2 className="text-xl font-bold">Gợi ý cho bạn</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {allRecommendations.slice(0, displayedCount).map((post) => (
+                {allRecommendations.map((post) => (
                   <Card
                     key={post.postId}
                     className="overflow-hidden hover:shadow-md transition-shadow"
@@ -384,11 +424,14 @@ export default function HomePage() {
                       </Button>
                     </div>
                     <CardContent className="p-4">
-                      <Link to={`/posts/${post.postId}/detail`}>
+                      <div
+                        onClick={() => handleRecommendationClick(post)}
+                        className="cursor-pointer"
+                      >
                         <h3 className="font-medium line-clamp-2 mb-2 hover:text-[#ff6d0b]">
                           {post.title}
                         </h3>
-                      </Link>
+                      </div>
                       <div className="flex flex-col justify-between items-start mb-1">
                         <div className="flex flex-row items-center gap-2">
                           <DollarSignIcon className="h-3 w-3 mr-1" />
@@ -434,7 +477,7 @@ export default function HomePage() {
                   </Card>
                 ))}
               </div>
-              {displayedCount < allRecommendations.length && (
+              {hasMoreRecommendations && (
                 <div className="flex justify-center mt-6">
                   <Button
                     onClick={handleLoadMoreRecommendations}

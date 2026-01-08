@@ -19,16 +19,17 @@ export interface ListPostRes {
   city: string;
   interiorCondition: string;
   acreage: number;
+  searchLogItemId?: number;  // For click tracking
   multimediaFiles: MultimediaFile[];
   moderationHistories: ModerationHistory[];
 }
 export interface ModerationHistory {
-  historyId:  number;
-  postId:     number;
-  adminId:    number;
+  historyId: number;
+  postId: number;
+  adminId: number;
   actionType: string;
-  reason:     string;
-  execAt:     Date;
+  reason: string;
+  execAt: Date;
 }
 
 export interface MultimediaFile {

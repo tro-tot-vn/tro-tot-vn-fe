@@ -6,13 +6,13 @@ import { ListPostRes } from "./get-list-post-by-status-reponse";
 export interface SearchPagination {
   /** Current page number (starts from 1) */
   page: number;
-  
+
   /** Number of items per page */
   pageSize: number;
-  
+
   /** Total number of results */
   total: number;
-  
+
   /** Total number of pages */
   totalPages: number;
 }
@@ -23,13 +23,16 @@ export interface SearchPagination {
 export interface SearchResponse {
   /** Success flag */
   success: boolean;
-  
+
+  /** Search log ID for feedback tracking */
+  searchLogId?: number;
+
   /** Array of search results (posts) */
   data: ListPostRes[];
-  
+
   /** Pagination information */
   pagination: SearchPagination;
-  
+
   /** Search execution time in milliseconds */
   searchTimeMs: number;
 }

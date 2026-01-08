@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { Link, useSearchParams, useNavigate } from "react-router";
+import { useSearchParams, useNavigate } from "react-router";
 import { ListPostRes } from "@/services/types/get-list-post-by-status-reponse";
 import { AreaRangeFilter } from "../elements/area-range-filter";
 import { InteriorConditionFilter } from "../elements/interior-condition-filter";
@@ -19,6 +19,8 @@ import { LocationFilter } from "../elements/location-filter";
 import { PriceRangeFilter } from "../elements/price-range-filter";
 import { SearchService } from "@/services/search.service";
 import { getFileUrl } from "@/config/env";
+import { SearchFeedbackWidget } from "../elements/search-feedback-widget.element";
+import { axios_auth } from "@/config/axios-auth";
 
 const searchService = new SearchService();
 
@@ -54,6 +56,10 @@ export default function SearchPage() {
   const [totalPages, setTotalPages] = useState(0);
   const [totalResults, setTotalResults] = useState(0);
 
+  // Feedback state
+  const [searchLogId, setSearchLogId] = useState<number | null>(null);
+  const [showFeedback, setShowFeedback] = useState(false);
+
   // Fetch search results using new vector search API
   const fetchSearchResults = async (page: number = 1, append: boolean = false) => {
     try {
@@ -84,6 +90,13 @@ export default function SearchPage() {
       setCurrentPage(response.pagination.page);
       setTotalPages(response.pagination.totalPages);
       setTotalResults(response.pagination.total);
+
+      // Store searchLogId for feedback
+      if (response.searchLogId) {
+        setSearchLogId(response.searchLogId);
+        // 20% chance to show feedback widget
+        setShowFeedback(Math.random() < 0.2);
+      }
     } catch (err) {
       console.error("Error fetching search results:", err);
       setResults([]);
@@ -174,11 +187,11 @@ export default function SearchPage() {
   // Handle page change
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages || loading) return;
-    
+
     setLoading(true);
     setCurrentPage(page);
     fetchSearchResults(page, false); // Fetch specific page, replace results
-    
+
     // Scroll to top of results
     window.scrollTo({ top: 300, behavior: 'smooth' });
   };
@@ -207,7 +220,35 @@ export default function SearchPage() {
     }
   };
 
+  // Track click and navigate
+  const handlePostClick = (post: ListPostRes) => {
+    console.log('🔵 handlePostClick called:', {
+      postId: post.postId,
+      searchLogId,
+      searchLogItemId: post.searchLogItemId
+    });
+
+    // Log click asynchronously (don't block navigation)
+    if (searchLogId && post.searchLogItemId) {
+      console.log('🟢 Logging click to API...');
+      axios_auth.post('/api/search/click', {
+        searchLogId,
+        searchLogItemId: post.searchLogItemId
+      })
+        .then(res => console.log('✅ Click logged:', res.data))
+        .catch(err => console.error('❌ Click failed:', err));
+    } else {
+      console.warn('⚠️ Missing IDs:', { searchLogId, searchLogItemId: post.searchLogItemId });
+    }
+
+    // Navigate to post detail
+    console.log('🔵 Navigating to:', `/posts/${post.postId}/detail`);
+    navigate(`/posts/${post.postId}/detail`);
+  };
+
   // Initial fetch on mount and when URL params change
+  const prevParamsRef = useRef<string | null>(null);
+
   useEffect(() => {
     // Set initial filter values from URL params
     const initialFilters = {
@@ -232,8 +273,15 @@ export default function SearchPage() {
     setFilters(initialFilters);
     setSearchQuery(searchParams.get("q") || "");
 
-    fetchSearchResults(1, false); // Start from page 1
-  }, []);
+    // Create a unique key from search params
+    const currentParams = searchParams.toString();
+
+    // Only fetch if params actually changed (prevent duplicate on mount/back navigation)
+    if (prevParamsRef.current !== currentParams) {
+      prevParamsRef.current = currentParams;
+      fetchSearchResults(1, false);
+    }
+  }, [searchParams]); // Depend on searchParams, not empty array
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -386,11 +434,14 @@ export default function SearchPage() {
                     </Button>
                   </div>
                   <CardContent className="p-4">
-                    <Link to={`/posts/${post.postId}/detail`}>
+                    <div
+                      onClick={() => handlePostClick(post)}
+                      className="cursor-pointer"
+                    >
                       <h3 className="font-medium line-clamp-2 mb-2 hover:text-[#ff6d0b]">
                         {post.title}
                       </h3>
-                    </Link>
+                    </div>
                     <div className="flex flex-col justify-between items-start mb-1">
                       <div className="flex flex-row items-center gap-2">
                         <DollarSignIcon className="h-3 w-3 mr-1" />
@@ -440,7 +491,7 @@ export default function SearchPage() {
                 {(() => {
                   const pages = [];
                   const maxVisible = 5;
-                  
+
                   if (totalPages <= maxVisible) {
                     // Show all pages
                     for (let i = 1; i <= totalPages; i++) {
@@ -494,6 +545,16 @@ export default function SearchPage() {
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
+              </div>
+            )}
+
+            {/* Search Feedback Widget (20% sampling) */}
+            {showFeedback && searchLogId && (
+              <div className="mt-8">
+                <SearchFeedbackWidget
+                  searchLogId={searchLogId}
+                  onDismiss={() => setShowFeedback(false)}
+                />
               </div>
             )}
           </>

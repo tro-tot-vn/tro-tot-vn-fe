@@ -23,9 +23,13 @@ export class CustomerService {
     cursor: Date | null = null
   ) {
     return axios_base.get<ResponseData<CursorPaging<RateResponse, Date>>>(
-      `api/customer/post/${postId}/rate?limit=${limit}${
-        cursor ? `&cursor=${cursor.toISOString()}` : ""
-      }`
+      `api/customer/posts/${postId}/rates`,
+      {
+        params: {
+          limit,
+          cursor: cursor ? cursor.toISOString() : undefined,
+        },
+      }
     );
   }
 
@@ -36,75 +40,58 @@ export class CustomerService {
   }
   async getMyProfile() {
     return axios_auth.get<ResponseData<GetMyProfileResponse>>(
-      `api/customer/my-profile`
+      `api/customer/me`
     );
   }
-  updateMyProfile(newProfile: {
-    phone: string;
-    bio: string;
-    lastName: string;
-    firstName: string;
-    email: string;
-    gender: string;
-    birthDate: string;
-    currentCity?: string;
-    currentDistrict?: string;
-    currentJob?: string;
-  }) {
-    return axios_auth.put<ResponseData<GetMyProfileResponse>>(
-      `api/customer/my-profile`,
+  updateMyProfile(newProfile: any) {
+    return axios_auth.post<ResponseData<GetMyProfileResponse>>(
+      `api/customer/me`,
       newProfile
     );
   }
   async getListSavedPost() {
     return await axios_auth.get<ResponseData<ListPostRes[]>>(
-      "api/customer/saved-post"
+      "api/customer/saved-posts"
     );
   }
   async addToSavedPosts(postId: number) {
-    return axios_auth.post<ResponseData<unknown>>(`api/customer/save-post`, {
-      postId: postId,
-    });
+    return axios_auth.post<ResponseData<unknown>>(`api/customer/saved-posts/${postId}`, {});
   }
   async deleteSavedPost(postId: number) {
-    return axios_auth.delete<ResponseData<unknown>>(`api/customer/saved-post`, {
-      data: {
-        postId: postId,
-      },
-    });
+    return axios_auth.delete<ResponseData<unknown>>(`api/customer/saved-posts/${postId}`);
   }
   async addRate(numStar: number, comment: string, postId: number) {
     return axios_auth.post<ResponseData<unknown>>(
-      `api/customer/post/${postId}/rate`,
+      `api/customer/posts/${postId}/rate`,
       {
-        numStar: numStar,
-        comment: comment,
+        numStar,
+        comment,
       }
     );
   }
   getMyRateFromPost(postId: number) {
     return axios_auth.get<ResponseData<GetMyRateFromPostRes>>(
-      `api/customer/post/${postId}/my-rate`
+      `api/customer/posts/${postId}/rate` 
     );
   }
   delMyRateOnPost(postId: number) {
     return axios_auth.delete<ResponseData<unknown>>(
-      `api/customer/post/${postId}/my-rate`
+      `api/customer/posts/${postId}/rate`
     );
   }
   getRatingStats(postId: number) {
     return axios_base.get<ResponseData<StatsPostResponse>>(
-      `api/customer/post/${postId}/avg-rate`
+      `api/customer/posts/${postId}/rate-avg`
     );
   }
   getSubscriptions() {
     return axios_auth.get<ResponseData<GetSubscriptionResponse[]>>(
-      `api/customer/subscription`
+      `api/customer/subscriptions`
     );
   }
   addSubscription(city: string, district: string) {
     return axios_auth.post<ResponseData<GetSubscriptionResponse>>(
-      `api/customer/subscription`,
+      `api/customer/subscriptions`,
       {
         city: city,
         district: district,
@@ -113,12 +100,12 @@ export class CustomerService {
   }
   deleteSubscription(subscriptionId: number) {
     return axios_auth.delete<ResponseData<unknown>>(
-      `api/customer/subscription/${subscriptionId}`
+      `api/customer/subscriptions/${subscriptionId}`
     );
   }
   editSubscription(subscriptionId: number, city: string, district: string) {
     return axios_auth.put<ResponseData<GetSubscriptionResponse>>(
-      `api/customer/subscription/${subscriptionId}`,
+      `api/customer/subscriptions/${subscriptionId}`,
       {
         city: city,
         district: district,
@@ -127,7 +114,7 @@ export class CustomerService {
   }
   async getHistoryViewPost() {
     return axios_auth.get<ResponseData<PostViewHistoryResponse>>(
-      `api/customer/history-view-post`
+      `api/customer/view-history`
     );
   }
 

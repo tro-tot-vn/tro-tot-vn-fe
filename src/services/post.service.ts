@@ -10,7 +10,7 @@ import { CursorPaging } from "./types/paging-response";
 export class PostService {
   createPost = async (data: FormData) => {
     const res = await axios_auth.post<ResponseData<object>>(
-      "api/post/create",
+      "api/posts",
       data,
       {
         headers: {
@@ -23,7 +23,7 @@ export class PostService {
   };
   getListPost = async (status: string, cursor?: number, limit: number = 10) => {
     const res = await axios_auth.get<ResponseData<GetPostByStatusResponse>>(
-      "api/post/list",
+      "api/posts/me",
       {
         params: {
           status,
@@ -37,13 +37,13 @@ export class PostService {
   };
   getDetailPost = async (postId: number) => {
     const res = await axios_auth.get<ResponseData<GetDetailPostResponse>>(
-      `api/post/${postId}/detail`
+      `api/posts/${postId}`
     );
     return res;
   };
   getLatestPost = async (limit: number = 4) => {
     const res = await axios_auth.get<ResponseData<Array<ListPostRes>>>(
-      "api/post/latest-post",
+      "api/posts/latest",
       {
         params: {
           limit,
@@ -53,8 +53,8 @@ export class PostService {
     return res;
   };
   editPost = async (data: FormData, postId: number) => {
-    const res = await axios_auth.post<ResponseData<ListPostRes>>(
-      `api/post/${postId}/edit`,
+    const res = await axios_auth.put<ResponseData<ListPostRes>>(
+      `api/posts/${postId}`,
       data,
       {
         headers: {
@@ -66,25 +66,21 @@ export class PostService {
   };
   getDetailMyPost = async (postId: number) => {
     const res = await axios_auth.get<ResponseData<GetDetailPostResponse>>(
-      `api/post/${postId}/my-post`
+      `api/posts/me/${postId}`
     );
     return res;
   };
   hidePost = async (postId: number) => {
     const res = await axios_auth.post<ResponseData<object>>(
-      `api/post/hide-post`,
-      {
-        postId,
-      }
+      `api/posts/${postId}/hide`,
+      {}
     );
     return res;
   };
   unHidePost = async (postId: number) => {
     const res = await axios_auth.post<ResponseData<object>>(
-      `api/post/un-hide-post`,
-      {
-        postId,
-      }
+      `api/posts/${postId}/unhide`,
+      {}
     );
     return res;
   };
@@ -128,7 +124,7 @@ export class PostService {
     if (cursor !== undefined) params.cursor = cursor;
 
     return axios_auth.get<ResponseData<CursorPaging<ListPostRes, Date>>>(
-      "api/post/search",
+      "api/posts/search",
       { params: params }
     );
   };

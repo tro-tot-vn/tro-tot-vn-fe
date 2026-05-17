@@ -98,6 +98,15 @@ axios_auth.interceptors.request.use((config) => {
 axios_auth.interceptors.response.use(
   async (response) => {
     if (response.status === 401) {
+      // If access token is invalid (not just expired), log out immediately without refreshing
+      if (response.data && response.data.message === "INVALID_ACCESS_TOKEN") {
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("account");
+        window.location.replace("/login");
+        return response;
+      }
+
       // Get the original request config
       const originalConfig = response.config as CustomAxiosRequestConfig;
 

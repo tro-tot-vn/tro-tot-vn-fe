@@ -7,8 +7,6 @@ import { ThumbsUp, ThumbsDown, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { axios_auth } from '@/config/axios-auth';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:6969";
-
 interface SearchFeedbackWidgetProps {
     searchLogId: number;
     onDismiss?: () => void;
